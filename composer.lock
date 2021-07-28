@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "08094d6cad5ab5e3818297e5560f7ca7",
+    "content-hash": "bfd9c5359a19bf9803bc3b47fa02beb4",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3047,16 +3047,16 @@
         },
         {
             "name": "opendialogai/webchat",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "c67843cf70283d46256710e72362792592bae706"
+                "reference": "336bf256cec7aed62298f45f11fb86828a9af133"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/c67843cf70283d46256710e72362792592bae706",
-                "reference": "c67843cf70283d46256710e72362792592bae706",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/336bf256cec7aed62298f45f11fb86828a9af133",
+                "reference": "336bf256cec7aed62298f45f11fb86828a9af133",
                 "shasum": ""
             },
             "require": {
@@ -3098,9 +3098,9 @@
             "description": "Webchat front end component for the Open Dialog project",
             "support": {
                 "issues": "https://github.com/opendialogai/webchat/issues",
-                "source": "https://github.com/opendialogai/webchat/tree/1.0.0"
+                "source": "https://github.com/opendialogai/webchat/tree/1.0.1"
             },
-            "time": "2021-07-19T10:57:09+00:00"
+            "time": "2021-07-27T11:05:44+00:00"
         },
         {
             "name": "opis/closure",
