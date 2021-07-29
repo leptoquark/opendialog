@@ -109,7 +109,7 @@ class ScenariosController extends Controller
         $newScenario = Serializer::deserialize($request->getContent(), Scenario::class, 'json');
 
         if ($newScenario->getInterpreter() === "") {
-            $newScenario->setInterpreter(CreateCoreConfigurations::DEFAULT_CALLBACK);
+            $newScenario->setInterpreter(CreateCoreConfigurations::OPENDIALOG_INTERPRETER);
         }
 
         $persistedScenario = $this->createDefaultConversations($newScenario);
@@ -321,7 +321,7 @@ class ScenariosController extends Controller
         $incomingIntent->setOdId($incomingIntentId);
         $incomingIntent->setDescription('Automatically generated');
         $incomingIntent->setSampleUtterance($incomingSampleUtterance);
-        $incomingIntent->setInterpreter(CreateCoreConfigurations::DEFAULT_CALLBACK);
+        $incomingIntent->setInterpreter(CreateCoreConfigurations::OPENDIALOG_INTERPRETER);
         $incomingIntent->setConfidence(1);
         $incomingIntent->setCreatedAt(Carbon::now());
         $incomingIntent->setUpdatedAt(Carbon::now());
@@ -495,7 +495,7 @@ class ScenariosController extends Controller
         $speaker = $requestIntent->getSpeaker();
 
         if ($speaker === Intent::USER) {
-            $requestIntent->setInterpreter(CreateCoreConfigurations::DEFAULT_CALLBACK);
+            $requestIntent->setInterpreter(CreateCoreConfigurations::OPENDIALOG_INTERPRETER);
         } else {
             $requestIntent->setInterpreter('');
         }
