@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "218fdc750fe0b70bd558eac84556b777",
+    "content-hash": "75028192d255d5bf54542630854ed25a",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2916,16 +2916,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "1.0.1",
+            "version": "1.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "228075659b94b54d53125f151af4dde853e5a7f8"
+                "reference": "69eb76c44c85f18a59ca1a16a4c9c718e7173a1d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/228075659b94b54d53125f151af4dde853e5a7f8",
-                "reference": "228075659b94b54d53125f151af4dde853e5a7f8",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/69eb76c44c85f18a59ca1a16a4c9c718e7173a1d",
+                "reference": "69eb76c44c85f18a59ca1a16a4c9c718e7173a1d",
                 "shasum": ""
             },
             "require": {
@@ -2952,6 +2952,7 @@
                 "phpunit/phpunit": "^9.0",
                 "squizlabs/php_codesniffer": "^3.4"
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -3001,9 +3002,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/1.0.1"
+                "source": "https://github.com/opendialogai/core/tree/1.x"
             },
-            "time": "2021-08-02T14:18:07+00:00"
+            "time": "2021-08-02T16:22:08+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -11431,7 +11432,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "opendialogai/core": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
