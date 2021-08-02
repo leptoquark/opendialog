@@ -46,16 +46,15 @@ class IntentRequest extends FormRequest
             "${prefix}virtual_intent" => ['nullable'],
             "${prefix}virtual_intent.speaker" => [
                 'bail',
-                "required_with:${prefix}virtual_intent",
+                'nullable',
                 'string',
                 Rule::in([Intent::USER]),
                 Rule::notIn([$this->json("${prefix}speaker")])
             ],
             "${prefix}virtual_intent.intent_id" => [
                 'bail',
-                "required_with:${prefix}virtual_intent",
+                'nullable',
                 'string',
-                'filled'
             ],
             "${prefix}actions" => 'array',
         ];
