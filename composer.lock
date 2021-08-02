@@ -2920,12 +2920,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "6df2d46296b150a27117626b1214a5e47f9d98f0"
+                "reference": "ab8e5cfe2ba5db5c7bf3d0d4f68c018e6cb72fcc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/6df2d46296b150a27117626b1214a5e47f9d98f0",
-                "reference": "6df2d46296b150a27117626b1214a5e47f9d98f0",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/ab8e5cfe2ba5db5c7bf3d0d4f68c018e6cb72fcc",
+                "reference": "ab8e5cfe2ba5db5c7bf3d0d4f68c018e6cb72fcc",
                 "shasum": ""
             },
             "require": {
@@ -3003,7 +3003,7 @@
                 "issues": "https://github.com/opendialogai/core/issues",
                 "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-885--virtual-intents-implementation"
             },
-            "time": "2021-07-26T16:19:39+00:00"
+            "time": "2021-07-27T09:54:29+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
