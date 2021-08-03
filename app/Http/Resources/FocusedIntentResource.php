@@ -13,6 +13,7 @@ use OpenDialogAi\Core\Conversation\MessageTemplate;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\Scene;
 use OpenDialogAi\Core\Conversation\Turn;
+use OpenDialogAi\Core\Conversation\VirtualIntent;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class FocusedIntentResource extends JsonResource
@@ -40,8 +41,9 @@ class FocusedIntentResource extends JsonResource
             Intent::CONFIDENCE,
             Intent::EXPECTED_ATTRIBUTES,
             Intent::TRANSITION,
-            Intent::VIRTUAL_INTENTS,
+            Intent::VIRTUAL_INTENT,
             Intent::ACTIONS => Action::FIELDS,
+            Intent::VIRTUAL_INTENT => VirtualIntent::FIELDS,
             Intent::MESSAGE_TEMPLATES => [
                 MessageTemplate::UID,
                 MessageTemplate::OD_ID,
