@@ -3,6 +3,8 @@ import VueRouter from 'vue-router'
 // Containers
 import DefaultContainer from '@/containers/DefaultContainer'
 
+import store from '@opendialogai/opendialog-design-system-pkg/src/store'
+
 import Home from '@opendialogai/opendialog-design-system-pkg/src/components/Views/Home'
 import WebchatSettingView from '@opendialogai/opendialog-design-system-pkg/src/components/Views/WebchatSettingView'
 import MessageEditor from '@opendialogai/opendialog-design-system-pkg/src/components/Views/MessageEditor'
@@ -15,7 +17,9 @@ import WebchatDemo from '@opendialogai/opendialog-design-system-pkg/src/componen
 import ConversationLog from '@opendialogai/opendialog-design-system-pkg/src/components/Views/ConversationLog'
 import DynamicAttribute from '@/views/DynamicAttribute'
 import Scenarios
-  from '@opendialogai/opendialog-design-system-pkg/src/components/ConversationBuilder/Scenarios/Scenarios'
+  from '@opendialogai/opendialog-design-system-pkg/src/components/Scenarios/Scenarios'
+import CreateNewScenario
+  from '@opendialogai/opendialog-design-system-pkg/src/components/Scenarios/CreateNewScenario'
 import ConversationBuilder
   from '@opendialogai/opendialog-design-system-pkg/src/components/ConversationBuilder/Wrapper/ConversationBuilder'
 import Interpreters
@@ -43,19 +47,22 @@ const router = new VueRouter({
       children: [
         {
           path: '/',
-          name: 'home',
-          component: Home,
-          meta: {
-            title: 'Dashboard',
-          },
-        },
-        {
-          path: 'conversation-builder/scenarios',
           name: 'scenarios',
           component: Scenarios,
           props: route => ({ newScenario: route.query.newScenario === "true" }),
           meta: {
-              title: 'Scenarios',
+              title: 'Workspace',
+              sidebarLabel: 'All scenarios'
+          },
+        },
+        {
+          path: 'create-new-scenario',
+          name: 'create-scenario',
+          component: CreateNewScenario,
+          meta: {
+              title: 'Create New Scenario',
+              sidebarLabel: 'Create scenario',
+              sidebarIcon: 'od-icon-plus-2'
           },
         },
         {
@@ -305,5 +312,38 @@ const router = new VueRouter({
     },
   ],
 });
+
+router.beforeEach(async (to, from, next) => {
+  if (store.state.hasScenarios === null) {
+    await store.dispatch('fetchScenarios').then(hasScenarios => {
+      if (!hasScenarios) {
+        next('/admin/create-new-scenario')
+      }
+    })
+  }
+
+  if (to.path === '/admin' || to.path === '/admin/create-new-scenario') {
+    store.commit('updateSelectedScenario', {name: null, id: null})
+  }
+  
+  if (to.query.scenario && !store.state.selectedScenario.id) {
+    store.dispatch('fetchScenario', to.query.scenario).then(() => {
+      store.commit('initialScenarioLoaded', true)
+    })
+  } else {
+    store.commit('initialScenarioLoaded', true)
+  }
+
+  const scenario = to.query.scenario ? to.query.scenario : store.state.selectedScenario.id
+  if (!scenario && (to.path !== '/admin' && to.path !== '/admin/create-new-scenario')) {
+    next('/admin')
+  } else {
+    if (scenario && !to.query.scenario && (to.path !== '/admin' && to.path !== '/admin/create-new-scenario')) {
+      next({path: to.path, query: {...to.query, scenario: scenario}})
+    } else {
+      next()
+    }
+  }
+})
 
 export default router;
