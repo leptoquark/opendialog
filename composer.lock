@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0af776b4006c3a1be384fe9aafcfc8cc",
+    "content-hash": "f430bfe9daadbc3bbc900c34ba8e1270",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2916,16 +2916,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "dev-feature/OPNDLG-926--php-nlu",
+            "version": "dev-feature/configuration-ownership-data",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "1216944f408e098866fb01a17c62ceaf86d334f9"
+                "reference": "4384a62334aa8bbdecc396c5043623adc87a5038"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/1216944f408e098866fb01a17c62ceaf86d334f9",
-                "reference": "1216944f408e098866fb01a17c62ceaf86d334f9",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/4384a62334aa8bbdecc396c5043623adc87a5038",
+                "reference": "4384a62334aa8bbdecc396c5043623adc87a5038",
                 "shasum": ""
             },
             "require": {
@@ -3001,9 +3001,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-926--php-nlu"
+                "source": "https://github.com/opendialogai/core/tree/feature/configuration-ownership-data"
             },
-            "time": "2021-08-03T10:24:10+00:00"
+            "time": "2021-08-04T10:45:42+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
