@@ -199,6 +199,9 @@ class ComponentConfigurationTest extends TestCase
             'configuration' => [],
         ];
 
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
+
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
             ->assertStatus(422)
@@ -212,6 +215,9 @@ class ComponentConfigurationTest extends TestCase
             'component_id' => self::COMPONENT_ID,
             'configuration' => self::CONFIGURATION,
         ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
@@ -247,6 +253,9 @@ class ComponentConfigurationTest extends TestCase
             ],
         ];
 
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
+
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
             ->assertStatus(422)
@@ -264,6 +273,9 @@ class ComponentConfigurationTest extends TestCase
                 LuisInterpreterConfiguration::APP_ID => '123',
             ],
         ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
@@ -285,6 +297,9 @@ class ComponentConfigurationTest extends TestCase
             ],
         ];
 
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
+
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
             ->assertStatus(422)
@@ -301,6 +316,9 @@ class ComponentConfigurationTest extends TestCase
                 'webhook_url' => 'localhost'
             ],
         ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
