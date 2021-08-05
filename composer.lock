@@ -2920,12 +2920,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "4384a62334aa8bbdecc396c5043623adc87a5038"
+                "reference": "0af1bea70e57716c64f01d927585551fc6530839"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/4384a62334aa8bbdecc396c5043623adc87a5038",
-                "reference": "4384a62334aa8bbdecc396c5043623adc87a5038",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/0af1bea70e57716c64f01d927585551fc6530839",
+                "reference": "0af1bea70e57716c64f01d927585551fc6530839",
                 "shasum": ""
             },
             "require": {
@@ -3003,7 +3003,7 @@
                 "issues": "https://github.com/opendialogai/core/issues",
                 "source": "https://github.com/opendialogai/core/tree/feature/configuration-ownership-data"
             },
-            "time": "2021-08-04T10:45:42+00:00"
+            "time": "2021-08-05T11:19:04+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
