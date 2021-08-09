@@ -8,14 +8,17 @@ use Illuminate\Support\Facades\Artisan;
 use Mockery\MockInterface;
 use OpenDialogAi\AttributeEngine\CoreAttributes\UtteranceAttribute;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
+use OpenDialogAi\Core\Console\Commands\CreateCoreConfigurations;
 use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
-use OpenDialogAi\Core\Conversation\IntentCollection;
+use OpenDialogAi\Core\Conversation\InterpretedIntentCollection;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\ScenarioCollection;
 use OpenDialogAi\Core\InterpreterEngine\Callback\CallbackInterpreterConfiguration;
 use OpenDialogAi\Core\InterpreterEngine\Luis\LuisInterpreterConfiguration;
+use OpenDialogAi\Core\InterpreterEngine\OpenDialog\OpenDialogInterpreterConfiguration;
 use OpenDialogAi\Core\InterpreterEngine\Service\ConfiguredInterpreterServiceInterface;
 use OpenDialogAi\InterpreterEngine\Interpreters\CallbackInterpreter;
+use OpenDialogAi\InterpreterEngine\Interpreters\OpenDialogInterpreter;
 use OpenDialogAi\InterpreterEngine\Service\InterpreterComponentServiceInterface;
 use Tests\TestCase;
 
@@ -384,10 +387,10 @@ class ComponentConfigurationTest extends TestCase
             'configuration' => self::CONFIGURATION,
         ];
 
-        $mockInterpreter = new class(CallbackInterpreterConfiguration::create('test', self::CONFIGURATION)) extends CallbackInterpreter {
-            public function interpret(UtteranceAttribute $utterance): IntentCollection
+        $mockInterpreter = new class(OpenDialogInterpreterConfiguration::create('test', self::CONFIGURATION)) extends OpenDialogInterpreter {
+            public function interpret(UtteranceAttribute $utterance): InterpretedIntentCollection
             {
-                return new IntentCollection();
+                return new InterpretedIntentCollection();
             }
         };
 
@@ -408,7 +411,7 @@ class ComponentConfigurationTest extends TestCase
 
     public function testQueryConfigurationUse()
     {
-        $configurationName = 'Default Callback';
+        $configurationName = CreateCoreConfigurations::OPENDIALOG_INTERPRETER;
         $data = [
             'name' => $configurationName,
         ];
