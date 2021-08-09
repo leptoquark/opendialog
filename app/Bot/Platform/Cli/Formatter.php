@@ -4,6 +4,9 @@
 namespace App\Bot\Platform\Cli;
 
 
+use App\Bot\Platform\Cli\Messages\CliTextMessage;
+use DOMDocument;
+use Illuminate\Support\Facades\Log;
 use OpenDialogAi\Core\Components\ODComponentTypes;
 use OpenDialogAi\ResponseEngine\Formatters\BaseMessageFormatter;
 use OpenDialogAi\ResponseEngine\Message\AutocompleteMessage;
@@ -21,6 +24,7 @@ use OpenDialogAi\ResponseEngine\Message\MetaMessage;
 use OpenDialogAi\ResponseEngine\Message\OpenDialogMessage;
 use OpenDialogAi\ResponseEngine\Message\OpenDialogMessages;
 use OpenDialogAi\ResponseEngine\Message\RichMessage;
+use SimpleXMLElement;
 
 class Formatter extends BaseMessageFormatter
 {
@@ -29,7 +33,102 @@ class Formatter extends BaseMessageFormatter
 
     public function getMessages(string $markup): OpenDialogMessages
     {
-        return new CliMessages($markup);
+        $messages = [];
+
+        try {
+            $message = new SimpleXMLElement($markup);
+
+            foreach ($message->children() as $item) {
+                // Deal with attribute message
+                $messages[] = $this->parseMessage($item);
+            }
+
+            // Disable text and hide avatar don't make sense outside of webchat
+        } catch (\Exception $e) {
+            Log::warning(sprintf('Message Builder error: %s', $e->getMessage()));
+            return new CliMessages();
+        }
+
+        $messageWrapper = new CliMessages();
+        foreach ($messages as $message) {
+            $messageWrapper->addMessage($message);
+        }
+
+        return $messageWrapper;
+    }
+
+    /**
+     * @param SimpleXMLElement $message
+     * @return OpenDialogMessage
+     */
+    private function parseMessage(SimpleXMLElement $message): OpenDialogMessage
+    {
+        switch ($message->getName()) {
+            case self::TEXT_MESSAGE:
+                $text = $this->getMessageText($message);
+                $template = [self::TEXT => $text];
+                return $this->generateTextMessage($template);
+        }
+    }
+
+    protected function getMessageText(SimpleXMLElement $element): string
+    {
+        $dom = new DOMDocument();
+        $dom->loadXML($element->asXml());
+
+        $text = '';
+        foreach ($dom->childNodes as $node) {
+            foreach ($node->childNodes as $item) {
+                if ($item->nodeType === XML_TEXT_NODE) {
+                    if (!empty(trim($item->textContent))) {
+                        $text .= ' ' . trim($item->textContent);
+                    }
+                } elseif ($item->nodeType === XML_ELEMENT_NODE) {
+                    if ($item->nodeName === self::LINK) {
+                        $openNewTab = $this->convertToBoolean((string)$item->getAttribute('new_tab'));
+
+                        $link = [
+                            self::OPEN_NEW_TAB => $openNewTab,
+                            self::TEXT => '',
+                            self::URL => '',
+                        ];
+
+                        foreach ($item->childNodes as $t) {
+                            $link[$t->nodeName] = trim($t->nodeValue);
+                        }
+
+                        if ($link[self::URL]) {
+                            $text .= ' ' . $this->generateLinkHtml(
+                                    $link[self::URL],
+                                    $link[self::TEXT],
+                                    $link[self::OPEN_NEW_TAB]
+                                );
+                        } else {
+                            Log::debug('Not adding link to message text, url is empty');
+                        }
+                    }
+                }
+            }
+        }
+
+        return trim($text);
+    }
+
+    /**
+     * @param string $value
+     * @return bool
+     */
+    private function convertToBoolean(string $value): bool
+    {
+        if ($value === '1' || $value === 'true') {
+            return true;
+        }
+        return false;
+    }
+
+    protected function generateLinkHtml(string $url, string $text, bool $openNewTab): string
+    {
+        return $url;
     }
 
     public function generateAutocompleteMessage(array $template): AutocompleteMessage
@@ -89,7 +188,7 @@ class Formatter extends BaseMessageFormatter
 
     public function generateTextMessage(array $template): OpenDialogMessage
     {
-        // TODO: Implement generateTextMessage() method.
+        return (new CliTextMessage())->setText($template[self::TEXT]);
     }
 
     public function generateHandToSystemMessage(array $template): HandToSystemMessage

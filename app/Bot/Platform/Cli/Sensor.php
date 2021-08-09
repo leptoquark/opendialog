@@ -11,6 +11,7 @@ use OpenDialogAi\SensorEngine\BaseSensor;
 class Sensor extends BaseSensor
 {
 
+    // remove the type
     public function interpret(Request $request): UtteranceAttribute
     {
         // won't work

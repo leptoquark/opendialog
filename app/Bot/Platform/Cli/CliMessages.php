@@ -7,19 +7,25 @@ use OpenDialogAi\ResponseEngine\Message\OpenDialogMessages;
 
 class CliMessages implements OpenDialogMessages
 {
+    private array $messages = [];
 
     public function addMessage(OpenDialogMessage $message): void
     {
-        // TODO: Implement addMessage() method.
+        $this->messages[] = $message;
     }
 
     public function getMessages(): array
     {
-        // TODO: Implement getMessages() method.
+        return $this->messages;
     }
 
     public function getMessageToPost(): array
     {
-        // TODO: Implement getMessageToPost() method.
+        $messagesToPost = [];
+        foreach ($this->messages as $message) {
+            $messagesToPost[] = $message->getMessageToPost();
+        }
+
+        return $messagesToPost;
     }
 }

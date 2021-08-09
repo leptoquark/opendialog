@@ -32,133 +32,30 @@ class Cli extends Command
 
         $this->output->writeln("<info>Identified {$userId}</info>");
 
+        // new / returning
         $request = new Request($userId, 'WELCOME');
 
         $response = $this->sendRequest($request);
 
-        $this->info($response->);
+        while (true) {
+            foreach ($response as $message) {
+                $userInput = $this->ask($message['data']['text']);
 
+                if ($userInput === 'exit') {
+                    $this->info('bye bye');
+                    break 2;
+                }
 
-//        $chatRequest = $this->createWebchatRequest($user, 'trigger', $openingIntent);
-//
-//        while (!empty($chatRequest)) {
-//            // Get the Utterance.
-//            $utterance = $webChatSensor->interpret($chatRequest);
-//
-//            /** @var WebChatMessages $messageWrapper */
-//            $messageWrapper = $odController->runConversation($utterance);
-//
-//            $messages = $messageWrapper->getMessageToPost();
-//
-//            $chatRequest = $this->renderMessages($user, $messages);
-//        }
-//
-//        $this->output->writeln("<comment>The end</comment>");
-    }
+                if ($userInput === 'restart') {
+                    $request = new Request($userId, 'intent.core.restart');
+                } else if ($userInput === 'end chat') {
+                    $request = new Request($userId, 'intent.core.end_chat');
+                } else {
+                    $request = new Request($userId, '', $userInput);
+                }
 
-    protected function createWebchatRequest($user, $type, $intent = '', $text = '', $value = '')
-    {
-        $chatData = [
-            'notification' => 'message',
-            'user_id' => $user->email,
-            'author' => $user->email,
-            'content' => [
-                'type' => $type,
-                'author' => $user->email,
-                'callback_id' => $intent,
-                'data' => [
-                    'text' => $text,
-                    'value' => $value,
-                    'date' => "Wed 16 Dec",
-                    'time' => "11:50:40 AM",
-                ],
-                'mode' => 'webchat',
-                'modeInstance' => 0,
-                'user_id' => $user->email,
-                'user' => [
-                    "first_name" => $user->name,
-                    "last_name" => "",
-                    "email" => $user->email,
-                    "external_id" => $user->id,
-                ]
-            ]
-        ];
-
-        return $this->createRequest('POST', json_encode($chatData));
-    }
-
-    /**
-     * @param $user
-     * @param $messages
-     *
-     * @return \Illuminate\Http\Request|\Symfony\Component\HttpFoundation\Request|void
-     */
-    protected function renderMessages($user, $messages)
-    {
-        if (empty($messages)) {
-            $this->output->writeln("<info>Empty list of messages</info>");
-            return;
-        }
-
-        foreach ($messages as $message) {
-            $response = $this->renderMessage($user, $message);
-
-            if (!empty($response)) {
-                return $response;
+                $response = $this->sendRequest($request);
             }
-        }
-
-        $freeTextResponse = $this->ask('');
-        return $this->createWebchatRequest($user, 'text', '', $freeTextResponse);
-    }
-
-    protected function renderMessage($user, $message)
-    {
-        if (empty($message)) {
-            $this->output->writeln("<info>Empty response</info>");
-            return null;
-        }
-
-        $this->output->writeln("\n------------------------------------------------------------\n"
-            . "<info>{$message['type']} message ({$message['intent']})</info>");
-
-        if ($this->output->isVerbose()) {
-            print_r($message);
-        }
-
-        switch ($message['type']) {
-            case 'button':
-                $optionsText = '';
-                $options = [];
-
-                foreach ($message['data']['buttons'] as $id => $button) {
-                    $optionsText .= "   > {$button['text']} ({$button['callback_id']})\n";
-                    $options[] = $button['text'];
-                }
-
-                $result = $this->askWithCompletion("<comment>{$message['data']['text']}</comment>"
-                    . "\n<info> Button options:\n{$optionsText}</info>", $options, $message['data']['buttons'][0]['text']);
-                $choice = array_search($result, $options);
-
-                if ($choice === false) {
-                    $this->output->writeln("<error>Foolish human! That was not an option.</error>");
-                    return null;
-                }
-
-                return $this->createWebchatRequest(
-                    $user,
-                    'button_response',
-                    $message['data']['buttons'][$choice]['callback_id'],
-                    $message['data']['buttons'][$choice]['text']
-                );
-
-            case 'text':
-                $this->output->writeln("<comment>{$message['data']['text']}</comment>");
-                break;
-
-            default:
-                $this->output->writeln("<error>CLI cannot deal with a {$message['type']} response</error>");
-                break;
         }
     }
 

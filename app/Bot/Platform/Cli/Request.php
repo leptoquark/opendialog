@@ -24,8 +24,8 @@ class Request
         $this->userId = $userId;
         $this->callbackId = $callbackId;
         $this->text = $text;
-        $this->attributeName = $attributeName;
-        $this->attributeValue = $attributeValue;
+//        $this->attributeName = $attributeName;
+//        $this->attributeValue = $attributeValue;
     }
 
     public function format()

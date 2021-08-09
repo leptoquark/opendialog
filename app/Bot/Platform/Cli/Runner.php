@@ -28,6 +28,6 @@ class Runner
         $utterance = $this->sensor->interpreter($request);
         $messageWrapper = $this->controller->runConversation($utterance);
 
-        return $messageWrapper;
+        return $messageWrapper->getMessageToPost();
     }
 }
