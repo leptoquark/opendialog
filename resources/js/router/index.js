@@ -329,6 +329,8 @@ router.beforeEach(async (to, from, next) => {
   if (to.query.scenario && !store.state.selectedScenario.id) {
     store.dispatch('fetchScenario', to.query.scenario).then(() => {
       store.commit('initialScenarioLoaded', true)
+    }).catch(() => {
+      next('/admin')
     })
   } else {
     store.commit('initialScenarioLoaded', true)
