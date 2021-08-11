@@ -210,6 +210,8 @@ class ScenariosController extends Controller
         ConversationDataClient::updateIntent($triggerWelcomeIntent);
         ConversationDataClient::updateIntent($triggerRestartIntent);
 
+        CreateCoreConfigurations::createOpenDialogInterpreterForScenario($scenario->getUid());
+
         return $scenario;
     }
 
