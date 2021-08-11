@@ -16,6 +16,7 @@ use App\ImportExportHelpers\ScenarioImportExportHelper;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
 use OpenDialogAi\Core\Console\Commands\CreateCoreConfigurations;
 use OpenDialogAi\Core\Conversation\Behavior;
 use OpenDialogAi\Core\Conversation\BehaviorsCollection;
@@ -238,6 +239,10 @@ class ScenariosController extends Controller
     public function destroy(Scenario $scenario): Response
     {
         if (ConversationDataClient::deleteScenarioByUid($scenario->getUid())) {
+            ComponentConfiguration::where([
+                'scenario_id' => $scenario->getUid()
+            ])->delete();
+
             return response()->noContent(200);
         } else {
             return response('Error deleting scenario, check the logs', 500);
