@@ -32,17 +32,22 @@ class ImportScenarios extends Command
             $scenarioData = ScenarioImportExportHelper::getScenarioFileData($filePath);
         } catch (FileNotFoundException $e) {
             $this->error(sprintf('No scenario file at %s', $filePath));
+            return;
         }
 
         try {
             $scenario = ScenarioImportExportHelper::importScenarioFromString($scenarioData);
+            CreateCoreConfigurations::createOpenDialogInterpreterForScenario($scenario->getUid());
         } catch (NotEncodableValueException $e) {
             $this->error(sprintf("Import of %s failed. Unable to decode file as json", $filePath));
+            return;
         } catch (DuplicateConversationObjectOdIdException $e) {
-            $this->warn(sprintf("An existing Scenario with odId %s already exists!. Skipping %s!", $e->getDuplicateOdId(),
-                $filePath));
+            $this->warn(sprintf(
+                "An existing Scenario with odId %s already exists!. Skipping %s!",
+                $e->getDuplicateOdId(),
+                $filePath
+            ));
+            return;
         }
-
-        CreateCoreConfigurations::createOpenDialogInterpreterForScenario($scenario->getUid());
     }
 }
