@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "75028192d255d5bf54542630854ed25a",
+    "content-hash": "ee849cca915ffc962d0112bc362a4983",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2916,16 +2916,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "1.x-dev",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "54575c7814dc4650b306dcb4a4b255b76dcf7746"
+                "reference": "ca06460161bfd1012f8dcaecea1faeb777fc9693"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/54575c7814dc4650b306dcb4a4b255b76dcf7746",
-                "reference": "54575c7814dc4650b306dcb4a4b255b76dcf7746",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/ca06460161bfd1012f8dcaecea1faeb777fc9693",
+                "reference": "ca06460161bfd1012f8dcaecea1faeb777fc9693",
                 "shasum": ""
             },
             "require": {
@@ -2952,7 +2952,6 @@
                 "phpunit/phpunit": "^9.0",
                 "squizlabs/php_codesniffer": "^3.4"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -3002,9 +3001,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/1.x"
+                "source": "https://github.com/opendialogai/core/tree/1.1.0"
             },
-            "time": "2021-08-09T10:33:49+00:00"
+            "time": "2021-08-16T14:36:31+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -3048,16 +3047,16 @@
         },
         {
             "name": "opendialogai/webchat",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "336bf256cec7aed62298f45f11fb86828a9af133"
+                "reference": "1ac49f82a6b44d8397500d4a4cc592eb50390e0b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/336bf256cec7aed62298f45f11fb86828a9af133",
-                "reference": "336bf256cec7aed62298f45f11fb86828a9af133",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/1ac49f82a6b44d8397500d4a4cc592eb50390e0b",
+                "reference": "1ac49f82a6b44d8397500d4a4cc592eb50390e0b",
                 "shasum": ""
             },
             "require": {
@@ -3065,7 +3064,7 @@
                 "php": "^7.4 || ^8.0"
             },
             "require-dev": {
-                "opendialogai/core": "1.0.0",
+                "opendialogai/core": "1.1.0",
                 "orchestra/testbench": "^6.0",
                 "phpunit/phpunit": "^9.0",
                 "squizlabs/php_codesniffer": "^3.4"
@@ -3099,9 +3098,9 @@
             "description": "Webchat front end component for the Open Dialog project",
             "support": {
                 "issues": "https://github.com/opendialogai/webchat/issues",
-                "source": "https://github.com/opendialogai/webchat/tree/1.0.1"
+                "source": "https://github.com/opendialogai/webchat/tree/1.0.2"
             },
-            "time": "2021-07-27T11:05:44+00:00"
+            "time": "2021-08-16T15:46:27+00:00"
         },
         {
             "name": "opis/closure",
@@ -11432,9 +11431,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "opendialogai/core": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
