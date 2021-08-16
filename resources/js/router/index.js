@@ -306,7 +306,7 @@ const router = new VueRouter({
           component: WebchatDemo,
           meta: {
               title: 'Preview',
-          },
+          }
         }
       ],
     },
@@ -319,7 +319,11 @@ router.beforeEach(async (to, from, next) => {
       if (!hasScenarios) {
         next('/admin/create-new-scenario')
       }
+    }).catch(err => {
+      next('/admin/create-new-scenario')
     })
+  } else if (store.state.hasScenarios === false && to.path !== '/admin/create-new-scenario') {
+    next('/admin/create-new-scenario')
   }
 
   if (to.path === '/admin' || to.path === '/admin/create-new-scenario') {
@@ -332,7 +336,7 @@ router.beforeEach(async (to, from, next) => {
     }).catch(() => {
       next('/admin')
     })
-  } else {
+  } else if (!store.state.initialScenarioLoaded) {
     store.commit('initialScenarioLoaded', true)
   }
 
