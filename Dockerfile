@@ -2,7 +2,7 @@ FROM php:7.4-fpm
 
 # Install dependencies
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get update && apt-get install -y \
+    apt-get update --allow-releaseinfo-change && apt-get install -y \
     nodejs \
     build-essential \
     mariadb-client \
