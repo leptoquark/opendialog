@@ -36,10 +36,6 @@ class ComponentConfigurationTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Artisan::call('configurations:create');
-
-        $this->app->forgetInstance(ConfiguredInterpreterServiceInterface::class);
-        $this->app->forgetInstance(InterpreterComponentServiceInterface::class);
 
         $this->user = factory(User::class)->create();
     }
@@ -91,7 +87,7 @@ class ComponentConfigurationTest extends TestCase
             ->assertStatus(200)
             ->getData();
 
-        $this->assertEquals(2, count($response->data));
+        $this->assertEquals(1, count($response->data));
     }
 
     public function testViewAllByComponentType()
@@ -118,8 +114,8 @@ class ComponentConfigurationTest extends TestCase
             ->assertStatus(200)
             ->assertJson([
                 'data' => [
+                    $configurations[1]->toArray(),
                     $configurations[2]->toArray(),
-                    $configurations[3]->toArray(),
                 ],
             ]);
     }
@@ -412,12 +408,23 @@ class ComponentConfigurationTest extends TestCase
     public function testQueryConfigurationUse()
     {
         $configurationName = CreateCoreConfigurations::OPENDIALOG_INTERPRETER;
+        $scenarioId = '0x123';
+
+        ComponentConfiguration::create([
+            'name' => $configurationName,
+            'scenario_id' => $scenarioId,
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [],
+            'active' => true,
+        ]);
+
         $data = [
             'name' => $configurationName,
+            'scenario_id' => $scenarioId
         ];
 
         $scenario1 = new Scenario();
-        $scenario1->setUid('0x123');
+        $scenario1->setUid($scenarioId);
         $scenario1->setOdId('scenario_1');
         $scenario1->setInterpreter($configurationName);
         $scenario1->setCreatedAt(new DateTime());
