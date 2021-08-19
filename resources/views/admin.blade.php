@@ -42,7 +42,7 @@
     @if (request()->route()->getName() == 'webchat-demo' && request()->get('selected_scenario'))
       <script>
         window.openDialogSettings = {
-          url: "{{ env("APP_URL") }}",
+          url: "{{ URL::to('/') }}",
           validPath: 'admin/demo',
           user: {
             custom: {
@@ -52,7 +52,7 @@
         };
       </script>
 
-      <script src="{{ env('APP_URL') }}/vendor/webchat/js/opendialog-bot.js"></script>
+      <script src="{{ URL::to('/') }}/vendor/webchat/js/opendialog-bot.js"></script>
     @endif
   </body>
 </html>

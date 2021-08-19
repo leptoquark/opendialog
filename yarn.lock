@@ -714,10 +714,9 @@
     consola "^2.15.0"
     node-fetch "^2.6.1"
 
-"@opendialogai/opendialog-design-system-pkg@1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@opendialogai/opendialog-design-system-pkg/-/opendialog-design-system-pkg-1.0.4.tgz#9455c69479bd7ee124130c351bd551d14ea7255e"
-  integrity sha512-uDON4Z95xPBiyT4gB7x/RO1Pqrwx1pNK+64A8ndnu2gna0/nCEwn+ErT5sOx6yooFkybfh/hzloh9P+NHM4Lmg==
+"@opendialogai/opendialog-design-system-pkg@git+ssh://git@github.com:opendialogai/opendialog-design-system.git#feature/OPNDLG-958-token-based-auth-for-incoming-channels":
+  version "1.0.4-0"
+  resolved "git+ssh://git@github.com:opendialogai/opendialog-design-system.git#d352eb2835f3acfe98096a9ba7d2608a64afde0f"
   dependencies:
     "@coreui/coreui" "^2.1.12"
     "@coreui/coreui-plugin-chartjs-custom-tooltips" "^1.3.1"

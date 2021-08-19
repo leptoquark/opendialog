@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee849cca915ffc962d0112bc362a4983",
+    "content-hash": "9e4dbab09a8a4fed43513852e0d124ab",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2162,6 +2162,70 @@
             "time": "2020-10-27T14:25:32+00:00"
         },
         {
+            "name": "laravel/sanctum",
+            "version": "v2.11.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/sanctum.git",
+                "reference": "b21e65cbe13896946986cb0868180cd69e1bd5d3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/sanctum/zipball/b21e65cbe13896946986cb0868180cd69e1bd5d3",
+                "reference": "b21e65cbe13896946986cb0868180cd69e1bd5d3",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/contracts": "^6.9|^7.0|^8.0",
+                "illuminate/database": "^6.9|^7.0|^8.0",
+                "illuminate/support": "^6.9|^7.0|^8.0",
+                "php": "^7.2|^8.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.0",
+                "orchestra/testbench": "^4.0|^5.0|^6.0",
+                "phpunit/phpunit": "^8.0|^9.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Sanctum\\SanctumServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Sanctum\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "Laravel Sanctum provides a featherweight authentication system for SPAs and simple APIs.",
+            "keywords": [
+                "auth",
+                "laravel",
+                "sanctum"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/sanctum/issues",
+                "source": "https://github.com/laravel/sanctum"
+            },
+            "time": "2021-06-15T15:56:21+00:00"
+        },
+        {
             "name": "laravel/tinker",
             "version": "v2.6.1",
             "source": {
@@ -2916,16 +2980,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "1.1.0",
+            "version": "dev-feature/OPNDLG-958-token-based-auth-for-channels",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "ca06460161bfd1012f8dcaecea1faeb777fc9693"
+                "reference": "44b939ff4dbe8d6609c966db287e652573b4501e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/ca06460161bfd1012f8dcaecea1faeb777fc9693",
-                "reference": "ca06460161bfd1012f8dcaecea1faeb777fc9693",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/44b939ff4dbe8d6609c966db287e652573b4501e",
+                "reference": "44b939ff4dbe8d6609c966db287e652573b4501e",
                 "shasum": ""
             },
             "require": {
@@ -2935,6 +2999,7 @@
                 "guzzlehttp/guzzle": "^7.0.1",
                 "justinrainbow/json-schema": "^5.2",
                 "laravel/framework": "^8.0",
+                "laravel/sanctum": "^2.11",
                 "php": "^7.4.0 || ^8.0",
                 "php-ds/php-ds": "^1.2",
                 "symfony/property-access": "^5.2",
@@ -3001,9 +3066,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/1.1.0"
+                "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-958-token-based-auth-for-channels"
             },
-            "time": "2021-08-16T14:36:31+00:00"
+            "time": "2021-08-18T15:02:37+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -3047,16 +3112,16 @@
         },
         {
             "name": "opendialogai/webchat",
-            "version": "1.0.2",
+            "version": "dev-feature/OPNDLG-958-token-based-auth-for-channels",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "1ac49f82a6b44d8397500d4a4cc592eb50390e0b"
+                "reference": "365f13ca58e66bdfd1bc9070d97cbb9c6eb4fa5d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/1ac49f82a6b44d8397500d4a4cc592eb50390e0b",
-                "reference": "1ac49f82a6b44d8397500d4a4cc592eb50390e0b",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/365f13ca58e66bdfd1bc9070d97cbb9c6eb4fa5d",
+                "reference": "365f13ca58e66bdfd1bc9070d97cbb9c6eb4fa5d",
                 "shasum": ""
             },
             "require": {
@@ -3098,9 +3163,9 @@
             "description": "Webchat front end component for the Open Dialog project",
             "support": {
                 "issues": "https://github.com/opendialogai/webchat/issues",
-                "source": "https://github.com/opendialogai/webchat/tree/1.0.2"
+                "source": "https://github.com/opendialogai/webchat/tree/feature/OPNDLG-958-token-based-auth-for-channels"
             },
-            "time": "2021-08-16T15:46:27+00:00"
+            "time": "2021-08-18T10:31:14+00:00"
         },
         {
             "name": "opis/closure",
@@ -11431,7 +11496,10 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "opendialogai/core": 20,
+        "opendialogai/webchat": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -11440,5 +11508,5 @@
         "ext-simplexml": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.1.0"
 }

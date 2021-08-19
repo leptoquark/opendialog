@@ -91,6 +91,9 @@ Route::namespace('API')
 
         Route::prefix('conversation-builder')->group(function () {
             Route::apiResource('scenarios', 'ScenariosController');
+
+            Route::get('scenarios/{scenario}/key', 'ScenariosController@showDeploymentKey');
+
             Route::post('scenarios/{scenario}/duplicate', 'ScenariosController@duplicate');
 
             Route::get('scenarios/{scenario}/conversations', 'ScenariosController@showConversationsByScenario');
