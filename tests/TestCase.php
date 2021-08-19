@@ -54,11 +54,6 @@ abstract class TestCase extends BaseTestCase
 //        }
     }
 
-    protected function webchatSetup(): void
-    {
-        $this->artisan('webchat:setup', ['--non-interactive' => true]);
-    }
-
     /**
      * @param Turn $turn
      * @param $uid

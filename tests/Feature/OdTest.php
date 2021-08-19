@@ -25,8 +25,6 @@ class OdTest extends TestCase
 
         $this->app->forgetInstance(ConfiguredInterpreterServiceInterface::class);
         $this->app->forgetInstance(InterpreterComponentServiceInterface::class);
-
-        $this->webchatSetup();
     }
 
     /**
