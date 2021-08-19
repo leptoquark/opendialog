@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "47d7c04e238e570a7b17e403d65b306e",
+    "content-hash": "249c17d1c9379a5f7ce097fe388c969d",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2916,16 +2916,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "dev-rc/1.1.1",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "5f8c37cdd2123c77216739f0431cfdb21164aa46"
+                "reference": "e3079223efc3c02bdc6da29614dec794f4e8c3f5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/5f8c37cdd2123c77216739f0431cfdb21164aa46",
-                "reference": "5f8c37cdd2123c77216739f0431cfdb21164aa46",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/e3079223efc3c02bdc6da29614dec794f4e8c3f5",
+                "reference": "e3079223efc3c02bdc6da29614dec794f4e8c3f5",
                 "shasum": ""
             },
             "require": {
@@ -3001,9 +3001,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/rc/1.1.1"
+                "source": "https://github.com/opendialogai/core/tree/1.1.1"
             },
-            "time": "2021-08-18T15:56:13+00:00"
+            "time": "2021-08-18T16:10:32+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -11431,9 +11431,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "opendialogai/core": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
