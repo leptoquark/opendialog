@@ -43,6 +43,19 @@ class CreateDefaultCallbackInterpreter extends BaseConfigurationUpdate
     /**
      * @inheritDoc
      */
+    public function beforeDown(): bool
+    {
+        $updateConfirm = sprintf(
+            'Are you sure you want to remove the "%s" configuration?',
+            ConfigurationDataHelper::DEFAULT_CALLBACK
+        );
+
+        return $this->option('non-interactive') || $this->confirm($updateConfirm);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function down(): void
     {
         $this->info('Removing Default Callback interpreter');

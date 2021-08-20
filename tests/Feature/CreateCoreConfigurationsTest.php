@@ -4,6 +4,7 @@
 namespace Tests\Feature;
 
 
+use App\Console\Commands\ConfigurationUpdates\AllUpdatesHaveRunException;
 use App\Console\Commands\CreateCoreConfigurations;
 use Illuminate\Support\Collection;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
@@ -23,43 +24,7 @@ class CreateCoreConfigurationsTest extends TestCase
 {
     public function testSuccessCreatingWebchatPlatforms()
     {
-        // Create old style webchat settings to be converted
-        $generalSetting = new WebchatSetting();
-        $generalSetting->name = 'general';
-        $generalSetting->value = 'general';
-        $generalSetting->type = 'object';
-        $generalSetting->save();
-
-        $setting = new WebchatSetting();
-        $setting->name = 'teamName';
-        $setting->value = 'OpenDialog Webchat';
-        $setting->type = 'string';
-        $setting->parent_id = $generalSetting->id;
-        $setting->save();
-
-        $setting2 = new WebchatSetting();
-        $setting2->name = 'open';
-        $setting2->value = true;
-        $setting2->type = 'boolean';
-        $setting2->parent_id = $generalSetting->id;
-        $setting2->save();
-
-        $expectedSettings = [
-            'general' => [
-                'teamName' => 'OpenDialog Webchat',
-                'open' => true,
-            ]
-        ];
-
-        ConversationObjectDataClient::shouldReceive('updateAllConversationObjectInterpreters')
-            ->once();
-
-        $this->mockTwoScenarios(
-            '0x000',
-            ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
-            '0x001',
-            ConfigurationDataHelper::OPENDIALOG_INTERPRETER
-        );
+        $expectedSettings = $this->mockWebchatSettings();
 
         $this->artisan('configurations:create up -u 3 --non-interactive')
             ->assertExitCode(0)
@@ -227,6 +192,29 @@ class CreateCoreConfigurationsTest extends TestCase
         ])->first());
     }
 
+    public function testNothingToRun()
+    {
+        $this->mockWebchatSettings();
+
+        $this->artisan('configurations:create up --non-interactive')
+            ->assertExitCode(0)
+            ->run();
+
+        $this->artisan('configurations:create up --non-interactive')
+            ->assertExitCode(0)
+            ->expectsOutput('There are no further updates to be run.')
+            ->run();
+
+        $this->artisan('configurations:create down --non-interactive')
+            ->assertExitCode(0)
+            ->run();
+
+        $this->artisan('configurations:create down --non-interactive')
+            ->assertExitCode(0)
+            ->expectsOutput('There are no further updates to be run.')
+            ->run();
+    }
+
     /**
      * @param string $uid1
      * @param string $interpreter1
@@ -282,5 +270,72 @@ class CreateCoreConfigurationsTest extends TestCase
         list($start, $end) = CreateCoreConfigurations::determineStartAndEndIndices('down', 4, 2, 5);
         $this->assertEquals(4, $start);
         $this->assertEquals(5, $end);
+    }
+
+    /**
+     * Tests that an exception is thrown if the previously run update was the last one to be run up
+     *
+     * @throws AllUpdatesHaveRunException
+     */
+    public function testDetermineIndicesWhenAllHaveRunUp()
+    {
+        $this->expectException(AllUpdatesHaveRunException::class);
+        CreateCoreConfigurations::determineStartAndEndIndices('up', 4, -1, 5);
+    }
+
+
+    /**
+     * Tests that an exception is thrown if the previously run update was the last one to be run down
+     *
+     * @throws AllUpdatesHaveRunException
+     */
+    public function testDetermineIndicesWhenAllHaveRunDown()
+    {
+        $this->expectException(AllUpdatesHaveRunException::class);
+        CreateCoreConfigurations::determineStartAndEndIndices('down', -1, -1, 5);
+    }
+
+    /**
+     * @return array[]
+     */
+    public function mockWebchatSettings(): array
+    {
+        // Create old style webchat settings to be converted
+        $generalSetting = new WebchatSetting();
+        $generalSetting->name = 'general';
+        $generalSetting->value = 'general';
+        $generalSetting->type = 'object';
+        $generalSetting->save();
+
+        $setting = new WebchatSetting();
+        $setting->name = 'teamName';
+        $setting->value = 'OpenDialog Webchat';
+        $setting->type = 'string';
+        $setting->parent_id = $generalSetting->id;
+        $setting->save();
+
+        $setting2 = new WebchatSetting();
+        $setting2->name = 'open';
+        $setting2->value = true;
+        $setting2->type = 'boolean';
+        $setting2->parent_id = $generalSetting->id;
+        $setting2->save();
+
+        $expectedSettings = [
+            'general' => [
+                'teamName' => 'OpenDialog Webchat',
+                'open' => true,
+            ]
+        ];
+
+        ConversationObjectDataClient::shouldReceive('updateAllConversationObjectInterpreters');
+
+        $this->mockTwoScenarios(
+            '0x000',
+            ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+            '0x001',
+            ConfigurationDataHelper::OPENDIALOG_INTERPRETER
+        );
+        return $expectedSettings;
     }
 }

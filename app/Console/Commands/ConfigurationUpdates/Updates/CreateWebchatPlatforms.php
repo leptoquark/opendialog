@@ -95,6 +95,7 @@ class CreateWebchatPlatforms extends BaseConfigurationUpdate
 
     /**
      * @param string $scenarioUid
+     * @param array $configuration
      */
     public static function createWebchatPlatformForScenario(string $scenarioUid, array $configuration): void
     {

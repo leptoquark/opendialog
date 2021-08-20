@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\ConfigurationUpdates\AllUpdatesHaveRunException;
 use App\Console\Commands\ConfigurationUpdates\BaseConfigurationUpdate;
 use App\Console\Commands\ConfigurationUpdates\Updates\CreateDefaultCallbackInterpreter;
 use App\Console\Commands\ConfigurationUpdates\Updates\CreateWebchatPlatforms;
@@ -40,42 +41,6 @@ class CreateCoreConfigurations extends Command
         ScopeConfigurationsByScenario::class,
         CreateWebchatPlatforms::class,
     ];
-
-    /**
-     * @param string $direction
-     * @param int $lastRunUpdateIndex
-     * @param int $number
-     * @param int $totalNumUpdates
-     * @return array
-     */
-    public static function determineStartAndEndIndices(
-        string $direction,
-        int $lastRunUpdateIndex,
-        int $number,
-        int $totalNumUpdates
-    ): array {
-        if ($direction === self::UP) {
-            // Start from the latest update that hasn't run
-            $startIndex = $lastRunUpdateIndex + 1;
-        } else {
-            // Start from the latest update that ran
-            $startIndex = $lastRunUpdateIndex;
-        }
-
-        if ($number < 0) {
-            // If no number specified, run them all up
-            $number = $totalNumUpdates - $startIndex;
-        }
-
-        $endIndex = $startIndex + $number;
-
-        if ($endIndex > $totalNumUpdates) {
-            // Ensure it's restricted by number of available updates
-            $endIndex = $totalNumUpdates;
-        }
-
-        return array($startIndex, $endIndex);
-    }
 
     /**
      * Execute the console command.
@@ -118,45 +83,38 @@ class CreateCoreConfigurations extends Command
             } else {
                 // Select the latest update that has run
                 $lastRunUpdate = $updatesThatHaveRun->last()->key;
-                $lastRunUpdateIndex = array_search($lastRunUpdate, self::UPDATES);
+                $lastRunUpdateIndex = array_search($lastRunUpdate, $updateObjects->keys()->toArray());
             }
 
+            $totalNumUpdates = count($updates);
+
             if (is_null($lastRunUpdateIndex)) {
-                // If no number specified, run them all
-                $number = $number < 0 ? count($updates) : $number;
+                $lastRunUpdateIndex = -1;
+            }
 
-                if (!$this->option('non-interactive') && !$this->confirm(sprintf(
-                            'Are you sure you want to run all updates %s?',
-                            $direction)
-                    )) {
-                    $this->info('Okay, not updating');
-                    return 0;
-                }
-
-                // Start from the first update
-                for ($i = 0; $i < $number; $i++) {
-                    $this->runUpdate($updateObjects, $i, $direction);
-                }
-            } else {
+            try {
                 list($startIndex, $endIndex) = self::determineStartAndEndIndices(
                     $direction,
                     $lastRunUpdateIndex,
                     $number,
-                    count($updates)
+                    $totalNumUpdates
                 );
+            } catch (AllUpdatesHaveRunException $e) {
+                $this->info("There are no further updates to be run.");
+                return 0;
+            }
 
-                if (!$this->option('non-interactive') && !$this->confirm(sprintf(
-                            'Are you sure you want to run %d updates %s?',
-                            $endIndex - $startIndex,
-                            $direction)
-                    )) {
-                    $this->info('Okay, not updating');
-                    return 0;
-                }
+            if (!$this->option('non-interactive') && !$this->confirm(sprintf(
+                        'Are you sure you want to run %d updates %s?',
+                        $endIndex - $startIndex,
+                        $direction)
+                )) {
+                $this->info('Okay, not updating');
+                return 0;
+            }
 
-                for ($i = $startIndex; $i < $endIndex; $i++) {
-                    $this->runUpdate($updateObjects, $i, $direction);
-                }
+            for ($i = $startIndex; $i < $endIndex; $i++) {
+                $this->runUpdate($updateObjects, $i, $direction);
             }
         } catch (Exception $e) {
             $this->error($e->getMessage());
@@ -167,6 +125,51 @@ class CreateCoreConfigurations extends Command
     }
 
     /**
+     * @param string $direction
+     * @param int $lastRunUpdateIndex
+     * @param int $number
+     * @param int $totalNumUpdates
+     * @return array
+     * @throws AllUpdatesHaveRunException
+     */
+    public static function determineStartAndEndIndices(
+        string $direction,
+        int $lastRunUpdateIndex,
+        int $number,
+        int $totalNumUpdates
+    ): array {
+        if ($direction === self::UP) {
+            // Start from the latest update that hasn't run
+            $startIndex = $lastRunUpdateIndex + 1;
+
+            if ($startIndex >= $totalNumUpdates) {
+                throw new AllUpdatesHaveRunException();
+            }
+        } else {
+            if ($lastRunUpdateIndex < 0) {
+                throw new AllUpdatesHaveRunException();
+            }
+
+            // Start from the latest update that ran
+            $startIndex = $lastRunUpdateIndex;
+        }
+
+        if ($number < 0) {
+            // If no number specified, run them all up
+            $number = $totalNumUpdates - $startIndex;
+        }
+
+        $endIndex = $startIndex + $number;
+
+        if ($endIndex > $totalNumUpdates) {
+            // Ensure it's restricted by number of available updates
+            $endIndex = $totalNumUpdates;
+        }
+
+        return array($startIndex, $endIndex);
+    }
+
+    /**
      * @param Map $updateObjects
      * @param int $i
      * @param string $direction
@@ -174,7 +177,7 @@ class CreateCoreConfigurations extends Command
      */
     public function runUpdate(Map $updateObjects, int $i, string $direction): void
     {
-        $key = self::UPDATES[$i];
+        $key = $updateObjects->keys()->get($i);
 
         /** @var BaseConfigurationUpdate $update */
         $update = $updateObjects->get($key);
