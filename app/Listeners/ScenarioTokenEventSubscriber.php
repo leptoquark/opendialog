@@ -6,7 +6,6 @@ namespace App\Listeners;
 
 use App\ScenarioAccessToken;
 use App\User;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\PersonalAccessToken;
 use OpenDialogAi\Core\Conversation\Events\ConversationObjectCreated;
@@ -23,7 +22,6 @@ class ScenarioTokenEventSubscriber
     public function handleScenarioCreated($event)
     {
         if ($this->isScenario($event)) {
-            $uid = $event->conversationObject->getUid();
             $tokenName = $this->getTokenName($event);
             $botUser = $this->getBotUser();
 
@@ -36,7 +34,7 @@ class ScenarioTokenEventSubscriber
             if (!$accessToken) {
                 $token = $botUser->createToken($tokenName, [$tokenName])->plainTextToken;
                 ScenarioAccessToken::create([
-                    'scenario_id' => $uid,
+                    'scenario_id' => $event->conversationObject->getUid(),
                     'access_token_plaintext' => $token
                 ]);
             }
@@ -52,7 +50,7 @@ class ScenarioTokenEventSubscriber
         if ($this->isScenario($event)) {
             $tokenName = $this->getTokenName($event);
             $accessToken = PersonalAccessToken::where("name", $tokenName)->first();
-            if (!is_null($accessToken)) {
+            if ($this->has($accessToken)) {
                 if ($event->conversationObject->isActive() && $accessToken->cant('active')) {
                     $accessToken->abilities = $this->addValueToAbilities($accessToken, 'active');
                     $accessToken->save();
@@ -148,6 +146,15 @@ class ScenarioTokenEventSubscriber
     private function addValueToAbilities($accessToken, $ability): array
     {
         return array_merge($accessToken->abilities, [$ability]);
+    }
+
+    /**
+     * @param $accessToken
+     * @return bool
+     */
+    private function has($accessToken): bool
+    {
+        return !is_null($accessToken);
     }
 
 }

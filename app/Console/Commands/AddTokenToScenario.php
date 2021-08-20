@@ -22,7 +22,7 @@ class AddTokenToScenario extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Adds a sanctum token for each scenario';
 
     /**
      * Create a new command instance.
@@ -51,10 +51,9 @@ class AddTokenToScenario extends Command
                 return 1;
             }
 
-
             if (!$accessToken) {
                 $this->info("This scenario does NOT have an access token, creating one..." );
-                $token = $botUser->createToken($tokenName, [$tokenName, 'billable:true'])->plainTextToken;
+                $token = $botUser->createToken($tokenName, [$tokenName])->plainTextToken;
                 ScenarioAccessToken::create([
                     'scenario_id' => $scenario->getUid(),
                     'access_token_plaintext' => $token

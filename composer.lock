@@ -2984,12 +2984,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "44b939ff4dbe8d6609c966db287e652573b4501e"
+                "reference": "566258f6c051d143a7e263ad784d26b43b57d6ec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/44b939ff4dbe8d6609c966db287e652573b4501e",
-                "reference": "44b939ff4dbe8d6609c966db287e652573b4501e",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/566258f6c051d143a7e263ad784d26b43b57d6ec",
+                "reference": "566258f6c051d143a7e263ad784d26b43b57d6ec",
                 "shasum": ""
             },
             "require": {
@@ -3068,7 +3068,7 @@
                 "issues": "https://github.com/opendialogai/core/issues",
                 "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-958-token-based-auth-for-channels"
             },
-            "time": "2021-08-18T15:02:37+00:00"
+            "time": "2021-08-20T10:28:08+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -11508,5 +11508,5 @@
         "ext-simplexml": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.0.0"
 }
