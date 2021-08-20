@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\User;
 use DateTime;
-use Illuminate\Support\Facades\Artisan;
 use Mockery\MockInterface;
 use OpenDialogAi\AttributeEngine\CoreAttributes\UtteranceAttribute;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
@@ -13,10 +12,8 @@ use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
 use OpenDialogAi\Core\Conversation\InterpretedIntentCollection;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\ScenarioCollection;
-use OpenDialogAi\Core\InterpreterEngine\Callback\CallbackInterpreterConfiguration;
 use OpenDialogAi\Core\InterpreterEngine\Luis\LuisInterpreterConfiguration;
 use OpenDialogAi\Core\InterpreterEngine\OpenDialog\OpenDialogInterpreterConfiguration;
-use OpenDialogAi\Core\InterpreterEngine\Service\ConfiguredInterpreterServiceInterface;
 use OpenDialogAi\InterpreterEngine\Interpreters\CallbackInterpreter;
 use OpenDialogAi\InterpreterEngine\Interpreters\OpenDialogInterpreter;
 use OpenDialogAi\InterpreterEngine\Service\InterpreterComponentServiceInterface;
@@ -36,10 +33,6 @@ class ComponentConfigurationTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Artisan::call('configurations:create');
-
-        $this->app->forgetInstance(ConfiguredInterpreterServiceInterface::class);
-        $this->app->forgetInstance(InterpreterComponentServiceInterface::class);
 
         $this->user = factory(User::class)->create();
     }
@@ -91,7 +84,7 @@ class ComponentConfigurationTest extends TestCase
             ->assertStatus(200)
             ->getData();
 
-        $this->assertEquals(2, count($response->data));
+        $this->assertEquals(1, count($response->data));
     }
 
     public function testViewAllByComponentType()
@@ -118,8 +111,8 @@ class ComponentConfigurationTest extends TestCase
             ->assertStatus(200)
             ->assertJson([
                 'data' => [
+                    $configurations[1]->toArray(),
                     $configurations[2]->toArray(),
-                    $configurations[3]->toArray(),
                 ],
             ]);
     }
@@ -412,12 +405,23 @@ class ComponentConfigurationTest extends TestCase
     public function testQueryConfigurationUse()
     {
         $configurationName = CreateCoreConfigurations::OPENDIALOG_INTERPRETER;
+        $scenarioId = '0x123';
+
         $data = [
             'name' => $configurationName,
+            'scenario' => $scenarioId
         ];
 
+        ComponentConfiguration::create([
+            'name' => $configurationName,
+            'scenario_id' => $scenarioId,
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [],
+            'active' => true,
+        ]);
+
         $scenario1 = new Scenario();
-        $scenario1->setUid('0x123');
+        $scenario1->setUid($scenarioId);
         $scenario1->setOdId('scenario_1');
         $scenario1->setInterpreter($configurationName);
         $scenario1->setCreatedAt(new DateTime());
