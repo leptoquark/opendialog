@@ -7,6 +7,8 @@ use App\Http\Facades\Serializer;
 use App\Http\Resources\ScenarioResource;
 use App\User;
 use Carbon\Carbon;
+use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
+use OpenDialogAi\Core\Console\Commands\CreateCoreConfigurations;
 use OpenDialogAi\Core\Conversation\Condition;
 use OpenDialogAi\Core\Conversation\ConditionCollection;
 use OpenDialogAi\Core\Conversation\Conversation;
@@ -23,6 +25,8 @@ use OpenDialogAi\Core\Conversation\Scene;
 use OpenDialogAi\Core\Conversation\SceneCollection;
 use OpenDialogAi\Core\Conversation\Turn;
 use OpenDialogAi\Core\Conversation\TurnCollection;
+use OpenDialogAi\Core\InterpreterEngine\OpenDialog\OpenDialogInterpreterConfiguration;
+use OpenDialogAi\InterpreterEngine\Interpreters\OpenDialogInterpreter;
 use OpenDialogAi\MessageBuilder\MessageMarkUpGenerator;
 use Tests\TestCase;
 
@@ -370,6 +374,32 @@ class ScenariosTest extends TestCase
             ->once()
             ->andReturnUsing(fn ($scenario) => $scenario);
 
+        /** @var ComponentConfiguration $openDialogInterpreter */
+        $openDialogInterpreter = ComponentConfiguration::create([
+            'name' => CreateCoreConfigurations::OPENDIALOG_INTERPRETER,
+            'scenario_id' => '0x0001',
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [
+                OpenDialogInterpreterConfiguration::CALLBACKS => [
+                    'hello' => 'world',
+                ],
+            ],
+            'active' => true,
+        ]);
+
+        /** @var ComponentConfiguration $otherInterpreter */
+        $otherInterpreter = ComponentConfiguration::create([
+            'name' => 'other',
+            'scenario_id' => '0x0001',
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [
+                OpenDialogInterpreterConfiguration::CALLBACKS => [
+                    'open' => 'dialog',
+                ],
+            ],
+            'active' => false,
+        ]);
+
         // Attempt to duplicate with different ID
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/conversation-builder/scenarios/' . $scenario->getUid() . '/duplicate')
@@ -396,6 +426,40 @@ class ScenariosTest extends TestCase
                     ]
                 ]
             ]);
+
+        // The default interpreter and platform should have been duplicated too
+        $this->assertCount(4, ComponentConfiguration::all());
+
+        $this->assertNotNull(
+            ComponentConfiguration::where([
+                'name' => CreateCoreConfigurations::OPENDIALOG_INTERPRETER,
+                'scenario_id' => '0x0001'
+            ])->first()
+        );
+
+        $this->assertNotNull(
+            ComponentConfiguration::where([
+                'name' => 'other',
+                'scenario_id' => '0x0001'
+            ])->first()
+        );
+
+        /** @var ComponentConfiguration $newConfiguration1 */
+        $newConfiguration1 = ComponentConfiguration::where([
+            'name' => CreateCoreConfigurations::OPENDIALOG_INTERPRETER,
+            'scenario_id' => '0x9999'
+        ])->first();
+        $this->assertNotNull($newConfiguration1);
+        $this->assertEquals($openDialogInterpreter->configuration, $newConfiguration1->configuration);
+        $this->assertEquals($openDialogInterpreter->active, $newConfiguration1->active);
+
+        $newConfiguration2 = ComponentConfiguration::where([
+            'name' => 'other',
+            'scenario_id' => '0x9999'
+        ])->first();
+        $this->assertNotNull($newConfiguration2);
+        $this->assertEquals($otherInterpreter->configuration, $newConfiguration2->configuration);
+        $this->assertEquals($otherInterpreter->active, $newConfiguration2->active);
     }
 
     public function testUpdateScenarioNotFound()

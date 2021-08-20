@@ -256,7 +256,9 @@ class ScenariosController extends Controller
      */
     public function duplicate(ConversationObjectDuplicationRequest $request, Scenario $scenario): ScenarioResource
     {
-        $scenario = ScenarioDataClient::getFullScenarioGraph($scenario->getUid());
+        $originalScenarioUid = $scenario->getUid();
+
+        $scenario = ScenarioDataClient::getFullScenarioGraph($originalScenarioUid);
 
         // Set new OD ID for the scenario and create a map of UIDs to/from paths,
         /** @var Scenario $scenario */
@@ -291,6 +293,8 @@ class ScenariosController extends Controller
         ]);
 
         $duplicate = ScenarioImportExportHelper::patchScenario($duplicate, $scenarioWithPathsSubstituted);
+
+        $this->duplicateConfigurationsForScenario($originalScenarioUid, $duplicate->getUid());
 
         return new ScenarioResource($duplicate);
     }
@@ -520,5 +524,22 @@ class ScenariosController extends Controller
 
             $requestIntent->addMessageTemplate($messageTemplate);
         }
+    }
+
+    /**
+     * Duplicates all configurations for original scenario to new scenario
+     *
+     * @param string $originalUid
+     * @param string $newUid
+     */
+    private function duplicateConfigurationsForScenario(string $originalUid, string $newUid): void
+    {
+        $configurations = ComponentConfiguration::where('scenario_id', $originalUid)->get();
+
+        $configurations->each(function (ComponentConfiguration $configuration) use ($newUid) {
+            $duplicate = $configuration->replicate();
+            $duplicate->scenario_id = $newUid;
+            $duplicate->save();
+        });
     }
 }
