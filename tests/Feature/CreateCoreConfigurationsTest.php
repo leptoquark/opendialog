@@ -5,6 +5,7 @@ namespace Tests\Feature;
 
 
 use App\Console\Commands\ConfigurationUpdates\AllUpdatesHaveRunException;
+use App\Console\Commands\ConfigurationUpdates\Updates\CreateWebchatPlatforms;
 use App\Console\Commands\CreateCoreConfigurations;
 use Illuminate\Support\Collection;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
@@ -22,7 +23,7 @@ use Tests\TestCase;
 
 class CreateCoreConfigurationsTest extends TestCase
 {
-    public function testSuccessCreatingWebchatPlatforms()
+    public function testSuccessCreatingWebchatPlatformsWithPreviousSettings()
     {
         $expectedSettings = $this->mockWebchatSettings();
 
@@ -46,6 +47,49 @@ class CreateCoreConfigurationsTest extends TestCase
 
         $this->assertEquals($expectedSettings, $convertedSettings[0]->configuration);
         $this->assertEquals($expectedSettings, $convertedSettings[1]->configuration);
+
+        $this->artisan('configurations:create down -u 1 --non-interactive')
+            ->assertExitCode(0)
+            ->run();
+
+        $this->assertCount(0, ComponentConfiguration::where([
+            'name' => ConfigurationDataHelper::WEBCHAT_PLATFORM,
+        ])->get());
+    }
+
+    public function testSuccessCreatingWebchatPlatformsWithoutPreviousSettings()
+    {
+        ConversationObjectDataClient::shouldReceive('updateAllConversationObjectInterpreters');
+
+        $this->mockTwoScenarios(
+            '0x000',
+            ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+            '0x001',
+            ConfigurationDataHelper::OPENDIALOG_INTERPRETER
+        );
+
+        $this->artisan('configurations:create up -u 3 --non-interactive')
+            ->assertExitCode(0)
+            ->run();
+
+        $this->assertCount(0, ComponentConfiguration::where([
+            'name' => ConfigurationDataHelper::WEBCHAT_PLATFORM,
+        ])->get());
+
+        $url = "https://example.com";
+        $this->artisan("configurations:create up -u 1 --non-interactive --url {$url}")
+            ->assertExitCode(0)
+            ->run();
+
+        /** @var ComponentConfiguration[] $convertedSettings */
+        $convertedSettings = ComponentConfiguration::where([
+            'name' => ConfigurationDataHelper::WEBCHAT_PLATFORM,
+        ])->get();
+        $this->assertCount(2, $convertedSettings);
+
+        $defaultSettings = CreateWebchatPlatforms::getDefaultSettings($url);
+        $this->assertEquals($defaultSettings, $convertedSettings[0]->configuration);
+        $this->assertEquals($defaultSettings, $convertedSettings[1]->configuration);
 
         $this->artisan('configurations:create down -u 1 --non-interactive')
             ->assertExitCode(0)

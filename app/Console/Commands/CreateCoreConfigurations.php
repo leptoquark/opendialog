@@ -26,7 +26,8 @@ class CreateCoreConfigurations extends Command
     protected $signature = 'configurations:create'
         . ' {direction=up : up|down}'
         . ' {--u|updates=-1 : Number of updates to perform}'
-        . ' {--y|non-interactive}';
+        . ' {--y|non-interactive : Will automatically answer yes to any confirmations}'
+        . ' {--url= : The url of the instance}';
 
     /**
      * The console command description.
