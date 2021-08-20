@@ -16,7 +16,7 @@ use App\ImportExportHelpers\ScenarioImportExportHelper;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use OpenDialogAi\Core\Console\Commands\CreateCoreConfigurations;
+use OpenDialogAi\Core\Components\Configuration\ConfigurationDataHelper;
 use OpenDialogAi\Core\Conversation\Behavior;
 use OpenDialogAi\Core\Conversation\BehaviorsCollection;
 use OpenDialogAi\Core\Conversation\Condition;
@@ -109,7 +109,7 @@ class ScenariosController extends Controller
         $newScenario = Serializer::deserialize($request->getContent(), Scenario::class, 'json');
 
         if ($newScenario->getInterpreter() === "") {
-            $newScenario->setInterpreter(CreateCoreConfigurations::OPENDIALOG_INTERPRETER);
+            $newScenario->setInterpreter(ConfigurationDataHelper::OPENDIALOG_INTERPRETER);
         }
 
         $persistedScenario = $this->createDefaultConversations($newScenario);
@@ -321,7 +321,7 @@ class ScenariosController extends Controller
         $incomingIntent->setOdId($incomingIntentId);
         $incomingIntent->setDescription('Automatically generated');
         $incomingIntent->setSampleUtterance($incomingSampleUtterance);
-        $incomingIntent->setInterpreter(CreateCoreConfigurations::OPENDIALOG_INTERPRETER);
+        $incomingIntent->setInterpreter(ConfigurationDataHelper::OPENDIALOG_INTERPRETER);
         $incomingIntent->setConfidence(1);
         $incomingIntent->setCreatedAt(Carbon::now());
         $incomingIntent->setUpdatedAt(Carbon::now());
@@ -495,7 +495,7 @@ class ScenariosController extends Controller
         $speaker = $requestIntent->getSpeaker();
 
         if ($speaker === Intent::USER) {
-            $requestIntent->setInterpreter(CreateCoreConfigurations::OPENDIALOG_INTERPRETER);
+            $requestIntent->setInterpreter(ConfigurationDataHelper::OPENDIALOG_INTERPRETER);
         } else {
             $requestIntent->setInterpreter('');
         }

@@ -2920,12 +2920,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "31d2a23c470d6f895b884e9b9cd2e73f77d8640f"
+                "reference": "9044d3bdb6e54af37ef518006dda7f74eaf50ed2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/31d2a23c470d6f895b884e9b9cd2e73f77d8640f",
-                "reference": "31d2a23c470d6f895b884e9b9cd2e73f77d8640f",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/9044d3bdb6e54af37ef518006dda7f74eaf50ed2",
+                "reference": "9044d3bdb6e54af37ef518006dda7f74eaf50ed2",
                 "shasum": ""
             },
             "require": {
@@ -3005,7 +3005,7 @@
                 "issues": "https://github.com/opendialogai/core/issues",
                 "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-976--platform-configuration"
             },
-            "time": "2021-08-19T08:08:42+00:00"
+            "time": "2021-08-19T13:18:18+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -3053,12 +3053,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "8711cd84e7a930921030b9a5f177d02b39bb7486"
+                "reference": "e3806439e925494f2349e113f14aa579e9b5624b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/8711cd84e7a930921030b9a5f177d02b39bb7486",
-                "reference": "8711cd84e7a930921030b9a5f177d02b39bb7486",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/e3806439e925494f2349e113f14aa579e9b5624b",
+                "reference": "e3806439e925494f2349e113f14aa579e9b5624b",
                 "shasum": ""
             },
             "require": {
@@ -3102,7 +3102,7 @@
                 "issues": "https://github.com/opendialogai/webchat/issues",
                 "source": "https://github.com/opendialogai/webchat/tree/feature/OPNDLG-976--platform-configuration"
             },
-            "time": "2021-08-19T11:57:56+00:00"
+            "time": "2021-08-19T13:25:00+00:00"
         },
         {
             "name": "opis/closure",

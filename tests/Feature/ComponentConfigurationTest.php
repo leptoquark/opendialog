@@ -4,19 +4,16 @@ namespace Tests\Feature;
 
 use App\User;
 use DateTime;
-use Illuminate\Support\Facades\Artisan;
 use Mockery\MockInterface;
 use OpenDialogAi\AttributeEngine\CoreAttributes\UtteranceAttribute;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
-use OpenDialogAi\Core\Console\Commands\CreateCoreConfigurations;
+use OpenDialogAi\Core\Components\Configuration\ConfigurationDataHelper;
 use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
 use OpenDialogAi\Core\Conversation\InterpretedIntentCollection;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\ScenarioCollection;
-use OpenDialogAi\Core\InterpreterEngine\Callback\CallbackInterpreterConfiguration;
 use OpenDialogAi\Core\InterpreterEngine\Luis\LuisInterpreterConfiguration;
 use OpenDialogAi\Core\InterpreterEngine\OpenDialog\OpenDialogInterpreterConfiguration;
-use OpenDialogAi\Core\InterpreterEngine\Service\ConfiguredInterpreterServiceInterface;
 use OpenDialogAi\InterpreterEngine\Interpreters\CallbackInterpreter;
 use OpenDialogAi\InterpreterEngine\Interpreters\OpenDialogInterpreter;
 use OpenDialogAi\InterpreterEngine\Service\InterpreterComponentServiceInterface;
@@ -407,7 +404,7 @@ class ComponentConfigurationTest extends TestCase
 
     public function testQueryConfigurationUse()
     {
-        $configurationName = CreateCoreConfigurations::OPENDIALOG_INTERPRETER;
+        $configurationName = ConfigurationDataHelper::OPENDIALOG_INTERPRETER;
         $scenarioId = '0x123';
 
         ComponentConfiguration::create([
