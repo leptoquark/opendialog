@@ -39,7 +39,6 @@ Route::namespace('API')
         Route::apiResource('global-context', 'GlobalContextsController');
 
         Route::apiResource('component-configuration', 'ComponentConfigurationController');
-        Route::get('component-configurations/{scenario}', 'ComponentConfigurationController@indexByScenario');
         Route::post('component-configurations/test', 'ComponentConfigurationController@test');
         Route::post('component-configurations/{component_configuration}/query', 'ComponentConfigurationController@query');
 
