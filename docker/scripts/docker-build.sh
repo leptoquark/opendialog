@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 USER="${DOCKER_USER}"
 PASSWD="${DOCKER_PASS}"
 
