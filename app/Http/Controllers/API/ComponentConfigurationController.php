@@ -8,6 +8,7 @@ use App\Http\Requests\ComponentConfigurationTestRequest;
 use App\Http\Resources\ComponentConfigurationCollection;
 use App\Http\Resources\ComponentConfigurationResource;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -44,49 +45,26 @@ class ComponentConfigurationController extends Controller
      */
     public function index(Request $request)
     {
+        $scenarioId = $request->get('scenario_id');
         $type = $request->get('type', self::ALL);
+
+        /** @var ComponentConfiguration|Builder $query */
+        $query = ComponentConfiguration::query();
+
+        if ($scenarioId) {
+            $query->byScenario($scenarioId);
+        }
 
         switch ($type) {
             case self::ACTION:
-                $configurations = ComponentConfiguration::actions()->paginate(50);
+                $query->actions();
                 break;
             case self::INTERPRETER:
-                $configurations = ComponentConfiguration::interpreters()->paginate(50);
-                break;
-            case self::ALL:
-            default:
-                $configurations = ComponentConfiguration::paginate(50);
+                $query->interpreters();
                 break;
         }
 
-        $configurations->appends(['type' => $type]);
-
-        return new ComponentConfigurationCollection($configurations);
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @param Scenario $scenario
-     * @return ComponentConfigurationCollection|Response
-     */
-    public function indexByScenario(Request $request, Scenario $scenario)
-    {
-        $type = $request->get('type', self::ALL);
-
-        switch ($type) {
-            case self::ACTION:
-                $configurations = ComponentConfiguration::byScenario($scenario->getUid())->actions()->paginate(50);
-                break;
-            case self::INTERPRETER:
-                $configurations = ComponentConfiguration::byScenario($scenario->getUid())->interpreters()->paginate(50);
-                break;
-            case self::ALL:
-            default:
-                $configurations = ComponentConfiguration::byScenario($scenario->getUid())->paginate(50);
-                break;
-        }
+        $configurations = $query->paginate(50);
 
         $configurations->appends(['type' => $type]);
 
