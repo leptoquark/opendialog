@@ -2920,12 +2920,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "6c9d664bf9b48069eb81251079fa4793920cb07c"
+                "reference": "b9c20e24163d9942abddec1a276bed7f488fada3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/6c9d664bf9b48069eb81251079fa4793920cb07c",
-                "reference": "6c9d664bf9b48069eb81251079fa4793920cb07c",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/b9c20e24163d9942abddec1a276bed7f488fada3",
+                "reference": "b9c20e24163d9942abddec1a276bed7f488fada3",
                 "shasum": ""
             },
             "require": {
@@ -3003,7 +3003,7 @@
                 "issues": "https://github.com/opendialogai/core/issues",
                 "source": "https://github.com/opendialogai/core/tree/feature/configuration-ownership-compatability"
             },
-            "time": "2021-08-12T12:36:08+00:00"
+            "time": "2021-08-24T09:08:55+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
