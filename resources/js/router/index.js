@@ -51,8 +51,8 @@ const router = new VueRouter({
           component: Scenarios,
           props: route => ({ newScenario: route.query.newScenario === "true" }),
           meta: {
-              title: 'Workspace',
-              sidebarLabel: 'All scenarios'
+            title: 'Workspace',
+            sidebarLabel: 'All scenarios'
           },
         },
         {
@@ -60,9 +60,9 @@ const router = new VueRouter({
           name: 'create-scenario',
           component: CreateNewScenario,
           meta: {
-              title: 'Create New Scenario',
-              sidebarLabel: 'Create scenario',
-              sidebarIcon: 'od-icon-plus-2'
+            title: 'Create New Scenario',
+            sidebarLabel: 'Create scenario',
+            sidebarIcon: 'od-icon-plus-2'
           },
         },
         {
@@ -71,7 +71,8 @@ const router = new VueRouter({
           component: ConversationBuilder,
           props: route => ({ newScenario: route.query.newScenario }),
           meta: {
-              title: 'Conversation Designer',
+            title: 'Conversation Designer',
+            requiresScenario: true
           },
         },
         {
@@ -79,7 +80,8 @@ const router = new VueRouter({
           name: 'actions',
           component: Actions,
           meta: {
-              title: 'Actions',
+            title: 'Actions',
+            requiresScenario: true
           },
         },
         {
@@ -87,7 +89,8 @@ const router = new VueRouter({
           name: 'configure-action',
           component: ConfigureAction,
           meta: {
-              title: 'Conversation Designer',
+            title: 'Actions',
+            requiresScenario: true
           },
         },
         {
@@ -95,7 +98,8 @@ const router = new VueRouter({
           name: 'interpreters',
           component: Interpreters,
           meta: {
-              title: 'Interpreters',
+            title: 'Interpreters',
+            requiresScenario: true
           },
         },
         {
@@ -104,6 +108,7 @@ const router = new VueRouter({
           component: MessageEditor,
           meta: {
             title: 'Message Editor',
+            requiresScenario: true
           },
         },
         {
@@ -111,7 +116,8 @@ const router = new VueRouter({
           name: 'configure-interpreter',
           component: ConfigureInterpreter,
           meta: {
-              title: 'Configure Interpreter',
+            title: 'Configure Interpreter',
+            requiresScenario: true
           },
         },
         {
@@ -119,7 +125,8 @@ const router = new VueRouter({
           name: 'edit-interpreter',
           component: EditInterpreter,
           meta: {
-              title: 'Configure Interpreter',
+            title: 'Configure Interpreter',
+            requiresScenario: true
           },
         },
         {
@@ -127,7 +134,8 @@ const router = new VueRouter({
           name: 'map-interpreter',
           component: MapInterpreter,
           meta: {
-              title: 'Configure Interpreter',
+            title: 'Configure Interpreter',
+            requiresScenario: true
           },
         },
         {
@@ -135,7 +143,8 @@ const router = new VueRouter({
           name: 'webchat-setting',
           component: WebchatSettingView,
           meta: {
-              title: 'Interface Settings',
+            title: 'Interface Settings',
+            requiresScenario: true
           },
         },
         {
@@ -143,7 +152,7 @@ const router = new VueRouter({
           name: 'chatbot-users',
           component: ChatbotUsersView,
           meta: {
-              title: 'Chatbot Users',
+            title: 'Chatbot Users',
           },
         },
         {
@@ -151,7 +160,7 @@ const router = new VueRouter({
           name: 'view-chatbot-user',
           component: ChatbotUsersView,
           meta: {
-              title: 'Chatbot Users',
+            title: 'Chatbot Users',
           },
           props: true,
         },
@@ -160,7 +169,7 @@ const router = new VueRouter({
           name: 'conversation-log',
           component: ConversationLog,
           meta: {
-              title: 'Conversation Log',
+            title: 'Conversation Log',
           },
           props: true,
         },
@@ -169,7 +178,7 @@ const router = new VueRouter({
           name: 'dynamic-attributes',
           component: DynamicAttribute,
           meta: {
-              title: 'Dynamic Attributes',
+            title: 'Dynamic Attributes',
           },
         },
         {
@@ -177,7 +186,7 @@ const router = new VueRouter({
           name: 'add-dynamic-attribute',
           component: DynamicAttribute,
           meta: {
-              title: 'Dynamic Attributes',
+            title: 'Dynamic Attributes',
           },
         },
         {
@@ -185,7 +194,7 @@ const router = new VueRouter({
           name: 'view-dynamic-attribute',
           component: DynamicAttribute,
           meta: {
-              title: 'Dynamic Attributes',
+            title: 'Dynamic Attributes',
           },
           props: true,
       },
@@ -194,7 +203,7 @@ const router = new VueRouter({
           name: 'edit-dynamic-attribute',
           component: DynamicAttribute,
           meta: {
-              title: 'Dynamic Attributes',
+            title: 'Dynamic Attributes',
           },
           props: true,
       },
@@ -203,7 +212,7 @@ const router = new VueRouter({
           name: 'users',
           component: UserView,
           meta: {
-              title: 'Users',
+            title: 'Users',
           },
         },
         {
@@ -211,7 +220,7 @@ const router = new VueRouter({
           name: 'add-user',
           component: UserView,
           meta: {
-              title: 'Add User',
+            title: 'Add User',
           },
         },
         {
@@ -219,7 +228,7 @@ const router = new VueRouter({
           name: 'view-user',
           component: UserView,
           meta: {
-              title: 'Account',
+            title: 'Account',
           },
           props: true,
         },
@@ -228,7 +237,7 @@ const router = new VueRouter({
           name: 'edit-user',
           component: UserView,
           meta: {
-              title: 'Account',
+            title: 'Account',
           },
           props: true,
         },
@@ -237,7 +246,7 @@ const router = new VueRouter({
           name: 'requests',
           component: RequestView,
           meta: {
-              title: 'Requests',
+            title: 'Requests',
           },
         },
         {
@@ -245,7 +254,7 @@ const router = new VueRouter({
           name: 'view-request',
           component: RequestView,
           meta: {
-              title: 'Requests',
+            title: 'Requests',
           },
           props: true,
         },
@@ -254,7 +263,7 @@ const router = new VueRouter({
           name: 'global-contexts',
           component: GlobalContextView,
           meta: {
-              title: 'Global Contexts',
+            title: 'Global Contexts',
           },
         },
         {
@@ -262,7 +271,7 @@ const router = new VueRouter({
           name: 'add-global-context',
           component: GlobalContextView,
           meta: {
-              title: 'Global Contexts',
+            title: 'Global Contexts',
           },
         },
         {
@@ -270,7 +279,7 @@ const router = new VueRouter({
           name: 'view-global-context',
           component: GlobalContextView,
           meta: {
-              title: 'Global Contexts',
+            title: 'Global Contexts',
           },
           props: true,
         },
@@ -279,7 +288,7 @@ const router = new VueRouter({
           name: 'edit-global-context',
           component: GlobalContextView,
           meta: {
-              title: 'Global Contexts',
+            title: 'Global Contexts',
           },
           props: true,
         },
@@ -288,7 +297,7 @@ const router = new VueRouter({
           name: 'warnings',
           component: WarningView,
           meta: {
-              title: 'Warnings',
+            title: 'Warnings',
           },
         },
         {
@@ -296,7 +305,7 @@ const router = new VueRouter({
           name: 'view-warning',
           component: WarningView,
           meta: {
-              title: 'Warnings',
+            title: 'Warnings',
           },
           props: true,
         },
@@ -305,7 +314,8 @@ const router = new VueRouter({
           name: 'webchat-demo',
           component: WebchatDemo,
           meta: {
-              title: 'Preview',
+            title: 'Preview',
+            requiresScenario: true
           }
         }
       ],
@@ -341,10 +351,10 @@ router.beforeEach(async (to, from, next) => {
   }
 
   const scenario = to.query.scenario ? to.query.scenario : store.state.selectedScenario.id
-  if (!scenario && (to.path !== '/admin' && to.path !== '/admin/create-new-scenario')) {
+  if (!scenario && (to.meta.requiresScenario)) {
     next('/admin')
   } else {
-    if (scenario && !to.query.scenario && (to.path !== '/admin' && to.path !== '/admin/create-new-scenario')) {
+    if (scenario && !to.query.scenario && (to.meta.requiresScenario)) {
       next({path: to.path, query: {...to.query, scenario: scenario}})
     } else {
       next()
