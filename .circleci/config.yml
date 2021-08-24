@@ -21,7 +21,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run: sudo apt-get update
+      - run: sudo apt-get update --allow-releaseinfo-change
       - run: sudo apt install -y libsqlite3-dev
       - run: sudo docker-php-ext-install bcmath
       - run: sudo docker-php-ext-install exif
@@ -139,7 +139,8 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 19.03.14
 
       - run: |
           if [ "${DOCKER_BUILD}" = "true" ]; then
