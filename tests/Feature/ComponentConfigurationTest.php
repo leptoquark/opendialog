@@ -126,6 +126,9 @@ class ComponentConfigurationTest extends TestCase
             'name' => 'My New Name',
         ];
 
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
+
         $this->actingAs($this->user, 'api')
             ->json('PATCH', '/admin/api/component-configuration/'.$configuration->id, $data)
             ->assertNoContent();
@@ -138,7 +141,7 @@ class ComponentConfigurationTest extends TestCase
         $this->assertEquals(self::CONFIGURATION, $updatedConfiguration->configuration);
     }
 
-    public function testUpdateDuplicateName()
+    public function testUpdateDuplicateNameAndScenario()
     {
         /** @var ComponentConfiguration $a */
         $a = factory(ComponentConfiguration::class)->create();
@@ -150,6 +153,9 @@ class ComponentConfigurationTest extends TestCase
             'name' => $b->name
         ];
 
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
+
         $this->actingAs($this->user, 'api')
             ->json('PATCH', '/admin/api/component-configuration/'.$a->id, $data)
             ->assertStatus(422)
@@ -159,27 +165,37 @@ class ComponentConfigurationTest extends TestCase
     public function testStoreValidData()
     {
         $name = 'My New Name';
+        $scenarioId = '0x001';
+
         $data = [
             'name' => $name,
+            'scenario_id' => $scenarioId,
             'component_id' => self::COMPONENT_ID,
             'configuration' => self::CONFIGURATION,
         ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration', $data)
             ->assertStatus(201)
             ->assertJsonFragment($data);
 
-        $this->assertDatabaseHas('component_configurations', ['name' => $name]);
+        $this->assertDatabaseHas('component_configurations', ['name' => $name, 'scenario_id' => $scenarioId]);
     }
 
     public function testStoreInvalidComponentId()
     {
         $data = [
             'name' => 'My New Name',
+            'scenario_id' => '0x000',
             'component_id' => 'unknown',
             'configuration' => [],
         ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
@@ -190,6 +206,24 @@ class ComponentConfigurationTest extends TestCase
     public function testStoreMissingName()
     {
         $data = [
+            'scenario_id' => '0x000',
+            'component_id' => self::COMPONENT_ID,
+            'configuration' => self::CONFIGURATION,
+        ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
+
+        $this->actingAs($this->user, 'api')
+            ->json('POST', '/admin/api/component-configuration/', $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
+    }
+
+    public function testStoreMissingScenarioId()
+    {
+        $data = [
+            'name' => 'Test',
             'component_id' => self::COMPONENT_ID,
             'configuration' => self::CONFIGURATION,
         ];
@@ -197,7 +231,7 @@ class ComponentConfigurationTest extends TestCase
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['name']);
+            ->assertJsonValidationErrors(['scenario_id']);
     }
 
     public function testStoreInvalidConfiguration()
@@ -206,12 +240,16 @@ class ComponentConfigurationTest extends TestCase
 
         $data = [
             'name' => 'My New Name',
+            'scenario_id' => '0x000',
             'component_id' => 'interpreter.core.luis',
             'configuration' => [
                 LuisInterpreterConfiguration::APP_URL => 'https://example.com/',
                 LuisInterpreterConfiguration::APP_ID => '123',
             ],
         ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
@@ -223,12 +261,16 @@ class ComponentConfigurationTest extends TestCase
     {
         $data = [
             'name' => 'My New Name',
+            'scenario_id' => '0x000',
             'component_id' => 'interpreter.core.luis',
             'configuration' => [
                 LuisInterpreterConfiguration::APP_URL => 'file://example.com/', //invalid scheme
                 LuisInterpreterConfiguration::APP_ID => '123',
             ],
         ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
@@ -242,12 +284,16 @@ class ComponentConfigurationTest extends TestCase
 
         $data = [
             'name' => 'My New Name',
+            'scenario_id' => '0x000',
             'component_id' => 'interpreter.core.luis',
             'configuration' => [
                 LuisInterpreterConfiguration::APP_URL => 'file://example.com/', //invalid scheme
                 LuisInterpreterConfiguration::APP_ID => '123',
             ],
         ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
@@ -259,11 +305,15 @@ class ComponentConfigurationTest extends TestCase
     {
         $data = [
             'name' => 'Bad webhook',
+            'scenario_id' => '0x000',
             'component_id' => 'action.core.webhook',
             'configuration' => [
                 'webhook_url' => 'localhost'
             ],
         ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/component-configuration/', $data)
@@ -277,6 +327,7 @@ class ComponentConfigurationTest extends TestCase
 
         $data = [
             'name' => 'Bad webhook',
+            'scenario_id' => '0x000',
             'component_id' => 'action.core.webhook',
             'configuration' => [
                 'webhook_url' => 'localhost'
@@ -304,6 +355,7 @@ class ComponentConfigurationTest extends TestCase
     {
         $data = [
             'name' => 'My New Name',
+            'scenario_id' => '0x000',
             'component_id' => self::COMPONENT_ID,
             'configuration' => self::CONFIGURATION,
         ];
@@ -328,6 +380,7 @@ class ComponentConfigurationTest extends TestCase
     {
         $data = [
             'name' => 'My New Name',
+            'scenario_id' => '0x000',
             'configuration' => self::CONFIGURATION,
         ];
 
@@ -341,6 +394,7 @@ class ComponentConfigurationTest extends TestCase
     {
         $data = [
             'name' => 'My New Name',
+            'scenario_id' => '0x000',
             'component_id' => 'interpreter.core.luis',
             'configuration' => [
                 LuisInterpreterConfiguration::APP_URL => 'file://example.com/', //invalid scheme
@@ -360,6 +414,7 @@ class ComponentConfigurationTest extends TestCase
 
         $data = [
             'name' => 'My New Name',
+            'scenario_id' => '0x000',
             'component_id' => 'interpreter.core.luis',
             'configuration' => [
                 LuisInterpreterConfiguration::APP_URL => 'file://example.com/', //invalid scheme
@@ -376,6 +431,7 @@ class ComponentConfigurationTest extends TestCase
     {
         $data = [
             'name' => 'My New Name',
+            'scenario_id' => '0x000',
             'component_id' => self::COMPONENT_ID,
             'configuration' => self::CONFIGURATION,
         ];
@@ -404,33 +460,31 @@ class ComponentConfigurationTest extends TestCase
 
     public function testQueryConfigurationUse()
     {
-        $configurationName = ConfigurationDataHelper::OPENDIALOG_INTERPRETER;
-        $scenarioId = '0x123';
-
-        ComponentConfiguration::create([
-            'name' => $configurationName,
-            'scenario_id' => $scenarioId,
+        /** @var ComponentConfiguration $configuration */
+        $configuration = ComponentConfiguration::create([
+            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+            'scenario_id' => '0x123',
             'component_id' => OpenDialogInterpreter::getComponentId(),
             'configuration' => [],
             'active' => true,
         ]);
 
         $data = [
-            'name' => $configurationName,
-            'scenario_id' => $scenarioId
+            'name' => $configuration->name,
+            'scenario_id' => $configuration->scenario_id,
         ];
 
         $scenario1 = new Scenario();
-        $scenario1->setUid($scenarioId);
+        $scenario1->setUid($configuration->scenario_id);
         $scenario1->setOdId('scenario_1');
-        $scenario1->setInterpreter($configurationName);
+        $scenario1->setInterpreter($configuration->name);
         $scenario1->setCreatedAt(new DateTime());
         $scenario1->setUpdatedAt(new DateTime());
 
         $scenario2 = new Scenario();
         $scenario2->setUid('0x456');
         $scenario2->setOdId('scenario_2');
-        $scenario2->setInterpreter($configurationName);
+        $scenario2->setInterpreter($configuration->name);
         $scenario2->setCreatedAt(new DateTime());
         $scenario2->setUpdatedAt(new DateTime());
 
@@ -442,7 +496,21 @@ class ComponentConfigurationTest extends TestCase
             ]));
 
         $this->actingAs($this->user, 'api')
-            ->json('POST', '/admin/api/component-configurations/query', $data)
+            ->json('POST', '/admin/api/component-configurations/' . $configuration->id . '/query')
             ->assertStatus(200);
+    }
+
+    public function testQueryConfigurationNotInUse()
+    {
+        /** @var ComponentConfiguration $configuration */
+        $configuration = factory(ComponentConfiguration::class)->create();
+
+        ConversationDataClient::shouldReceive('getScenariosWhereInterpreterIsUsed')
+            ->once()
+            ->andReturn(new ScenarioCollection([]));
+
+        $this->actingAs($this->user, 'api')
+            ->json('POST', '/admin/api/component-configurations/' . $configuration->id . '/query')
+            ->assertStatus(404);
     }
 }

@@ -3,11 +3,9 @@
 namespace Tests\Feature;
 
 use App\User;
-use Illuminate\Support\Facades\Artisan;
 use OpenDialogAi\ActionEngine\Service\ActionServiceInterface;
 use OpenDialogAi\AttributeEngine\AttributeResolver\AttributeResolver;
 use OpenDialogAi\ContextEngine\Contracts\ContextService;
-use OpenDialogAi\Core\InterpreterEngine\Service\ConfiguredInterpreterServiceInterface;
 use OpenDialogAi\Core\InterpreterEngine\Service\InterpreterServiceInterface;
 use OpenDialogAi\InterpreterEngine\Service\InterpreterComponentServiceInterface;
 use OpenDialogAi\ResponseEngine\Service\FormatterServiceInterface;

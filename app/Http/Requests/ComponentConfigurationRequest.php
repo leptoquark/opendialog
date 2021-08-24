@@ -5,10 +5,18 @@ namespace App\Http\Requests;
 use App\Rules\ComponentConfigurationRule;
 use App\Rules\ComponentRegistrationRule;
 use App\Rules\PublicUrlRule;
+use App\Rules\ScenarioExists;
 use App\Rules\UrlSchemeRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
 
+/**
+ * @property $name string
+ * @property $scenario_id string
+ * @property $component_id string
+ * @property $configuration array
+ */
 class ComponentConfigurationRequest extends FormRequest
 {
     /**
@@ -29,25 +37,34 @@ class ComponentConfigurationRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'name' => [
-                Rule::requiredIf($this->method() == 'POST'),
+            'scenario_id' => [
                 'bail',
+                Rule::requiredIf($this->method() == 'POST' || !is_null($this->name)),
                 'string',
                 'filled',
-                'unique:component_configurations,name'
+                new ScenarioExists,
+            ],
+            'name' => [
+                'bail',
+                Rule::requiredIf($this->method() == 'POST' || !is_null($this->scenario_id)),
+                'string',
+                'filled',
+                Rule::unique('component_configurations')->where(function ($query) {
+                    return $query->where('scenario_id', $this->scenario_id);
+                }),
             ],
             'component_id' => [
                 'bail',
-                Rule::requiredIf($this->method() == 'POST' || !is_null($this->get('configuration'))),
+                Rule::requiredIf($this->method() == 'POST' || !is_null($this->configuration)),
                 'string',
                 'filled',
                 new ComponentRegistrationRule
             ],
             'configuration' => [
                 'bail',
-                Rule::requiredIf($this->method() == 'POST' || !is_null($this->get('component_id'))),
+                Rule::requiredIf($this->method() == 'POST' || !is_null($this->component_id)),
                 'array',
-                new ComponentConfigurationRule($this->get('component_id', ''))
+                new ComponentConfigurationRule($this->component_id ?? '')
             ],
             'active' => [
                 'bail',
@@ -71,5 +88,17 @@ class ComponentConfigurationRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    protected function prepareForValidation()
+    {
+        if ($this->route('component_configuration')) {
+            /** @var ComponentConfiguration $configuration */
+            $configuration = $this->route('component_configuration');
+
+            $this->merge([
+                'scenario_id' => $configuration->scenario_id,
+            ]);
+        }
     }
 }
