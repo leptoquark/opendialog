@@ -23,12 +23,7 @@ Route::namespace('API')
     ->prefix('admin/api')
     ->group(function () {
         Route::apiResource('conversation', 'ConversationsController');
-        Route::apiResource(
-            'webchat-setting',
-            'WebchatSettingsController',
-            ['except' => ['store', 'destroy']]
-        );
-        Route::put('/webchat-setting', 'WebchatSettingsController@multiUpdate');
+        Route::get('webchat-setting','WebchatSettingsController@index');
         Route::apiResource(
             'chatbot-user',
             'ChatbotUsersController',
