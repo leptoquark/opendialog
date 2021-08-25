@@ -229,7 +229,8 @@ class ScenariosController extends Controller
             'configuration' => [
                 OpenDialogInterpreterConfiguration::CALLBACKS => [
                     'WELCOME' => 'intent.core.welcome',
-                ]
+                ],
+                OpenDialogInterpreterConfiguration::ENABLE_SIMILARITY_EVALUATION => true,
             ],
             'active' => true,
         ]);
