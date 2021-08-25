@@ -164,7 +164,7 @@ class ComponentConfigurationController extends Controller
         try {
             $parsedComponentType = ComponentHelper::parseComponentId($componentId);
         } catch (UnknownComponentTypeException $e) {
-            return response($e->getMessage(), 404);
+            return response($e->getMessage(), 400);
         }
 
         switch ($parsedComponentType) {
@@ -175,7 +175,7 @@ class ComponentConfigurationController extends Controller
                 $scenarios = ConversationDataClient::getScenariosWhereActionIsUsed($name);
                 break;
             default:
-                return response(null, 404);
+                return response(null, 400);
         }
 
         $status = $scenarios->contains(fn (Scenario $s) => $s->getUid() === $scenarioId) ? 200 : 404;
