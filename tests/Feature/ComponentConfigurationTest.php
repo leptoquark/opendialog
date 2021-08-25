@@ -153,12 +153,81 @@ class ComponentConfigurationTest extends TestCase
         ];
 
         ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->with($a->scenario_id)
             ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('PATCH', '/admin/api/component-configuration/'.$a->id, $data)
             ->assertStatus(422)
             ->assertJsonValidationErrors(['name']);
+    }
+
+    public function testUpdateNameToNew()
+    {
+        /** @var ComponentConfiguration $a */
+        $a = factory(ComponentConfiguration::class)->create();
+
+        /** @var ComponentConfiguration $b */
+        $b = factory(ComponentConfiguration::class)->create();
+
+        $a->scenario_id = '0x000';
+        $a->save();
+
+        $b->scenario_id = '0x001';
+        $b->save();
+
+        $data = [
+            'name' => $b->name
+        ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->with($a->scenario_id)
+            ->once();
+
+        $this->actingAs($this->user, 'api')
+            ->json('PATCH', '/admin/api/component-configuration/'.$a->id, $data)
+            ->assertStatus(204);
+    }
+
+    public function testUpdateNameToSame()
+    {
+        /** @var ComponentConfiguration $a */
+        $a = factory(ComponentConfiguration::class)->create();
+
+        /** @var ComponentConfiguration $b */
+        $b = factory(ComponentConfiguration::class)->create();
+
+        $a->scenario_id = '0x000';
+        $a->save();
+
+        $b->scenario_id = '0x001';
+        $b->save();
+
+        $data = [
+            'name' => $a->name
+        ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->with($a->scenario_id)
+            ->once();
+
+        $this->actingAs($this->user, 'api')
+            ->json('PATCH', '/admin/api/component-configuration/'.$a->id, $data)
+            ->assertStatus(204);
+    }
+
+    public function testUpdateActive()
+    {
+        /** @var ComponentConfiguration $a */
+        $a = factory(ComponentConfiguration::class)->create();
+
+        $data = [
+            'active' => false
+        ];
+
+        $this->actingAs($this->user, 'api')
+            ->json('PATCH', '/admin/api/component-configuration/'.$a->id, $data)
+            ->assertStatus(204);
     }
 
     public function testStoreValidData()
