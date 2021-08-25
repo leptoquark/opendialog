@@ -37,7 +37,7 @@ class ImportScenarios extends Command
 
         try {
             $scenario = ScenarioImportExportHelper::importScenarioFromString($scenarioData);
-            ScenariosController::createOpenDialogInterpreterForScenario($scenario->getUid());
+            ScenariosController::createDefaultConfigurationsForScenario($scenario->getUid());
         } catch (NotEncodableValueException $e) {
             $this->error(sprintf("Import of %s failed. Unable to decode file as json", $filePath));
             return;
