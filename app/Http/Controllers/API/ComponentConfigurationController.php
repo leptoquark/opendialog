@@ -30,6 +30,7 @@ class ComponentConfigurationController extends Controller
     const ALL = 'all';
     const ACTION = 'action';
     const INTERPRETER = 'interpreter';
+    const PLATFORM = 'platform';
 
     const VALID_TYPES = [
         self::ALL,
@@ -61,6 +62,9 @@ class ComponentConfigurationController extends Controller
                 break;
             case self::INTERPRETER:
                 $query->interpreters();
+                break;
+            case self::PLATFORM:
+                $query->platforms();
                 break;
         }
 
