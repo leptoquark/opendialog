@@ -48,4 +48,17 @@ return [
         'encrypt_cookies' => App\Http\Middleware\EncryptCookies::class,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Bot user
+    |--------------------------------------------------------------------------
+    |
+    | Generating sanctum tokens to be used as part of recording requests to webchat
+    | endpoints requires a User to attach tokens to. The following configuration
+    | provides a default user to be used in this case.
+    |
+    */
+
+    'bot_user' => env('BOT_USER', 'opendialog'),
+
 ];
