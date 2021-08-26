@@ -54,10 +54,13 @@ class AddTokenToScenario extends Command
 
             if (!$accessToken) {
                 $this->info("This scenario does NOT have an access token, creating one..." );
+                $abilities = [
+                    $tokenName,
+                    ($scenario->isActive() ? ScenarioAccessTokenConstants::ACTIVE : '')
+                ];
                 $token = $botUser->createToken(
                     $tokenName,
-                    [$tokenName] +
-                    ($scenario->getActive()) ? [ScenarioAccessTokenConstants::ACTIVE] : []
+                    array_filter($abilities)
                 )->plainTextToken;
                 ScenarioAccessToken::create([
                     'scenario_id' => $scenario->getUid(),
