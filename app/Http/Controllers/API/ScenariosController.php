@@ -16,6 +16,7 @@ use App\ImportExportHelpers\ScenarioImportExportHelper;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
 use OpenDialogAi\Core\Console\Commands\CreateCoreConfigurations;
 use OpenDialogAi\Core\Conversation\Behavior;
 use OpenDialogAi\Core\Conversation\BehaviorsCollection;
@@ -210,6 +211,8 @@ class ScenariosController extends Controller
         ConversationDataClient::updateIntent($triggerWelcomeIntent);
         ConversationDataClient::updateIntent($triggerRestartIntent);
 
+        CreateCoreConfigurations::createOpenDialogInterpreterForScenario($scenario->getUid());
+
         return $scenario;
     }
 
@@ -236,6 +239,10 @@ class ScenariosController extends Controller
     public function destroy(Scenario $scenario): Response
     {
         if (ConversationDataClient::deleteScenarioByUid($scenario->getUid())) {
+            ComponentConfiguration::where([
+                'scenario_id' => $scenario->getUid()
+            ])->delete();
+
             return response()->noContent(200);
         } else {
             return response('Error deleting scenario, check the logs', 500);
@@ -249,7 +256,9 @@ class ScenariosController extends Controller
      */
     public function duplicate(ConversationObjectDuplicationRequest $request, Scenario $scenario): ScenarioResource
     {
-        $scenario = ScenarioDataClient::getFullScenarioGraph($scenario->getUid());
+        $originalScenarioUid = $scenario->getUid();
+
+        $scenario = ScenarioDataClient::getFullScenarioGraph($originalScenarioUid);
 
         // Set new OD ID for the scenario and create a map of UIDs to/from paths,
         /** @var Scenario $scenario */
@@ -284,6 +293,8 @@ class ScenariosController extends Controller
         ]);
 
         $duplicate = ScenarioImportExportHelper::patchScenario($duplicate, $scenarioWithPathsSubstituted);
+
+        $this->duplicateConfigurationsForScenario($originalScenarioUid, $duplicate->getUid());
 
         return new ScenarioResource($duplicate);
     }
@@ -513,5 +524,22 @@ class ScenariosController extends Controller
 
             $requestIntent->addMessageTemplate($messageTemplate);
         }
+    }
+
+    /**
+     * Duplicates all configurations for original scenario to new scenario
+     *
+     * @param string $originalUid
+     * @param string $newUid
+     */
+    private function duplicateConfigurationsForScenario(string $originalUid, string $newUid): void
+    {
+        $configurations = ComponentConfiguration::where('scenario_id', $originalUid)->get();
+
+        $configurations->each(function (ComponentConfiguration $configuration) use ($newUid) {
+            $duplicate = $configuration->replicate();
+            $duplicate->scenario_id = $newUid;
+            $duplicate->save();
+        });
     }
 }

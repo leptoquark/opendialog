@@ -50,6 +50,10 @@ class ComponentConfigurationRequest extends FormRequest
                 'string',
                 'filled',
                 Rule::unique('component_configurations')->where(function ($query) {
+                    if ($this->route('component_configuration')) {
+                        $query->where('id', '!=', $this->route('component_configuration')->id);
+                    }
+
                     return $query->where('scenario_id', $this->scenario_id);
                 }),
             ],
@@ -92,7 +96,7 @@ class ComponentConfigurationRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        if ($this->route('component_configuration')) {
+        if ($this->route('component_configuration') && $this->name) {
             /** @var ComponentConfiguration $configuration */
             $configuration = $this->route('component_configuration');
 

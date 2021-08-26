@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\User;
 use DateTime;
-use Illuminate\Support\Facades\Artisan;
 use Mockery\MockInterface;
 use OpenDialogAi\AttributeEngine\CoreAttributes\UtteranceAttribute;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
@@ -14,7 +13,6 @@ use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\ScenarioCollection;
 use OpenDialogAi\Core\InterpreterEngine\Luis\LuisInterpreterConfiguration;
 use OpenDialogAi\Core\InterpreterEngine\OpenDialog\OpenDialogInterpreterConfiguration;
-use OpenDialogAi\Core\InterpreterEngine\Service\ConfiguredInterpreterServiceInterface;
 use OpenDialogAi\InterpreterEngine\Interpreters\CallbackInterpreter;
 use OpenDialogAi\InterpreterEngine\Interpreters\OpenDialogInterpreter;
 use OpenDialogAi\InterpreterEngine\Service\InterpreterComponentServiceInterface;
@@ -34,10 +32,6 @@ class ComponentConfigurationTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        Artisan::call('configurations:create');
-
-        $this->app->forgetInstance(ConfiguredInterpreterServiceInterface::class);
-        $this->app->forgetInstance(InterpreterComponentServiceInterface::class);
 
         $this->user = factory(User::class)->create();
     }
@@ -89,7 +83,7 @@ class ComponentConfigurationTest extends TestCase
             ->assertStatus(200)
             ->getData();
 
-        $this->assertEquals(2, count($response->data));
+        $this->assertEquals(1, count($response->data));
     }
 
     public function testViewAllByComponentType()
@@ -116,8 +110,8 @@ class ComponentConfigurationTest extends TestCase
             ->assertStatus(200)
             ->assertJson([
                 'data' => [
+                    $configurations[1]->toArray(),
                     $configurations[2]->toArray(),
-                    $configurations[3]->toArray(),
                 ],
             ]);
     }
@@ -159,12 +153,81 @@ class ComponentConfigurationTest extends TestCase
         ];
 
         ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->with($a->scenario_id)
             ->once();
 
         $this->actingAs($this->user, 'api')
             ->json('PATCH', '/admin/api/component-configuration/'.$a->id, $data)
             ->assertStatus(422)
             ->assertJsonValidationErrors(['name']);
+    }
+
+    public function testUpdateNameToNew()
+    {
+        /** @var ComponentConfiguration $a */
+        $a = factory(ComponentConfiguration::class)->create();
+
+        /** @var ComponentConfiguration $b */
+        $b = factory(ComponentConfiguration::class)->create();
+
+        $a->scenario_id = '0x000';
+        $a->save();
+
+        $b->scenario_id = '0x001';
+        $b->save();
+
+        $data = [
+            'name' => $b->name
+        ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->with($a->scenario_id)
+            ->once();
+
+        $this->actingAs($this->user, 'api')
+            ->json('PATCH', '/admin/api/component-configuration/'.$a->id, $data)
+            ->assertStatus(204);
+    }
+
+    public function testUpdateNameToSame()
+    {
+        /** @var ComponentConfiguration $a */
+        $a = factory(ComponentConfiguration::class)->create();
+
+        /** @var ComponentConfiguration $b */
+        $b = factory(ComponentConfiguration::class)->create();
+
+        $a->scenario_id = '0x000';
+        $a->save();
+
+        $b->scenario_id = '0x001';
+        $b->save();
+
+        $data = [
+            'name' => $a->name
+        ];
+
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->with($a->scenario_id)
+            ->once();
+
+        $this->actingAs($this->user, 'api')
+            ->json('PATCH', '/admin/api/component-configuration/'.$a->id, $data)
+            ->assertStatus(204);
+    }
+
+    public function testUpdateActive()
+    {
+        /** @var ComponentConfiguration $a */
+        $a = factory(ComponentConfiguration::class)->create();
+
+        $data = [
+            'active' => false
+        ];
+
+        $this->actingAs($this->user, 'api')
+            ->json('PATCH', '/admin/api/component-configuration/'.$a->id, $data)
+            ->assertStatus(204);
     }
 
     public function testStoreValidData()
