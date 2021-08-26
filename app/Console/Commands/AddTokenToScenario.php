@@ -7,6 +7,7 @@ use App\User;
 use Illuminate\Console\Command;
 use Laravel\Sanctum\PersonalAccessToken;
 use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
+use OpenDialogAi\Core\Http\Helpers\ScenarioAccessTokenConstants;
 
 class AddTokenToScenario extends Command
 {
@@ -45,7 +46,7 @@ class AddTokenToScenario extends Command
             $this->info("Getting scenario: " . $scenario->getUid());
             $tokenName = 'scenario:' . $scenario->getUid();
             $accessToken = PersonalAccessToken::where("name", $tokenName)->first();
-            $botUser = User::where("name", config('opendialog.core.bot_user'))->first();
+            $botUser = User::where("email", config('sanctum.bot_user'))->first();
             if (is_null($botUser)) {
                 $this->error('In order to generate access tokens you will need to configure a bot user');
                 return 1;
@@ -53,7 +54,11 @@ class AddTokenToScenario extends Command
 
             if (!$accessToken) {
                 $this->info("This scenario does NOT have an access token, creating one..." );
-                $token = $botUser->createToken($tokenName, [$tokenName])->plainTextToken;
+                $token = $botUser->createToken(
+                    $tokenName,
+                    [$tokenName] +
+                    ($scenario->getActive()) ? [ScenarioAccessTokenConstants::ACTIVE] : []
+                )->plainTextToken;
                 ScenarioAccessToken::create([
                     'scenario_id' => $scenario->getUid(),
                     'access_token_plaintext' => $token
