@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands\Specification;
 
+use App\Http\Controllers\API\ScenariosController;
 use App\ImportExportHelpers\ScenarioImportExportHelper;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
-use OpenDialogAi\Core\Console\Commands\CreateCoreConfigurations;
 use OpenDialogAi\Core\Conversation\Exceptions\DuplicateConversationObjectOdIdException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 
@@ -37,7 +37,7 @@ class ImportScenarios extends Command
 
         try {
             $scenario = ScenarioImportExportHelper::importScenarioFromString($scenarioData);
-            CreateCoreConfigurations::createOpenDialogInterpreterForScenario($scenario->getUid());
+            ScenariosController::createDefaultConfigurationsForScenario($scenario->getUid());
         } catch (NotEncodableValueException $e) {
             $this->error(sprintf("Import of %s failed. Unable to decode file as json", $filePath));
             return;

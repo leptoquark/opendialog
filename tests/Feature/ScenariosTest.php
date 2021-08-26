@@ -8,7 +8,7 @@ use App\Http\Resources\ScenarioResource;
 use App\User;
 use Carbon\Carbon;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
-use OpenDialogAi\Core\Console\Commands\CreateCoreConfigurations;
+use OpenDialogAi\Core\Components\Configuration\ConfigurationDataHelper;
 use OpenDialogAi\Core\Conversation\Condition;
 use OpenDialogAi\Core\Conversation\ConditionCollection;
 use OpenDialogAi\Core\Conversation\Conversation;
@@ -376,7 +376,7 @@ class ScenariosTest extends TestCase
 
         /** @var ComponentConfiguration $openDialogInterpreter */
         $openDialogInterpreter = ComponentConfiguration::create([
-            'name' => CreateCoreConfigurations::OPENDIALOG_INTERPRETER,
+            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
             'scenario_id' => '0x0001',
             'component_id' => OpenDialogInterpreter::getComponentId(),
             'configuration' => [
@@ -432,7 +432,7 @@ class ScenariosTest extends TestCase
 
         $this->assertNotNull(
             ComponentConfiguration::where([
-                'name' => CreateCoreConfigurations::OPENDIALOG_INTERPRETER,
+                'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
                 'scenario_id' => '0x0001'
             ])->first()
         );
@@ -446,7 +446,7 @@ class ScenariosTest extends TestCase
 
         /** @var ComponentConfiguration $newConfiguration1 */
         $newConfiguration1 = ComponentConfiguration::where([
-            'name' => CreateCoreConfigurations::OPENDIALOG_INTERPRETER,
+            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
             'scenario_id' => '0x9999'
         ])->first();
         $this->assertNotNull($newConfiguration1);

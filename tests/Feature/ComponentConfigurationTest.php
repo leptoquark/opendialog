@@ -7,6 +7,7 @@ use DateTime;
 use Mockery\MockInterface;
 use OpenDialogAi\AttributeEngine\CoreAttributes\UtteranceAttribute;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
+use OpenDialogAi\Core\Components\Configuration\ConfigurationDataHelper;
 use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
 use OpenDialogAi\Core\Conversation\InterpretedIntentCollection;
 use OpenDialogAi\Core\Conversation\Scenario;
@@ -529,21 +530,30 @@ class ComponentConfigurationTest extends TestCase
     public function testQueryConfigurationUse()
     {
         /** @var ComponentConfiguration $configuration */
-        $configuration = factory(ComponentConfiguration::class)->create();
+        $configuration = ComponentConfiguration::create([
+            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+            'scenario_id' => '0x123',
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [],
+            'active' => true,
+        ]);
 
-        $configurationName = $configuration->name;
+        $data = [
+            'name' => $configuration->name,
+            'scenario_id' => $configuration->scenario_id,
+        ];
 
         $scenario1 = new Scenario();
         $scenario1->setUid($configuration->scenario_id);
         $scenario1->setOdId('scenario_1');
-        $scenario1->setInterpreter($configurationName);
+        $scenario1->setInterpreter($configuration->name);
         $scenario1->setCreatedAt(new DateTime());
         $scenario1->setUpdatedAt(new DateTime());
 
         $scenario2 = new Scenario();
         $scenario2->setUid('0x456');
         $scenario2->setOdId('scenario_2');
-        $scenario2->setInterpreter($configurationName);
+        $scenario2->setInterpreter($configuration->name);
         $scenario2->setCreatedAt(new DateTime());
         $scenario2->setUpdatedAt(new DateTime());
 
