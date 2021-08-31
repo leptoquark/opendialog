@@ -21,7 +21,6 @@ class ReflectionTest extends TestCase
         $this->assertArrayHasKey('context_engine', $response);
         $this->assertArrayHasKey('interpreter_engine', $response);
         $this->assertArrayHasKey('operation_engine', $response);
-        $this->assertArrayHasKey('response_engine', $response);
-        $this->assertArrayHasKey('sensor_engine', $response);
+        $this->assertArrayHasKey('platform_engine', $response);
     }
 }

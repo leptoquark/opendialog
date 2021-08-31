@@ -44,7 +44,7 @@
         validPath: 'admin/demo',
         user: {
           custom: {
-            selected_scenario: "{{request()->get('selected_scenario')}}"
+            selected_scenario: "{{request()->get('scenario')}}"
           }
         },
       };

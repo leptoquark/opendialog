@@ -7,6 +7,7 @@ use OpenDialogAi\ActionEngine\Service\ActionComponentServiceInterface;
 use OpenDialogAi\Core\Components\Exceptions\UnknownComponentTypeException;
 use OpenDialogAi\Core\Components\Helper\ComponentHelper;
 use OpenDialogAi\InterpreterEngine\Service\InterpreterComponentServiceInterface;
+use OpenDialogAi\PlatformEngine\Services\PlatformComponentServiceInterface;
 
 class ComponentRegistrationRule implements Rule
 {
@@ -30,6 +31,8 @@ class ComponentRegistrationRule implements Rule
                 return resolve(InterpreterComponentServiceInterface::class)->has($value);
             case ComponentHelper::ACTION:
                 return resolve(ActionComponentServiceInterface::class)->has($value);
+            case ComponentHelper::PLATFORM:
+                return resolve(PlatformComponentServiceInterface::class)->has($value);
         }
     }
 

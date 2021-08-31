@@ -24,8 +24,7 @@ class ReflectionController extends Controller
             'context_engine' => $reflectionHelper->getContextEngineReflection(),
             'interpreter_engine' => $reflectionHelper->getInterpreterEngineReflection(),
             'operation_engine' => $reflectionHelper->getOperationEngineReflection(),
-            'response_engine' => $reflectionHelper->getResponseEngineReflection(),
-            'sensor_engine' => $reflectionHelper->getSensorEngineReflection(),
+            'platform_engine' => $reflectionHelper->getPlatformEngineReflection(),
         ]);
     }
 }

@@ -18,7 +18,8 @@ use App\ScenarioAccessToken;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use OpenDialogAi\Core\Console\Commands\CreateCoreConfigurations;
+use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
+use OpenDialogAi\Core\Components\Configuration\ConfigurationDataHelper;
 use OpenDialogAi\Core\Conversation\Behavior;
 use OpenDialogAi\Core\Conversation\BehaviorsCollection;
 use OpenDialogAi\Core\Conversation\Condition;
@@ -34,7 +35,11 @@ use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\Scene;
 use OpenDialogAi\Core\Conversation\Transition;
 use OpenDialogAi\Core\Conversation\Turn;
+use OpenDialogAi\Core\InterpreterEngine\OpenDialog\OpenDialogInterpreterConfiguration;
+use OpenDialogAi\InterpreterEngine\Interpreters\OpenDialogInterpreter;
 use OpenDialogAi\MessageBuilder\MessageMarkUpGenerator;
+use OpenDialogAi\PlatformEngine\Components\WebchatPlatform;
+use OpenDialogAi\Webchat\WebchatSetting;
 
 class ScenariosController extends Controller
 {
@@ -125,10 +130,12 @@ class ScenariosController extends Controller
         $newScenario = Serializer::deserialize($request->getContent(), Scenario::class, 'json');
 
         if ($newScenario->getInterpreter() === "") {
-            $newScenario->setInterpreter(CreateCoreConfigurations::OPENDIALOG_INTERPRETER);
+            $newScenario->setInterpreter(ConfigurationDataHelper::OPENDIALOG_INTERPRETER);
         }
 
         $persistedScenario = $this->createDefaultConversations($newScenario);
+
+        $this->createDefaultConfigurationsForScenario($persistedScenario->getUid());
 
         // Add a new condition to the scenario now that it has an ID
         $persistedScenario = $this->setDefaultScenarioCondition($persistedScenario);
@@ -229,6 +236,30 @@ class ScenariosController extends Controller
         return $scenario;
     }
 
+    public static function createDefaultConfigurationsForScenario(string $scenarioId)
+    {
+        ComponentConfiguration::create([
+            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+            'scenario_id' => $scenarioId,
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [
+                OpenDialogInterpreterConfiguration::CALLBACKS => [
+                    'WELCOME' => 'intent.core.welcome',
+                ],
+                OpenDialogInterpreterConfiguration::ENABLE_SIMILARITY_EVALUATION => true,
+            ],
+            'active' => true,
+        ]);
+
+        ComponentConfiguration::create([
+            'name' => ConfigurationDataHelper::WEBCHAT_PLATFORM,
+            'scenario_id' => $scenarioId,
+            'component_id' => WebchatPlatform::getComponentId(),
+            'configuration' => self::getDefaultWebchatSettings(env('APP_URL')),
+            'active' => true,
+        ]);
+    }
+
     /**
      * Update the specified scenario.
      *
@@ -252,6 +283,10 @@ class ScenariosController extends Controller
     public function destroy(Scenario $scenario): Response
     {
         if (ConversationDataClient::deleteScenarioByUid($scenario->getUid())) {
+            ComponentConfiguration::where([
+                'scenario_id' => $scenario->getUid()
+            ])->delete();
+
             return response()->noContent(200);
         } else {
             return response('Error deleting scenario, check the logs', 500);
@@ -265,7 +300,9 @@ class ScenariosController extends Controller
      */
     public function duplicate(ConversationObjectDuplicationRequest $request, Scenario $scenario): ScenarioResource
     {
-        $scenario = ScenarioDataClient::getFullScenarioGraph($scenario->getUid());
+        $originalScenarioUid = $scenario->getUid();
+
+        $scenario = ScenarioDataClient::getFullScenarioGraph($originalScenarioUid);
 
         // Set new OD ID for the scenario and create a map of UIDs to/from paths,
         /** @var Scenario $scenario */
@@ -300,6 +337,8 @@ class ScenariosController extends Controller
         ]);
 
         $duplicate = ScenarioImportExportHelper::patchScenario($duplicate, $scenarioWithPathsSubstituted);
+
+        $this->duplicateConfigurationsForScenario($originalScenarioUid, $duplicate->getUid());
 
         return new ScenarioResource($duplicate);
     }
@@ -337,7 +376,7 @@ class ScenariosController extends Controller
         $incomingIntent->setOdId($incomingIntentId);
         $incomingIntent->setDescription('Automatically generated');
         $incomingIntent->setSampleUtterance($incomingSampleUtterance);
-        $incomingIntent->setInterpreter(CreateCoreConfigurations::OPENDIALOG_INTERPRETER);
+        $incomingIntent->setInterpreter(ConfigurationDataHelper::OPENDIALOG_INTERPRETER);
         $incomingIntent->setConfidence(1);
         $incomingIntent->setCreatedAt(Carbon::now());
         $incomingIntent->setUpdatedAt(Carbon::now());
@@ -511,7 +550,7 @@ class ScenariosController extends Controller
         $speaker = $requestIntent->getSpeaker();
 
         if ($speaker === Intent::USER) {
-            $requestIntent->setInterpreter(CreateCoreConfigurations::OPENDIALOG_INTERPRETER);
+            $requestIntent->setInterpreter(ConfigurationDataHelper::OPENDIALOG_INTERPRETER);
         } else {
             $requestIntent->setInterpreter('');
         }
@@ -529,5 +568,123 @@ class ScenariosController extends Controller
 
             $requestIntent->addMessageTemplate($messageTemplate);
         }
+    }
+
+    /**
+     * Duplicates all configurations for original scenario to new scenario
+     *
+     * @param string $originalUid
+     * @param string $newUid
+     */
+    private function duplicateConfigurationsForScenario(string $originalUid, string $newUid): void
+    {
+        $configurations = ComponentConfiguration::where('scenario_id', $originalUid)->get();
+
+        $configurations->each(function (ComponentConfiguration $configuration) use ($newUid) {
+            $duplicate = $configuration->replicate();
+            $duplicate->scenario_id = $newUid;
+            $duplicate->save();
+        });
+    }
+
+    /**
+     * This must be separate from the method in the CreateWebchatPlatform class, as _this_ method can be updated, whereas
+     * that method (and class) shouldn't be changed (instead a new update class that edits existing settings
+     * should be created)
+     *
+     * @param string $odUrl
+     * @return array
+     */
+    public static function getDefaultWebchatSettings(string $odUrl): array
+    {
+        $commentsUrl = 'http://example.com';
+        $token = 'ApiTokenValue';
+
+        return [
+            WebchatSetting::GENERAL => [
+                WebchatSetting::URL => "$odUrl/web-chat",
+                WebchatSetting::OPEN => true,
+                WebchatSetting::TEAM_NAME => "",
+                WebchatSetting::LOGO => "$odUrl/images/homepage-logo.svg",
+                WebchatSetting::MESSAGE_DELAY => '500',
+                WebchatSetting::COLLECT_USER_IP => true,
+                WebchatSetting::CHATBOT_AVATAR_PATH => "$odUrl/vendor/webchat/images/avatar.svg",
+                WebchatSetting::CHATBOT_NAME => 'OpenDialog',
+                WebchatSetting::DISABLE_CLOSE_CHAT => false,
+                WebchatSetting::USE_HUMAN_AVATAR => false,
+                WebchatSetting::USE_HUMAN_NAME => false,
+                WebchatSetting::USE_BOT_AVATAR => true,
+                WebchatSetting::USE_BOT_NAME => false,
+                WebchatSetting::CHATBOT_FULLPAGE_CSS_PATH => "",
+                WebchatSetting::CHATBOT_CSS_PATH => "",
+                WebchatSetting::PAGE_CSS_PATH => "",
+                WebchatSetting::SHOW_TEXT_INPUT_WITH_EXTERNAL_BUTTONS => false,
+                WebchatSetting::FORM_RESPONSE_TEXT => null,
+                WebchatSetting::SCROLL_TO_FIRST_NEW_MESSAGE => false,
+                WebchatSetting::SHOW_HEADER_BUTTONS_ON_FULL_PAGE_MESSAGES => false,
+                WebchatSetting::SHOW_HEADER_CLOSE_BUTTON => false,
+                WebchatSetting::TYPING_INDICATOR_STYLE => "",
+                WebchatSetting::SHOW_RESTART_BUTTON => false,
+                WebchatSetting::SHOW_DOWNLOAD_BUTON => true,
+                WebchatSetting::SHOW_END_CHAT_BUTON => false,
+                WebchatSetting::HIDE_DATETIME_MESSAGE => true,
+                WebchatSetting::RESTART_BUTTON_CALLBACK => 'intent.core.restart',
+                WebchatSetting::MESSAGE_ANIMATION => false,
+                WebchatSetting::HIDE_TYPING_INDICATOR_ON_INTERNAL_MESSAGES => false,
+                WebchatSetting::HIDE_MESSAGE_TIME => true,
+                WebchatSetting::NEW_USER_START_MINIMIZED => false,
+                WebchatSetting::RETURNING_USER_START_MINIMIZED => false,
+                WebchatSetting::ONGOING_USER_START_MINIMIZED => false,
+                WebchatSetting::NEW_USER_OPEN_CALLBACK => 'WELCOME',
+                WebchatSetting::RETURNING_USER_OPEN_CALLBACK => 'WELCOME',
+                WebchatSetting::ONGOING_USER_OPEN_CALLBACK => '',
+                WebchatSetting::VALID_PATH => ["*"],
+            ],
+            WebchatSetting::COLOURS => [
+                WebchatSetting::HEADER_BACKGROUND => '#1b2956',
+                WebchatSetting::HEADER_TEXT => '#ffffff',
+                WebchatSetting::LAUNCHER_BACKGROUND => '#1b2956',
+                WebchatSetting::MESSAGE_LIST_BACKGROUND => '#1b2956',
+                WebchatSetting::SENT_MESSAGE_BACKGROUND => '#7fdad1',
+                WebchatSetting::SENT_MESSAGE_TEXT => '#1b2956',
+                WebchatSetting::RECEIVED_MESSAGE_BACKGROUND => '#ffffff',
+                WebchatSetting::RECEIVED_MESSAGE_TEXT => '#1b2956',
+                WebchatSetting::USER_INPUT_BACKGROUND => '#ffffff',
+                WebchatSetting::USER_INPUT_TEXT => '#1b212a',
+                WebchatSetting::ICON_BACKGROUND => '0000ff',
+                WebchatSetting::ICON_HOVER_BACKGROUND => 'ffffff',
+                WebchatSetting::BUTTON_BACKGROUND => '#7fdad1',
+                WebchatSetting::BUTTON_HOVER_BACKGROUND => '#7fdad1',
+                WebchatSetting::BUTTON_TEXT => '#1b2956',
+                WebchatSetting::EXTERNAL_BUTTON_BACKGROUND => '#7fdad1',
+                WebchatSetting::EXTERNAL_BUTTON_HOVER_BACKGROUND => '#7fdad1',
+                WebchatSetting::EXTERNAL_BUTTON_TEXT => '#1b2956',
+            ],
+            WebchatSetting::WEBCHAT_HISTORY => [
+                WebchatSetting::SHOW_HISTORY => true,
+                WebchatSetting::NUMBER_OF_MESSAGES => 10,
+            ],
+            WebchatSetting::COMMENTS => [
+                WebchatSetting::COMMENTS_ENABLED => false,
+                WebchatSetting::COMMENTS_NAME => 'Comments',
+                WebchatSetting::COMMENTS_ENABLED_PATH_PATTERN => '^\\/home\\/posts',
+                WebchatSetting::COMMENTS_ENTITY_NAME => 'comments',
+                WebchatSetting::COMMENTS_CREATED_FIELDNAME => 'created-at',
+                WebchatSetting::COMMENTS_TEXT_FIELDNAME => 'comment',
+                WebchatSetting::COMMENTS_AUTHOR_ENTITY_NAME => 'users',
+                WebchatSetting::COMMENTS_AUTHOR_RELATIONSHIP_NAME => 'author',
+                WebchatSetting::COMMENTS_AUTHOR_ID_FIELDNAME => 'id',
+                WebchatSetting::COMMENTS_AUTHOR_NAME_FIELDNAME => 'name',
+                WebchatSetting::COMMENTS_SECTION_ENTITY_NAME => 'posts',
+                WebchatSetting::COMMENTS_SECTION_RELATIONSHIP_NAME => 'post',
+                WebchatSetting::COMMENTS_SECTION_ID_FIELDNAME => 'id',
+                WebchatSetting::COMMENTS_SECTION_NAME_FIELDNAME => 'name',
+                WebchatSetting::COMMENTS_SECTION_FILTER_PATH_PATTERN => 'home\\/posts\\/(\\d*)\\/?',
+                WebchatSetting::COMMENTS_SECTION_FILTER_QUERY => 'post',
+                WebchatSetting::COMMENTS_SECTION_PATH_PATTERN => 'home\\/posts\\/\\d*$',
+                WebchatSetting::COMMENTS_ENDPOINT => "$commentsUrl/json-api/v1",
+                WebchatSetting::COMMENTS_AUTH_TOKEN => "Bearer $token",
+            ],
+        ];
     }
 }
