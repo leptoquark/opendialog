@@ -2984,12 +2984,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "ce176f6cfc0c9ee0d48bfa98e9955550dc902b20"
+                "reference": "4d976cb8972099c9b0b9ad74c5c7f26165df4bae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/ce176f6cfc0c9ee0d48bfa98e9955550dc902b20",
-                "reference": "ce176f6cfc0c9ee0d48bfa98e9955550dc902b20",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/4d976cb8972099c9b0b9ad74c5c7f26165df4bae",
+                "reference": "4d976cb8972099c9b0b9ad74c5c7f26165df4bae",
                 "shasum": ""
             },
             "require": {
@@ -3029,6 +3029,7 @@
                         "OpenDialogAi\\ResponseEngine\\ResponseEngineServiceProvider",
                         "OpenDialogAi\\InterpreterEngine\\InterpreterEngineServiceProvider",
                         "OpenDialogAi\\OperationEngine\\OperationEngineServiceProvider",
+                        "OpenDialogAi\\PlatformEngine\\PlatformEngineServiceProvider",
                         "OpenDialogAi\\AttributeEngine\\AttributeEngineServiceProvider",
                         "OpenDialogAi\\ContextEngine\\ContextEngineServiceProvider",
                         "OpenDialogAi\\ActionEngine\\ActionEngineServiceProvider",
@@ -3053,6 +3054,7 @@
                     "OpenDialogAi\\ResponseEngine\\": "src/ResponseEngine",
                     "OpenDialogAi\\InterpreterEngine\\": "src/InterpreterEngine",
                     "OpenDialogAi\\OperationEngine\\": "src/OperationEngine",
+                    "OpenDialogAi\\PlatformEngine\\": "src/PlatformEngine",
                     "OpenDialogAi\\SensorEngine\\": "src/SensorEngine",
                     "OpenDialogAi\\NlpEngine\\": "src/NlpEngine",
                     "OpenDialogAi\\Core\\Database\\": "database/",
@@ -3068,7 +3070,7 @@
                 "issues": "https://github.com/opendialogai/core/issues",
                 "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-958-token-based-auth-for-channels"
             },
-            "time": "2021-08-26T13:10:51+00:00"
+            "time": "2021-08-31T14:31:23+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -3116,12 +3118,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "365f13ca58e66bdfd1bc9070d97cbb9c6eb4fa5d"
+                "reference": "71fa7d38f772b4d9365142efb8586f2d99efa785"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/365f13ca58e66bdfd1bc9070d97cbb9c6eb4fa5d",
-                "reference": "365f13ca58e66bdfd1bc9070d97cbb9c6eb4fa5d",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/71fa7d38f772b4d9365142efb8586f2d99efa785",
+                "reference": "71fa7d38f772b4d9365142efb8586f2d99efa785",
                 "shasum": ""
             },
             "require": {
@@ -3129,7 +3131,7 @@
                 "php": "^7.4 || ^8.0"
             },
             "require-dev": {
-                "opendialogai/core": "1.1.0",
+                "opendialogai/core": "1.x-dev",
                 "orchestra/testbench": "^6.0",
                 "phpunit/phpunit": "^9.0",
                 "squizlabs/php_codesniffer": "^3.4"
@@ -3165,7 +3167,7 @@
                 "issues": "https://github.com/opendialogai/webchat/issues",
                 "source": "https://github.com/opendialogai/webchat/tree/feature/OPNDLG-958-token-based-auth-for-channels"
             },
-            "time": "2021-08-18T10:31:14+00:00"
+            "time": "2021-08-31T14:45:53+00:00"
         },
         {
             "name": "opis/closure",
