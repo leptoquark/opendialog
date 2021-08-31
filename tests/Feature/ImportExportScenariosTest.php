@@ -503,7 +503,7 @@ class ImportExportScenariosTest extends TestCase
         // After updates are made we get the full scenario with the updates included now
         ScenarioDataClient::shouldReceive('getFullScenarioGraph')
             ->times(3)
-            ->andReturn($this->getMatchingExampleScenario());
+            ->andReturn($storedExampleScenario, $storedExampleScenario, $storedMinimalScenario);
 
         $this->artisan('scenarios:import')
             ->expectsOutput(sprintf("Importing scenario from file %s...", $exampleScenarioFilePath))
@@ -561,7 +561,7 @@ class ImportExportScenariosTest extends TestCase
         // After updates are made we get the full scenario with the updates included now
         ScenarioDataClient::shouldReceive('getFullScenarioGraph')
             ->times(3)
-            ->andReturn($this->getMatchingExampleScenario());
+            ->andReturn($storedExampleScenario, $storedExampleScenario, $storedMinimalScenario);
 
         $this->artisan('scenarios:import')
             ->expectsOutput(sprintf("Import of %s failed. Unable to decode file as json", $filePath));
@@ -655,7 +655,7 @@ class ImportExportScenariosTest extends TestCase
         // After updates are made we get the full scenario with the updates included now
         ScenarioDataClient::shouldReceive('getFullScenarioGraph')
             ->times(3)
-            ->andReturn($this->getMatchingExampleScenario());
+            ->andReturn($storedExampleScenario, $storedExampleScenario, $storedMinimalScenario);
 
         $this->artisan('scenarios:import');
 

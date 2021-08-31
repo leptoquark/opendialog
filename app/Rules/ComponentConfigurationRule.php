@@ -9,6 +9,7 @@ use OpenDialogAi\Core\Components\Exceptions\InvalidConfigurationDataException;
 use OpenDialogAi\Core\Components\Exceptions\UnknownComponentTypeException;
 use OpenDialogAi\Core\Components\Helper\ComponentHelper;
 use OpenDialogAi\InterpreterEngine\Service\InterpreterComponentServiceInterface;
+use OpenDialogAi\PlatformEngine\Services\PlatformComponentServiceInterface;
 
 class ComponentConfigurationRule implements Rule
 {
@@ -42,6 +43,9 @@ class ComponentConfigurationRule implements Rule
                 break;
             case ComponentHelper::ACTION:
                 $componentService = resolve(ActionComponentServiceInterface::class);
+                break;
+            case ComponentHelper::PLATFORM:
+                $componentService = resolve(PlatformComponentServiceInterface::class);
                 break;
         }
 

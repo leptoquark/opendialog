@@ -5,41 +5,42 @@ return [
         [
             [
                 [
-                    'title' => 'Dashboard',
-                    'url' => '/admin',
-                    'icon' => 'home-2',
-                ],
-                [
                     'title' => 'Designer',
-                    'url' => '/admin/conversation-builder/scenarios',
-                    'icon' => 'filter-descending'
+                    'url' => '/admin/conversation-builder/scenario/:scenario',
+                    'icon' => 'filter-descending',
+                    'section' => 'conversation-builder'
                 ],
                 [
                     'title' => 'Message Editor',
-                    'url' => '/admin/message-editor',
-                    'icon' => 'edit-bubble'
+                    'url' => '/admin/conversation-builder/scenario/:scenario/intents',
+                    'icon' => 'edit-bubble',
+                    'section' => 'message-editor'
                 ],
                 [
                     'title' => 'Interpreters Setup',
                     'url' => '/admin/interpreters',
-                    'icon' => 'pattern'
+                    'icon' => 'pattern',
+                    'section' => 'interpreters'
                 ],
                 [
                     'title' => 'Actions Setup',
                     'url' => '/admin/actions',
-                    'icon' => 'refresh'
+                    'icon' => 'refresh',
+                    'section' => 'actions'
                 ],
                 [
                     'title' => 'Interface settings',
                     'url' => '/admin/webchat-setting',
-                    'icon' => 'settings-sliders'
+                    'icon' => 'settings-sliders',
+                    'section' => 'webchat-setting'
                 ],
             ],
             [
                 [
                     'title' => 'Preview',
                     'url' => '/admin/demo',
-                    'icon' => 'speech'
+                    'icon' => 'speech',
+                    'section' => 'demo'
                 ],
             ]
         ],

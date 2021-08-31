@@ -1,8 +1,11 @@
 FROM php:7.4-fpm
 
+# Set working directory
+WORKDIR /var/www
+
 # Install dependencies
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get update && apt-get install -y \
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt-get update --allow-releaseinfo-change && apt-get install -y \
     nodejs \
     build-essential \
     mariadb-client \
@@ -30,8 +33,6 @@ RUN docker-php-ext-install gd
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Set working directory
-WORKDIR /var/www
 
 # Copy existing application directory contents
 COPY --chown=www-data:www-data . /var/www

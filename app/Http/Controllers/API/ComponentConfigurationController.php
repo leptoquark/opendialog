@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ComponentConfigurationQueryRequest;
 use App\Http\Requests\ComponentConfigurationRequest;
 use App\Http\Requests\ComponentConfigurationTestRequest;
 use App\Http\Resources\ComponentConfigurationCollection;
 use App\Http\Resources\ComponentConfigurationResource;
-use App\Http\Resources\ScenarioResource;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -23,6 +22,7 @@ use OpenDialogAi\Core\Components\Helper\ComponentHelper;
 use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
 use OpenDialogAi\Core\Conversation\Intent;
 use OpenDialogAi\Core\Conversation\IntentCollection;
+use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\InterpreterEngine\Service\InterpreterComponentServiceInterface;
 
 class ComponentConfigurationController extends Controller
@@ -30,6 +30,7 @@ class ComponentConfigurationController extends Controller
     const ALL = 'all';
     const ACTION = 'action';
     const INTERPRETER = 'interpreter';
+    const PLATFORM = 'platform';
 
     const VALID_TYPES = [
         self::ALL,
@@ -45,20 +46,29 @@ class ComponentConfigurationController extends Controller
      */
     public function index(Request $request)
     {
+        $scenarioId = $request->get('scenario_id');
         $type = $request->get('type', self::ALL);
+
+        /** @var ComponentConfiguration|Builder $query */
+        $query = ComponentConfiguration::query();
+
+        if ($scenarioId) {
+            $query->byScenario($scenarioId);
+        }
 
         switch ($type) {
             case self::ACTION:
-                $configurations = ComponentConfiguration::actions()->paginate(50);
+                $query->actions();
                 break;
             case self::INTERPRETER:
-                $configurations = ComponentConfiguration::interpreters()->paginate(50);
+                $query->interpreters();
                 break;
-            case self::ALL:
-            default:
-                $configurations = ComponentConfiguration::paginate(50);
+            case self::PLATFORM:
+                $query->platforms();
                 break;
         }
+
+        $configurations = $query->paginate(50);
 
         $configurations->appends(['type' => $type]);
 
@@ -144,23 +154,21 @@ class ComponentConfigurationController extends Controller
     }
 
     /**
-     * Allows for querying of a configuration across all conversation objects
+     * Queries whether the given configuration is in use
      *
-     * @param ComponentConfigurationQueryRequest $request
-     * @return ScenarioResource|Response
+     * @param ComponentConfiguration $componentConfiguration
+     * @return Response
      */
-    public function query(ComponentConfigurationQueryRequest $request)
+    public function query(ComponentConfiguration $componentConfiguration)
     {
-        $name = $request->get('name');
-
-        /** @var ComponentConfiguration $configuration */
-        $configuration = ComponentConfiguration::where('name', $name)->first();
-        $componentId = $configuration->component_id;
+        $name = $componentConfiguration->name;
+        $scenarioId = $componentConfiguration->scenario_id;
+        $componentId = $componentConfiguration->component_id;
 
         try {
             $parsedComponentType = ComponentHelper::parseComponentId($componentId);
         } catch (UnknownComponentTypeException $e) {
-            return response($e->getMessage(), 404);
+            return response($e->getMessage(), 400);
         }
 
         switch ($parsedComponentType) {
@@ -171,10 +179,12 @@ class ComponentConfigurationController extends Controller
                 $scenarios = ConversationDataClient::getScenariosWhereActionIsUsed($name);
                 break;
             default:
-                return response(null, 404);
+                return response(null, 400);
         }
 
-        return new ScenarioResource($scenarios);
+        $status = $scenarios->contains(fn (Scenario $s) => $s->getUid() === $scenarioId) ? 200 : 404;
+
+        return response()->noContent($status);
     }
 
     /**

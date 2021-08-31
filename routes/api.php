@@ -23,12 +23,7 @@ Route::namespace('API')
     ->prefix('admin/api')
     ->group(function () {
         Route::apiResource('conversation', 'ConversationsController');
-        Route::apiResource(
-            'webchat-setting',
-            'WebchatSettingsController',
-            ['except' => ['store', 'destroy']]
-        );
-        Route::put('/webchat-setting', 'WebchatSettingsController@multiUpdate');
+        Route::get('webchat-setting', 'WebchatSettingsController@index');
         Route::apiResource(
             'chatbot-user',
             'ChatbotUsersController',
@@ -40,7 +35,7 @@ Route::namespace('API')
 
         Route::apiResource('component-configuration', 'ComponentConfigurationController');
         Route::post('component-configurations/test', 'ComponentConfigurationController@test');
-        Route::post('component-configurations/query', 'ComponentConfigurationController@query');
+        Route::post('component-configurations/{component_configuration}/query', 'ComponentConfigurationController@query');
 
         Route::get('dynamic-attributes/download', 'DynamicAttributesController@download');
         Route::post('dynamic-attributes/upload', 'DynamicAttributesController@upload');
