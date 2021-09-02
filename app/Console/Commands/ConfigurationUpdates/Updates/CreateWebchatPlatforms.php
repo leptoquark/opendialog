@@ -3,7 +3,6 @@
 namespace App\Console\Commands\ConfigurationUpdates\Updates;
 
 use App\Console\Commands\ConfigurationUpdates\BaseConfigurationUpdate;
-use Exception;
 use Illuminate\Support\Facades\DB;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
 use OpenDialogAi\Core\Components\Configuration\ConfigurationDataHelper;
@@ -31,10 +30,6 @@ class CreateWebchatPlatforms extends BaseConfigurationUpdate
      */
     public function beforeUp(): bool
     {
-        if (!$this->checkConfigurationsAreScopedByScenario()) {
-            return false;
-        }
-
         $this->warn("Webchat settings are deprecated, they should now be stored as platform configuration"
             . " for each scenario. Please convert your webchat settings.");
 
@@ -107,24 +102,6 @@ class CreateWebchatPlatforms extends BaseConfigurationUpdate
             'configuration' => $configuration,
             'active' => true,
         ]);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function checkConfigurationsAreScopedByScenario(): bool
-    {
-        $validConfiguration = ComponentConfiguration::where(['name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER])
-            ->where('scenario_id', '<>', '')
-            ->first();
-
-        if (is_null($validConfiguration)) {
-            throw new Exception("Check unsuccessful: Configurations aren't all scoped by scenario,"
-                . " please ensure you have run all necessary updates");
-        } else {
-            $this->info("Check successful: Configurations are all scoped by scenario.");
-            return true;
-        }
     }
 
     private function convertSettingsToArray(): array
