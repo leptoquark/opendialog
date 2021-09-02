@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e1213c1d6a8fec7869b749fa8a91a364",
+    "content-hash": "4c6ab577b8147340d08521de434a6b7f",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2916,16 +2916,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "1.x-dev",
+            "version": "dev-rc/1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "a9dbd11921f58d5a2f8f778259d9a5cb09fa7afb"
+                "reference": "93e9f9d3169adb390d42cb5eac7f7831d34e842f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/a9dbd11921f58d5a2f8f778259d9a5cb09fa7afb",
-                "reference": "a9dbd11921f58d5a2f8f778259d9a5cb09fa7afb",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/93e9f9d3169adb390d42cb5eac7f7831d34e842f",
+                "reference": "93e9f9d3169adb390d42cb5eac7f7831d34e842f",
                 "shasum": ""
             },
             "require": {
@@ -2952,7 +2952,6 @@
                 "phpunit/phpunit": "^9.0",
                 "squizlabs/php_codesniffer": "^3.4"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -3004,9 +3003,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/1.x"
+                "source": "https://github.com/opendialogai/core/tree/rc/1.2.0"
             },
-            "time": "2021-09-02T13:29:04+00:00"
+            "time": "2021-09-02T13:43:17+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -3050,16 +3049,16 @@
         },
         {
             "name": "opendialogai/webchat",
-            "version": "1.x-dev",
+            "version": "dev-rc/1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "11949d6f7b7fc1e8d49c43a9b9bab8a5c34c4fe6"
+                "reference": "fa49a1d33089fe6db258bc443ee3da5f0b474ee7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/11949d6f7b7fc1e8d49c43a9b9bab8a5c34c4fe6",
-                "reference": "11949d6f7b7fc1e8d49c43a9b9bab8a5c34c4fe6",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/fa49a1d33089fe6db258bc443ee3da5f0b474ee7",
+                "reference": "fa49a1d33089fe6db258bc443ee3da5f0b474ee7",
                 "shasum": ""
             },
             "require": {
@@ -3067,12 +3066,11 @@
                 "php": "^7.4 || ^8.0"
             },
             "require-dev": {
-                "opendialogai/core": "1.x-dev",
+                "opendialogai/core": "dev-rc/1.2.0",
                 "orchestra/testbench": "^6.0",
                 "phpunit/phpunit": "^9.0",
                 "squizlabs/php_codesniffer": "^3.4"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -3102,9 +3100,9 @@
             "description": "Webchat front end component for the Open Dialog project",
             "support": {
                 "issues": "https://github.com/opendialogai/webchat/issues",
-                "source": "https://github.com/opendialogai/webchat/tree/1.x"
+                "source": "https://github.com/opendialogai/webchat/tree/rc/1.1.0"
             },
-            "time": "2021-09-01T16:04:12+00:00"
+            "time": "2021-09-02T13:42:36+00:00"
         },
         {
             "name": "opis/closure",
