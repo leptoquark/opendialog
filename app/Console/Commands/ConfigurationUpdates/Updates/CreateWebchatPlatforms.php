@@ -171,7 +171,7 @@ class CreateWebchatPlatforms extends BaseConfigurationUpdate
     {
         $table = DB::table('webchat_settings');
 
-        if ($table->exists() && $table->count() > 0) {
+        if ($table->exists() && $table->count() > 0 && $table->where('value', '<>', '')->count() > 0) {
             return $this->convertSettingsToArray();
         } else {
             $odUrl = $this->option('url') ? $this->option('url') : env('APP_URL');
