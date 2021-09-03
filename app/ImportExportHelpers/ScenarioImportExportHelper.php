@@ -4,6 +4,9 @@
 namespace App\ImportExportHelpers;
 
 use App\Console\Facades\ImportExportSerializer;
+use App\Http\Controllers\API\ScenariosController;
+use Illuminate\Support\Collection;
+use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
 use OpenDialogAi\Core\Conversation\Conversation;
 use OpenDialogAi\Core\Conversation\DataClients\Serializers\Normalizers\ImportExport\ScenarioNormalizer;
 use OpenDialogAi\Core\Conversation\Exceptions\DuplicateConversationObjectOdIdException;
@@ -18,6 +21,8 @@ class ScenarioImportExportHelper extends BaseImportExportHelper
 {
     const SCENARIO_RESOURCE_DIRECTORY = 'scenarios';
     const SCENARIO_FILE_EXTENSION = ".scenario.json";
+
+    const CONFIGURATIONS = 'configurations';
 
     /**
      * @return string
@@ -97,6 +102,40 @@ class ScenarioImportExportHelper extends BaseImportExportHelper
         return self::getDisk()->exists($filePath);
     }
 
+    public static function getSerializedData(Scenario $scenario): string
+    {
+        $uidMap = PathSubstitutionHelper::createScenarioMap($scenario);
+
+        $serialized = ImportExportSerializer::serialize($scenario, 'json', [
+            ScenarioNormalizer::UID_MAP => $uidMap
+        ]);
+
+        $uid = $scenario->getUid();
+        if ($uid) {
+            /** @var Collection $configurations */
+            $configurations = ComponentConfiguration::select([
+                'name',
+                'scenario_id',
+                'component_id',
+                'configuration',
+                'active',
+            ])
+                ->where(['scenario_id' => $uid])
+                ->orderBy('created_at', 'ASC')
+                ->get();
+
+            $configurations->each(function (ComponentConfiguration $c) use ($uidMap) {
+                $c->scenario_id = $uidMap->get($c->scenario_id, $c->scenario_id);
+            });
+
+            $serializedArray = json_decode($serialized, true);
+            $serializedArray[self::CONFIGURATIONS] = $configurations->toArray();
+            $serialized = json_encode($serializedArray);
+        }
+
+        return $serialized;
+    }
+
     /**
      * @param  string  $data
      *
@@ -135,17 +174,28 @@ class ScenarioImportExportHelper extends BaseImportExportHelper
         $persistedScenario = ScenarioDataClient::addFullScenarioGraph($importingScenario);
         $persistedScenario = ScenarioDataClient::getFullScenarioGraph($persistedScenario->getUid());
 
-        if (!$hasPathsToSubstitute) {
-            return $persistedScenario;
-        }
-
         $map = PathSubstitutionHelper::createScenarioMap($persistedScenario);
 
-        // Deserialize WITH objects with potential path values and substitute the paths for the UIDs
-        /** @var Scenario $scenarioWithPathsSubstituted */
-        $scenarioWithPathsSubstituted = ImportExportSerializer::deserialize($data, Scenario::class, 'json', [
-            ScenarioNormalizer::UID_MAP => $map
-        ]);
+        if ($hasPathsToSubstitute) {
+            // Deserialize WITH objects with potential path values and substitute the paths for the UIDs
+            /** @var Scenario $scenarioWithPathsSubstituted */
+            $scenarioWithPathsSubstituted = ImportExportSerializer::deserialize($data, Scenario::class, 'json', [
+                ScenarioNormalizer::UID_MAP => $map
+            ]);
+        } else {
+            $scenarioWithPathsSubstituted = $persistedScenario;
+        }
+
+        $dataArray = json_decode($data, true);
+        if (!array_key_exists(ScenarioImportExportHelper::CONFIGURATIONS, $dataArray)) {
+            ScenariosController::createDefaultConfigurationsForScenario($scenarioWithPathsSubstituted->getUid());
+        } else {
+            foreach ($dataArray[ScenarioImportExportHelper::CONFIGURATIONS] as $configurationData) {
+                $substitutedScenarioId = $map->get($configurationData['scenario_id'], $configurationData['scenario_id']);
+                $configurationData['scenario_id'] = $substitutedScenarioId;
+                ComponentConfiguration::create($configurationData);
+            }
+        }
 
         return self::patchScenario($persistedScenario, $scenarioWithPathsSubstituted);
     }
