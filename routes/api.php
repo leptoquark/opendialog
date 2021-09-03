@@ -149,4 +149,7 @@ Route::namespace('API')
         Route::post('{userId}/context', 'UserContextController@addToUserContext');
 
         Route::post('conversation-simulation', 'ConversationSimulationController@simulate');
+
+        Route::get('/templates', 'TemplateController@index');
+        Route::get('/templates/{id}', 'TemplateController@show');
     });
