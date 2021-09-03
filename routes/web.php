@@ -31,7 +31,7 @@ Fortify::resetPasswordView(function ($request) {
 });
 
 Route::get('/', function () {
-    return redirect('/admin');
+    return view('welcome');
 });
 
 /**

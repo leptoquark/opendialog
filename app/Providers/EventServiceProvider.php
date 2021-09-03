@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\CreateScenarioAccessToken;
 use App\Listeners\ScenarioTokenEventSubscriber;
-use Illuminate\Support\Facades\Event;
+use App\Logging\ConversationLogs\ConversationEventSubscriber;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -30,6 +30,7 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $subscribe = [
         ScenarioTokenEventSubscriber::class,
+        ConversationEventSubscriber::class
     ];
 
     /**
