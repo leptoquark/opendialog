@@ -34,5 +34,17 @@
         </div>
       </div>
     </div>
+
+    <script>
+      window.openDialogSettings = {
+        url: 'https://1x.opendialog.ai',
+        user: {
+          custom: {
+            selected_scenario: '0xcc4f'
+          }
+        },
+      };
+    </script>
+    <script src='https://1x.opendialog.ai/vendor/webchat/js/opendialog-bot.js'></script>
   </body>
 </html>
