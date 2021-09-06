@@ -29,7 +29,7 @@ class ScopeConfigurationsByScenario extends BaseConfigurationUpdate
         $numOfConfigurations = ComponentConfiguration::count();
 
         $this->warn("Configurations are now scenario specific, please duplicate your existing configurations"
-            . "for each scenario and delete the outdated non-specific configurations.");
+            . " for each scenario and delete the outdated non-specific configurations.");
 
         $duplicateConfirm = sprintf(
             'Are you sure you want to duplicate all %d configurations for all %d scenarios, and then delete'

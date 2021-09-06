@@ -2984,12 +2984,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "4d976cb8972099c9b0b9ad74c5c7f26165df4bae"
+                "reference": "4ea2aa09921b4ad2d9ceaddb158c36a6bb8e668b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/4d976cb8972099c9b0b9ad74c5c7f26165df4bae",
-                "reference": "4d976cb8972099c9b0b9ad74c5c7f26165df4bae",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/4ea2aa09921b4ad2d9ceaddb158c36a6bb8e668b",
+                "reference": "4ea2aa09921b4ad2d9ceaddb158c36a6bb8e668b",
                 "shasum": ""
             },
             "require": {
@@ -3070,7 +3070,7 @@
                 "issues": "https://github.com/opendialogai/core/issues",
                 "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-958-token-based-auth-for-channels"
             },
-            "time": "2021-08-31T14:31:23+00:00"
+            "time": "2021-09-06T14:07:27+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -3118,12 +3118,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "71fa7d38f772b4d9365142efb8586f2d99efa785"
+                "reference": "87f770220ec2aa753b7d71d8eee78c186aa4e3bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/71fa7d38f772b4d9365142efb8586f2d99efa785",
-                "reference": "71fa7d38f772b4d9365142efb8586f2d99efa785",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/87f770220ec2aa753b7d71d8eee78c186aa4e3bd",
+                "reference": "87f770220ec2aa753b7d71d8eee78c186aa4e3bd",
                 "shasum": ""
             },
             "require": {
@@ -3167,7 +3167,7 @@
                 "issues": "https://github.com/opendialogai/webchat/issues",
                 "source": "https://github.com/opendialogai/webchat/tree/feature/OPNDLG-958-token-based-auth-for-channels"
             },
-            "time": "2021-08-31T14:45:53+00:00"
+            "time": "2021-09-06T14:18:07+00:00"
         },
         {
             "name": "opis/closure",
