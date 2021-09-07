@@ -59,6 +59,6 @@ return [
     |
     */
 
-    'bot_user' => env('BOT_USER', 'opendialog'),
+    'bot_user' => env('BOT_USER', 'opendialog@opendialog.ai'),
 
 ];
