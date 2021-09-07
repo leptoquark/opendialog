@@ -3,7 +3,6 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $id
@@ -11,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $description
  * @property array $data
  */
-class Template extends Model
+class Template extends VariableConnectionModel
 {
     use HasFactory;
 
