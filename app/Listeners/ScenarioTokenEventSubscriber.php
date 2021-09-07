@@ -121,7 +121,7 @@ class ScenarioTokenEventSubscriber
      */
     private function getBotUser()
     {
-        return User::where("name", config('opendialog.core.bot_user'))->first();
+        return User::where("email", config('sanctum.bot_user'))->first();
     }
 
     /**
