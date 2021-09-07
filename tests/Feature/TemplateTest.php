@@ -41,6 +41,10 @@ class TemplateTest extends TestCase
             factory(Template::class)->create();
         }
 
+        factory(Template::class)->create([
+            'active' => false,
+        ]);
+
         $templates = Template::all();
 
         $this->get('/admin/api/templates/')

@@ -13,5 +13,6 @@ $factory->define(Template::class, function (Faker $faker) {
             'conversations' => [],
             'configurations' => [],
         ],
+        'active' => true,
     ];
 });

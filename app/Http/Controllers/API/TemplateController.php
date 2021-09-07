@@ -16,7 +16,7 @@ class TemplateController extends Controller
      */
     public function index()
     {
-        return new TemplateResourceCollection(Template::paginate(50));
+        return new TemplateResourceCollection(Template::where('active', true)->paginate(50));
     }
 
     /**
