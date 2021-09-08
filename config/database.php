@@ -141,5 +141,5 @@ return [
     /*
      * Variable model connection
      */
-    'variable_model_connection' => env('VARIABLE_DB_CONNECTION')
+    'variable_model_connection' => env('VARIABLE_DB_CONNECTION', env('DB_CONNECTION', 'mysql'))
 ];
