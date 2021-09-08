@@ -87,6 +87,7 @@ Route::namespace('API')
         Route::prefix('conversation-builder')->group(function () {
             Route::apiResource('scenarios', 'ScenariosController');
             Route::post('scenarios/{scenario}/duplicate', 'ScenariosController@duplicate');
+            Route::post('scenarios/create-from-template/{template}', 'ScenariosController@duplicate');
 
             Route::get('scenarios/{scenario}/conversations', 'ScenariosController@showConversationsByScenario');
             Route::post('scenarios/{scenario}/conversations', 'ScenariosController@storeConversationsAgainstScenario');

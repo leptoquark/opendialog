@@ -19,5 +19,6 @@ class Template extends VariableConnectionModel
 
     protected $casts = [
         'data' => 'array',
+        'active' => 'boolean'
     ];
 }

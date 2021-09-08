@@ -5,6 +5,8 @@ namespace Tests\Feature;
 
 use App\Http\Facades\Serializer;
 use App\Http\Resources\ScenarioResource;
+use App\ImportExportHelpers\ScenarioImportExportHelper;
+use App\Template;
 use App\User;
 use Carbon\Carbon;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
@@ -326,14 +328,18 @@ class ScenariosTest extends TestCase
             ->assertStatus(422);
     }
 
-    public function testDuplicateScenarioSuccess()
+    public function testCreateFromTemplate()
     {
-        $scenario = self::getFakeScenarioForDuplication();
+        /** @var Template $template */
+        $template = Template::create([
+            'name' => 'My Template',
+            'data' => json_decode(ScenarioImportExportHelper::getSerializedData(self::getFakeScenarioForDuplication()), true)
+        ]);
 
-        // Called during route binding
-        ConversationDataClient::shouldReceive('getScenarioByUid')
-            ->once()
-            ->andReturn($scenario);
+        // Called in request validation, and in importing
+        ConversationDataClient::shouldReceive('getAllScenarios')
+            ->times(3)
+            ->andReturn(new ScenarioCollection([]));
 
         $duplicated = null;
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')
@@ -345,11 +351,10 @@ class ScenariosTest extends TestCase
                 return $scenario;
             });
 
-        // Called in controller, once before persisting, again after, and finally after patching
+        // Called in controller
         ScenarioDataClient::shouldReceive('getFullScenarioGraph')
-            ->times(3)
+            ->twice()
             ->andReturnUsing(
-                fn ($uid) => $scenario,
                 function ($uid) use (&$duplicated) {
                     return $duplicated;
                 },
@@ -364,10 +369,88 @@ class ScenariosTest extends TestCase
                 }
             );
 
-        // Called in controller
-        ConversationDataClient::shouldReceive('getAllScenarios')
+        // Called when patching the scenario's condition
+        ConversationDataClient::shouldReceive('updateScenario')
             ->once()
-            ->andReturn(new ScenarioCollection([$scenario]));
+            ->andReturnUsing(fn ($scenario) => $scenario);
+
+        // Attempt to create from template with different ID
+        $this->actingAs($this->user, 'api')
+            ->json(
+                'POST',
+                '/admin/api/conversation-builder/scenarios/create-from-template/' . $template->id,
+                [
+                    'name' => 'My scenario',
+                    'od_id' => 'my_scenario'
+                ]
+            )
+            ->assertStatus(200)
+            ->assertJson([
+                'name' => 'My scenario',
+                'od_id' => 'my_scenario',
+                'id'=> '0x9999',
+                "conditions" => [
+                    [
+                        "operation" => "eq",
+                        "operationAttributes" => [
+                            [
+                                "id" => "attribute",
+                                "value" => "user.selected_scenario"
+                            ]
+                        ],
+                        "parameters" => [
+                            [
+                                "id" => "value",
+                                "value" => "0x9999"
+                            ]
+                        ]
+                    ]
+                ]
+            ]);
+    }
+
+    public function testDuplicateScenarioSuccess()
+    {
+        $scenario = self::getFakeScenarioForDuplication();
+
+        // Called during route binding
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once()
+            ->andReturn($scenario);
+
+        // Called in request validation, and in importing
+        ConversationDataClient::shouldReceive('getAllScenarios')
+            ->twice()
+            ->andReturn(new ScenarioCollection([]));
+
+        $duplicated = null;
+        ScenarioDataClient::shouldReceive('addFullScenarioGraph')
+            ->once()
+            ->andReturnUsing(function ($scenario) use (&$duplicated) {
+                $scenario = $scenario->copy();
+                $scenario->setUid('0x9999');
+                $duplicated = $scenario;
+                return $scenario;
+            });
+
+        // Called in controller
+        ScenarioDataClient::shouldReceive('getFullScenarioGraph')
+            ->times(3)
+            ->andReturnUsing(
+                fn () => $scenario,
+                function ($uid) use (&$duplicated) {
+                    return $duplicated;
+                },
+                function ($uid) use (&$duplicated) {
+                    $duplicated->setConditions(new ConditionCollection([new Condition(
+                        'eq',
+                        ['attribute' => 'user.selected_scenario'],
+                        ['value' => $uid]
+                    )]));
+
+                    return $duplicated;
+                }
+            );
 
         // Called when patching the scenario's condition
         ConversationDataClient::shouldReceive('updateScenario')

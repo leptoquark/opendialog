@@ -28,7 +28,8 @@ class ConversationObjectDuplicationRequest extends FormRequest
     public function rules()
     {
         return $this->odIdRule() + [
-            'name' => ['bail', 'string', 'filled']
+            'name' => ['bail', 'string', 'filled'],
+            'od_id' => ['bail', 'string', 'filled']
         ];
     }
 
@@ -39,15 +40,17 @@ class ConversationObjectDuplicationRequest extends FormRequest
      * @param ConversationObject $object
      * @param ConversationObject|null $parent
      * @param bool $isIntent
+     * @param bool $isTemplate
      * @return ConversationObject
      */
     public function setUniqueOdId(
         ConversationObject $object,
         ?ConversationObject $parent = null,
-        bool $isIntent = false
+        bool $isIntent = false,
+        bool $isTemplate = false
     ): ConversationObject {
         $originalOdId = $object->getOdId();
-        $odId = $this->get('od_id', $this->formatId($originalOdId, null, $isIntent));
+        $odId = $this->get('od_id', $this->formatId($originalOdId, null, $isIntent, $isTemplate));
 
         $i = 1;
         while (!OdId::isOdIdUniqueWithinParentScope($odId, $parent)) {
@@ -56,9 +59,9 @@ class ConversationObjectDuplicationRequest extends FormRequest
         }
 
         if ($i > 1) {
-            $name = $this->get('name', $this->formatName($object->getName(), $i, $isIntent));
+            $name = $this->get('name', $this->formatName($object->getName(), $i, $isIntent, $isTemplate));
         } else {
-            $name = $this->get('name', $this->formatName($object->getName(), null, $isIntent));
+            $name = $this->get('name', $this->formatName($object->getName(), null, $isIntent, $isTemplate));
         }
 
         $object->setOdId($odId);
@@ -71,21 +74,22 @@ class ConversationObjectDuplicationRequest extends FormRequest
      * @param string $id
      * @param int|null $number
      * @param bool $isIntent
+     * @param bool $isTemplate
      * @return string
      */
-    public function formatId(string $id, int $number = null, bool $isIntent = false): string
+    public function formatId(string $id, int $number = null, bool $isIntent = false, bool $isTemplate = false): string
     {
         if (is_null($number)) {
             if ($isIntent) {
-                $id = sprintf("%sCopy", $id);
+                $id = sprintf("%s%s", $id, $isTemplate ? '' : 'Copy');
             } else {
-                $id = sprintf("%s_copy", $id);
+                $id = sprintf("%s%s", $id, $isTemplate ? '' : '_copy');
             }
         } else {
             if ($isIntent) {
-                $id = sprintf("%sCopy%d", $id, $number);
+                $id = sprintf("%s%s%d", $id, $isTemplate ? '' : 'Copy', $number);
             } else {
-                $id = sprintf("%s_copy_%d", $id, $number);
+                $id = sprintf("%s%s_%d", $id, $isTemplate ? '' : '_copy', $number);
             }
         }
 
@@ -96,14 +100,15 @@ class ConversationObjectDuplicationRequest extends FormRequest
      * @param string $name
      * @param int|null $number
      * @param bool $isIntent
+     * @param bool $isTemplate
      * @return string
      */
-    public function formatName(string $name, int $number = null, bool $isIntent = false): string
+    public function formatName(string $name, int $number = null, bool $isIntent = false, bool $isTemplate = false): string
     {
         if ($isIntent) {
-            $name = sprintf("%sCopy", $name);
+            $name = sprintf("%s%s", $name, $isTemplate ? '' : 'Copy');
         } else {
-            $name = sprintf("%s copy", $name);
+            $name = sprintf("%s%s", $name, $isTemplate ? '' : ' copy');
         }
 
         if (!is_null($number)) {
