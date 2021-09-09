@@ -38,6 +38,7 @@ use OpenDialogAi\InterpreterEngine\Interpreters\OpenDialogInterpreter;
 use OpenDialogAi\MessageBuilder\MessageMarkUpGenerator;
 use OpenDialogAi\PlatformEngine\Components\WebchatPlatform;
 use OpenDialogAi\Webchat\WebchatSetting;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ScenariosController extends Controller
 {
@@ -325,6 +326,21 @@ class ScenariosController extends Controller
         $this->duplicateConfigurationsForScenario($originalScenarioUid, $duplicate->getUid());
 
         return new ScenarioResource($duplicate);
+    }
+
+    public function export(Scenario $scenario): StreamedResponse
+    {
+        $scenario = ScenarioDataClient::getFullScenarioGraph($scenario->getUid());
+        $data = json_decode(ScenarioImportExportHelper::getSerializedData($scenario), true);
+
+        $odId = $scenario->getOdId();
+        $fileName = ScenarioImportExportHelper::suffixScenarioFileName($odId);
+
+        return response()->streamDownload(
+            fn () => print(json_encode($data)),
+            $fileName,
+            ['Content-Type' => 'application/json']
+        );
     }
 
     /**
