@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// NB this is temp code
+Route::get('api/scenario/{scenarioId}/css', 'CssController@getCss');
+
 Route::middleware('auth:api')->get('/api/user', function (Request $request) {
     return $request->user();
 });
