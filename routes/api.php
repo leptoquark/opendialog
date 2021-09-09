@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('api/frames/all', 'FrameDataController@all');
+
+Route::get('/api/frames/{frameNo}', 'FrameDataController@handle');
+
 Route::middleware('auth:api')->get('/api/user', function (Request $request) {
     return $request->user();
 });
