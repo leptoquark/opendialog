@@ -3,12 +3,19 @@
 namespace App\Http\Responses;
 
 use App\Http\Responses\FrameData\BaseData;
-use App\Http\Responses\FrameData\ScenarioData;
+use Illuminate\Support\Collection;
 use OpenDialogAi\Core\Conversation\Events\Conversation\FilteredConversations;
 use OpenDialogAi\Core\Conversation\Events\Conversation\SelectedStartingConversations;
 use OpenDialogAi\Core\Conversation\Events\Intent\MatchingIncomingIntent;
+use OpenDialogAi\Core\Conversation\Events\Intent\TopRankedIntent;
+use OpenDialogAi\Core\Conversation\Events\Interpretation\SuccessfulInterpreteration;
 use OpenDialogAi\Core\Conversation\Events\Scenario\FilteredScenarios;
 use OpenDialogAi\Core\Conversation\Events\Scene\FilteredScenes;
+use OpenDialogAi\Core\Conversation\Events\Scene\SelectedStartingScenes;
+use OpenDialogAi\Core\Conversation\Events\Turn\FilteredTurns;
+use OpenDialogAi\Core\Conversation\Events\Turn\SelectedSingleTurn;
+use OpenDialogAi\Core\Conversation\Events\Turn\SelectedStartingTurns;
+use Spatie\EventSourcing\StoredEvents\Models\EloquentStoredEvent;
 
 class NewUserIncomingFrame extends FrameDataResponse
 {
@@ -23,60 +30,85 @@ class NewUserIncomingFrame extends FrameDataResponse
         $this->loopNo = $loopNo;
     }
 
-    public function generateResponse()
+    protected function annotateNodes(): void
     {
-        $this->filterEvents();
-
         // Show selected scenarios
         $this->getScenarioIdsFromEvent(FilteredScenarios::class)->each(function ($scenarioId) {
-            $this->setScenarioStatus($scenarioId, BaseData::SELECTED);
-            $this->annotateScenario($scenarioId, ['passingConditions' => true]);
+            $this->setNodeStatus($scenarioId, BaseData::SELECTED);
+            $this->annotateNode($scenarioId, ['passingConditions' => true]);
         });
 
+        // Annotate conversations
         $selectedConversations = $this->getConversationIdsFromEvent(SelectedStartingConversations::class);
         $filterConversations = $this->getConversationIdsFromEvent(FilteredConversations::class);
+        $this->annotateSelectedFilteredNodes($selectedConversations, $filterConversations);
 
-        $selectedConversations->each(function ($conversationId) {
-            $this->setConversationStatus($conversationId, BaseData::CONSIDERED);
+        // Annotate scenes
+        $selectedScenes = $this->getSceneIdsFromEvent(SelectedStartingScenes::class);
+        $filterScenes = $this->getSceneIdsFromEvent(FilteredScenes::class);
+        $this->annotateSelectedFilteredNodes($selectedScenes, $filterScenes);
+
+        // Annotate turns
+        $selectedTurns = $this->getTurnIdsFromEvent(SelectedStartingTurns::class);
+        $filterTurns = $this->getTurnIdsFromEvent(FilteredTurns::class);
+        $this->annotateSelectedFilteredNodes($selectedTurns, $filterTurns);
+
+        // Annotate Intent interpretations
+        $this->getEvents(SuccessfulInterpreteration::class)->each(function (EloquentStoredEvent  $event) {
+            $this->setNodeStatus($event->event_properties['intentId'], BaseData::CONSIDERED);
+            $this->annotateNode($event->event_properties['intentId'], ['interpretation' => $event->meta_data['message']]);
         });
 
-        $filterConversations->each(function ($conversationId) {
-            $this->setConversationStatus($conversationId, BaseData::SELECTED);
-            $this->annotateConversation($conversationId, ['passingConditions' => true]);
-        });
-
-        $selectedConversations->diff($filterConversations)->each(function ($conversationId) {
-            $this->annotateConversation($conversationId, ['passingConditions' => false]);
-        });
-
-        return $this->formatResponse();
+        // Annotate selected intents
+        $topIntent = $this->getEvents(TopRankedIntent::class)->first();
+        $this->setNodeStatus($topIntent->event_properties['intentId'], BaseData::SELECTED);
+        $this->annotateNode($topIntent->event_properties['intentId'], ['interpretation' => $topIntent->meta_data['message']]);
     }
 
-    public function filterEvents()
+    public function filterEvents(): void
     {
         $startEventReached = false;
         $finalEventReached = false;
 
         $this->events = $this->events->filter(function ($event) use (&$startEventReached, &$finalEventReached) {
-            if ($event->event_class === MatchingIncomingIntent::class) {
-                if ($event->event_properties['loopNo'] == $this->loopNo) {
-                    $startEventReached = true;
-                }
-
-                if ($event->event_properties['loopNo'] > $this->loopNo) {
-                    $finalEventReached = true;
-                }
-
+            if ($event->event_class === MatchingIncomingIntent::class && $event->event_properties['loopNo'] == $this->loopNo) {
+                $startEventReached = true;
                 return true;
             }
 
-            if ($event->event_class === FilteredScenes::class) {
+            if ($event->event_class === MatchingIncomingIntent::class && $event->event_properties['loopNo'] > $this->loopNo) {
                 $finalEventReached = true;
+                return false;
+            }
 
+            if ($event->event_class === TopRankedIntent::class) {
+                $finalEventReached = true;
                 return true;
             }
 
             return $startEventReached && !$finalEventReached;
+        });
+    }
+
+    /**
+     * @param Collection $selectedConversationObjects
+     * @param Collection $filterConversationObjects
+     */
+    protected function annotateSelectedFilteredNodes(
+        Collection $selectedConversationObjects,
+        Collection $filterConversationObjects
+    ): void {
+        $selectedConversationObjects->each(function ($nodeId) {
+            $this->setNodeStatus($nodeId, BaseData::CONSIDERED);
+        });
+
+        $filterConversationObjects->each(function ($nodeId) {
+            $this->setNodeStatus($nodeId, BaseData::SELECTED);
+            $this->annotateNode($nodeId, ['passingConditions' => true]);
+        });
+
+        $selectedConversationObjects->diff($filterConversationObjects)->each(function ($nodeId) {
+            $this->annotateNode($nodeId, ['passingConditions' => false]);
         });
     }
 }

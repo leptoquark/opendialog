@@ -40,13 +40,13 @@ class FrameDataController extends Controller
 
         if ($this->wasNewUser()) {
             $totalFrames = $this->calculateTotalFrames();
-            $selectedScenarioId = $this->getSelectedScenarioId();
 
             if ($frameNo == 1) {
                 $response = new NewUserInitialFrame();
                 $response->addScenarios(ConversationDataClient::getAllScenarios());
             } else if ($frameNo < $totalFrames) {
                 $response = new NewUserIncomingFrame($frameNo - 1);
+                $selectedScenarioId = $this->getSelectedScenarioId();
                 $response->addScenario(ScenarioDataClient::getFullScenarioGraph($selectedScenarioId));
             } else if ($frameNo == $totalFrames) {
                 //

@@ -3,7 +3,6 @@
 namespace App\Http\Responses;
 
 use App\Http\Responses\FrameData\BaseData;
-use App\Http\Responses\FrameData\ScenarioData;
 use Illuminate\Support\Collection;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\ScenarioCollection;
@@ -20,8 +19,7 @@ abstract class FrameDataResponse
     public Collection $nodes;
 
     /**
-     * @var Collection Events for the frame. They will be run through
-     * @see FrameDataResponse::filterEvents()
+     * @var Collection Events for the frame. They will be run through filterEvents()
      */
     public Collection $events;
 
@@ -34,66 +32,74 @@ abstract class FrameDataResponse
         $this->nodes = new Collection();
     }
 
+    /**
+     * @param ScenarioCollection $scenarios
+     */
     public function addScenarios(ScenarioCollection $scenarios)
     {
         $scenarios->each(function (Scenario $scenario) {
-            $this->nodes->add(ScenarioData::fromScenario($scenario));
+            $this->addScenario($scenario);
         });
     }
 
-    public function addScenario($scenario)
+    /**
+     * @param Scenario $scenario
+     */
+    public function addScenario(Scenario $scenario)
     {
-        $this->nodes->add(ScenarioData::fromScenario($scenario));
+        $this->nodes = $this->nodes->concat(BaseData::generateConversationNodesFromScenario($scenario));
     }
 
+    /**
+     * @param $events
+     */
     public function addEvents($events)
     {
         $this->events = new Collection($events);
     }
 
-    public function annotateScenario($scenarioId, array $annotation)
+    public function annotateNode($nodeId, array $annotation)
     {
-        $this->getScenario($scenarioId)->data[array_keys($annotation)[0]] = array_values($annotation)[0];
-    }
+        $key = array_keys($annotation) ? array_keys($annotation)[0] : null;
+        $value  = array_values($annotation) ? array_values($annotation)[0] : $annotation;
+        $node = $this->getNode($nodeId);
 
-    public function setScenarioStatus($scenarioId, $status)
-    {
-        $this->getScenario($scenarioId)->status = $status;
-    }
-
-    public function annotateConversation($conversationId, array $annotation)
-    {
-        $this->getNode($conversationId)->data[array_keys($annotation)[0]] = array_values($annotation)[0];
-    }
-
-    public function setConversationStatus($conversationId, $status)
-    {
-        $this->getNode($conversationId)->status = $status;
-    }
-
-    public abstract function generateResponse();
-
-    public function formatResponse(Collection $startingPoint = null): array
-    {
-        if ($startingPoint) {
-            $nodes = $startingPoint;
+        if ($key && isset($node->data[$key])) {
+            if (is_array($node->data[$key])) {
+                $node->data[$key] = array_merge([$value], $node->data[$key]);
+            } else {
+                $node->data[$key] = [$value, $node->data[$key]];
+            }
         } else {
-            $nodes = $this->nodes;
+            $node->data[$key] = $value;
         }
+    }
 
-        $nodes->each(function (BaseData $node) {
+    public function setNodeStatus($nodeId, $status)
+    {
+        $this->getNode($nodeId)->status = $status;
+    }
+
+    public function generateResponse(): array
+    {
+        $this->filterEvents();
+        $this->annotateNodes();
+        return $this->formatResponse();
+    }
+
+    protected abstract function filterEvents(): void;
+
+    protected abstract function annotateNodes(): void;
+
+    private function formatResponse(): array
+    {
+        $this->nodes->each(function (BaseData $node) {
             $this->frameData[] = ['data' => $node->toArray()];
-
-            $node->children->each(function (BaseData $child) use ($node) {
-                $this->frameData[] = ['data' => $child->toArray()];
-                $this->connections[] = ['data' => $this->generateConnection($node, $child)];
-
-                if ($child->children->isNotEmpty()) {
-                    $this->formatResponse($child->children);
-                }
-            });
         });
 
+        $this->nodes->whereNotNull('parentId')->each(function (BaseData $node) {
+            $this->connections[] = $node->generateConnection();
+        });
         return [
             'total_frames' => $this->totalFrames,
             'frames' => array_merge($this->frameData, $this->connections),
@@ -102,46 +108,23 @@ abstract class FrameDataResponse
     }
 
     /**
-     * Gets the first scenario from the nodes with matching ID
-     *
-     * @param $scenarioId
-     * @return ScenarioData|null
+     * @param $id
+     * @return BaseData
      */
-    protected function getScenario($scenarioId): ?ScenarioData
+    protected function getNode($id): ?BaseData
     {
-        return $this->nodes->filter(function (BaseData $scenario) use ($scenarioId) {
-            return $scenario->id === $scenarioId;
-        })->first();
+        return $this->nodes->where('id', $id)->first();
     }
 
     /**
-     * Loops through all nodes to get one with the matching ID.
+     * Returns all events of the given class type
      *
-     * @param $id
-     * @param Collection|null $startPoint
-     * @return null
+     * @param $eventClass
+     * @return Collection
      */
-    protected function getNode($id, Collection $startPoint = null)
+    protected function getEvents($eventClass): Collection
     {
-        $nodes = $this->nodes;
-        if (!is_null($startPoint)) {
-            $nodes = $startPoint;
-        }
-
-        // Loop through all same level nodes first
-        foreach ($nodes as $node) {
-            if ($node->id === $id) {
-                return $node;
-            }
-        }
-
-        // Then loop through all children
-        foreach ($nodes as $node) {
-            return $this->getNode($id, $node->children);
-        }
-
-        // Node can't be found
-        return null;
+        return $this->events->where('event_class', $eventClass);
     }
 
     /**
@@ -205,35 +188,5 @@ abstract class FrameDataResponse
     protected function getIntentIdFromEvent($eventClass)
     {
         return $this->getEventProperty($eventClass, 'intentId');
-    }
-
-    /**
-     * Returns all events of the given class type
-     *
-     * @param $eventClass
-     * @return Collection
-     */
-    private function getEvents($eventClass): Collection
-    {
-        return $this->events->filter(function ($event) use ($eventClass) {
-            return $event->event_class === $eventClass;
-        });
-    }
-
-    /**
-     * Generates a node connection array for use in the response
-     *
-     * @param BaseData $node
-     * @param BaseData $child
-     * @return array The connect data for response
-     */
-    private function generateConnection(BaseData $node, BaseData $child): array
-    {
-        return [
-            'id' => $node->id . '-' . $child->id,
-            'source' => $node->id,
-            'target' => $child->id,
-            'status' => $child->status
-        ];
     }
 }
