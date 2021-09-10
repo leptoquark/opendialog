@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Responses\NewUserInitialFrame;
 use App\Http\Responses\NewUserIncomingFrame;
-use GuzzleHttp\Client;
+use App\Http\Responses\NewUserOutgoingFrame;
 use Illuminate\Database\Query\Builder;
 use OpenDialogAi\Core\Conversation\Events\Intent\MatchingIncomingIntent;
 use OpenDialogAi\Core\Conversation\Events\Sensor\ScenarioRequestReceived;
@@ -49,7 +49,9 @@ class FrameDataController extends Controller
                 $selectedScenarioId = $this->getSelectedScenarioId();
                 $response->addScenario(ScenarioDataClient::getFullScenarioGraph($selectedScenarioId));
             } else if ($frameNo == $totalFrames) {
-                //
+                $response = new NewUserOutgoingFrame($frameNo - 1);
+                $selectedScenarioId = $this->getSelectedScenarioId();
+                $response->addScenario(ScenarioDataClient::getFullScenarioGraph($selectedScenarioId));
             } else {
                 return response()->setStatusCode(404);
             }
