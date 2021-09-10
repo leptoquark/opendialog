@@ -55,14 +55,13 @@ class FrameDataController extends Controller
             } else {
                 return response()->setStatusCode(404);
             }
-
-            $response->totalFrames = $totalFrames;
-            $response->addEvents($this->getAllEventsForRequest()->get());
-
-            return $response->generateResponse();
+        } else {
+            $totalFrames = $this->calculateTotalFrames();
         }
+        $response->totalFrames = $totalFrames;
+        $response->addEvents($this->getAllEventsForRequest()->get());
 
-        return "returning user";
+        return $response->generateResponse();
     }
 
     /**
