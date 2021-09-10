@@ -66,7 +66,8 @@ abstract class FrameDataResponse
 
         if ($key && isset($node->data[$key])) {
             if (is_array($node->data[$key])) {
-                $node->data[$key] = array_merge([$value], $node->data[$key]);
+                $mergeValue = is_array($value) ? $value : [$value];
+                $node->data[$key] = array_merge($mergeValue, $node->data[$key]);
             } else {
                 $node->data[$key] = [$value, $node->data[$key]];
             }

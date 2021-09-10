@@ -67,16 +67,17 @@ abstract class BaseData
 
         $intents = new Collection();
         $turns->each(function (Turn $turn) use (&$intents, $nodes) {
-            $nodes->add(
-                TurnData::fromConversationObject($turn, $turn->getScene()->getUid())
-            );
+            $nodes->add(TurnData::fromConversationObject($turn, $turn->getScene()->getUid()));
+            $nodes->add(UserIntentsData::fromTurn($turn));
+            $nodes->add(AppIntentsData::fromTurn($turn));
+
             $intents = $intents->concat($turn->getRequestIntents());
             $intents = $intents->concat($turn->getResponseIntents());
         });
 
         $intents->each(function (Intent $intent) use ($nodes) {
             $nodes->add(
-                IntentData::fromConversationObject($intent, $intent->getTurn()->getUid())
+                IntentData::fromIntent($intent, $intent->getTurn())
             );
         });
 
@@ -106,7 +107,8 @@ abstract class BaseData
                 'id' => $this->parentId . '-' . $this->id,
                 'source' => $this->parentId,
                 'target' => $this->id,
-                'status' => $this->status
+                'status' => $this->status,
+                'parent' => $this->parentId
             ]
         ];
     }

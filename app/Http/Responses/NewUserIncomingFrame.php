@@ -13,7 +13,6 @@ use OpenDialogAi\Core\Conversation\Events\Scenario\FilteredScenarios;
 use OpenDialogAi\Core\Conversation\Events\Scene\FilteredScenes;
 use OpenDialogAi\Core\Conversation\Events\Scene\SelectedStartingScenes;
 use OpenDialogAi\Core\Conversation\Events\Turn\FilteredTurns;
-use OpenDialogAi\Core\Conversation\Events\Turn\SelectedSingleTurn;
 use OpenDialogAi\Core\Conversation\Events\Turn\SelectedStartingTurns;
 use Spatie\EventSourcing\StoredEvents\Models\EloquentStoredEvent;
 
@@ -56,13 +55,13 @@ class NewUserIncomingFrame extends FrameDataResponse
         // Annotate Intent interpretations
         $this->getEvents(SuccessfulInterpreteration::class)->each(function (EloquentStoredEvent  $event) {
             $this->setNodeStatus($event->event_properties['intentId'], BaseData::CONSIDERED);
-            $this->annotateNode($event->event_properties['intentId'], ['interpretation' => $event->meta_data['message']]);
+            $this->annotateNode($event->event_properties['intentId'], ['interpretation' => [$event->meta_data['message']]]);
         });
 
         // Annotate selected intents
         $topIntent = $this->getEvents(TopRankedIntent::class)->first();
         $this->setNodeStatus($topIntent->event_properties['intentId'], BaseData::SELECTED);
-        $this->annotateNode($topIntent->event_properties['intentId'], ['interpretation' => $topIntent->meta_data['message']]);
+        $this->annotateNode($topIntent->event_properties['intentId'], ['interpretation' => [$topIntent->meta_data['message']]]);
     }
 
     public function filterEvents(): void
