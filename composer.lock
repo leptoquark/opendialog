@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c773ea351cffa7dbd9c7fb429a273fb8",
+    "content-hash": "224e081e777ffb78c43528e2e7331d2b",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2980,16 +2980,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "dev-feature/OPNDLG-1004_preview_logs_poc",
+            "version": "dev-OPNDLG-1004_preview_logs_poc",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "f3eac0f0f122ea5c98e2fbc06e599dcd8d011939"
+                "reference": "72c2a31d691c500640b5407267bfb6f2233c4d4e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/f3eac0f0f122ea5c98e2fbc06e599dcd8d011939",
-                "reference": "f3eac0f0f122ea5c98e2fbc06e599dcd8d011939",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/72c2a31d691c500640b5407267bfb6f2233c4d4e",
+                "reference": "72c2a31d691c500640b5407267bfb6f2233c4d4e",
                 "shasum": ""
             },
             "require": {
@@ -3002,7 +3002,7 @@
                 "laravel/sanctum": "^2.11",
                 "php": "^7.4.0 || ^8.0",
                 "php-ds/php-ds": "^1.2",
-                "spatie/laravel-event-sourcing": "^4.10",
+                "spatie/laravel-event-sourcing": "^4.10.2",
                 "symfony/property-access": "^5.2",
                 "symfony/serializer": "^5.2",
                 "symfony/yaml": "^5.2"
@@ -3070,9 +3070,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-1004_preview_logs_poc"
+                "source": "https://github.com/opendialogai/core/tree/OPNDLG-1004_preview_logs_poc"
             },
-            "time": "2021-09-08T14:21:59+00:00"
+            "time": "2021-09-10T09:20:25+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",

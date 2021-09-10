@@ -14,8 +14,8 @@ abstract class BaseData
 {
     // Statuses
     public const NOT_CONSIDERED = 'not_considered';
-    public const CONSIDERED     = 'considered';
-    public const SELECTED       = 'selected';
+    public const CONSIDERED = 'considered';
+    public const SELECTED = 'selected';
 
     public string $label;
 
@@ -102,10 +102,12 @@ abstract class BaseData
     public function generateConnection(): array
     {
         return [
-            'id' => $this->parentId . '-' . $this->id,
-            'source' => $this->parentId,
-            'target' => $this->id,
-            'status' => $this->status
+            'data' => [
+                'id' => $this->parentId . '-' . $this->id,
+                'source' => $this->parentId,
+                'target' => $this->id,
+                'status' => $this->status
+            ]
         ];
     }
 }
