@@ -9,10 +9,12 @@ use App\Http\Requests\ConversationObjectDuplicationRequest;
 use App\Http\Requests\ConversationRequest;
 use App\Http\Requests\ScenarioRequest;
 use App\Http\Resources\ConversationResource;
+use App\Http\Resources\ScenarioDeploymentKeyResource;
 use App\Http\Resources\ScenarioResource;
 use App\ImportExportHelpers\PathSubstitutionHelper;
 use App\ImportExportHelpers\ScenarioImportExportHelper;
 use App\Template;
+use App\ScenarioAccessToken;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -73,6 +75,20 @@ class ScenariosController extends Controller
         return new ScenarioResource($scenario);
     }
 
+    /**
+     * Display the specified scenario deployment key.
+     *
+     * @param Scenario $scenario
+     * @return ScenarioDeploymentKeyResource
+     */
+    public function showDeploymentKey(Scenario $scenario): ScenarioDeploymentKeyResource
+    {
+        $deploymentKey = ScenarioAccessToken::where('scenario_id', $scenario->getUid())->first();
+        if (!$deploymentKey) {
+            abort(404);
+        }
+        return new ScenarioDeploymentKeyResource($deploymentKey);
+    }
 
     /**
      * Returns a collection of conversations for a particular scenario.

@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property string email
@@ -18,6 +19,7 @@ class User extends Authenticatable
 {
     use Notifiable;
     use TwoFactorAuthenticatable;
+    use HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
