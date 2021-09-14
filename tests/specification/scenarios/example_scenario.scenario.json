@@ -100,5 +100,131 @@
             ]
 
         }
+    ],
+    "configurations": [
+        {
+            "name": "Dialogflow",
+            "scenario_id": "$path:example_scenario",
+            "component_id": "interpreter.core.dialogflow",
+            "configuration": {
+                "intents": {
+                    "Knowledge.KnowledgeBase.*": "intent.dialogflow.faq"
+                },
+                "entities": {
+                    "": ""
+                },
+                "json_key": {},
+                "project_id": "dialogflow-test",
+                "environment": "draft",
+                "language_code": "en_gb"
+            },
+            "active": true
+        },
+        {
+            "name": "OpenDialog",
+            "scenario_id": "$path:example_scenario",
+            "component_id": "interpreter.core.opendialog",
+            "configuration": {
+                "callbacks": {
+                    "WELCOME": "intent.core.welcome"
+                },
+                "enable_similarity_evaluation": true
+            },
+            "active": true
+        },
+        {
+            "name": "Webchat",
+            "scenario_id": "$path:example_scenario",
+            "component_id": "platform.core.webchat",
+            "configuration": {
+                "colours": {
+                    "buttonText": "#1b2956",
+                    "headerText": "#ffffff",
+                    "userInputText": "#1b212a",
+                    "iconBackground": "0000ff",
+                    "sentMessageText": "#1b2956",
+                    "buttonBackground": "#7fdad1",
+                    "headerBackground": "#1b2956",
+                    "externalButtonText": "#1b2956",
+                    "launcherBackground": "#1b2956",
+                    "iconHoverBackground": "ffffff",
+                    "receivedMessageText": "#1b2956",
+                    "userInputBackground": "#ffffff",
+                    "buttonHoverBackground": "#7fdad1",
+                    "messageListBackground": "#1b2956",
+                    "sentMessageBackground": "#7fdad1",
+                    "externalButtonBackground": "#7fdad1",
+                    "receivedMessageBackground": "#ffffff",
+                    "externalButtonHoverBackground": "#7fdad1"
+                },
+                "general": {
+                    "url": "https:\/\/opendialog.test\/web-chat",
+                    "logo": "https:\/\/opendialog.test\/images\/homepage-logo.svg",
+                    "open": true,
+                    "teamName": "",
+                    "validPath": [
+                        "*"
+                    ],
+                    "useBotName": false,
+                    "chatbotName": "OpenDialog",
+                    "pageCssPath": "",
+                    "messageDelay": "500",
+                    "useBotAvatar": true,
+                    "useHumanName": false,
+                    "collectUserIp": true,
+                    "chatbotCssPath": "",
+                    "useHumanAvatar": false,
+                    "hideMessageTime": true,
+                    "disableCloseChat": false,
+                    "formResponseText": null,
+                    "messageAnimation": false,
+                    "chatbotAvatarPath": "https:\/\/opendialog.test\/vendor\/webchat\/images\/avatar.svg",
+                    "showEndChatButton": false,
+                    "showRestartButton": false,
+                    "showDownloadButton": true,
+                    "hideDatetimeMessage": true,
+                    "newUserOpenCallback": "WELCOME",
+                    "typingIndicatorStyle": "",
+                    "newUserStartMinimized": false,
+                    "restartButtonCallback": "intent.core.restart",
+                    "showHeaderCloseButton": false,
+                    "chatbotFullpageCssPath": "",
+                    "ongoingUserOpenCallback": "",
+                    "scrollToFirstNewMessage": false,
+                    "ongoingUserStartMinimized": false,
+                    "returningUserOpenCallback": "WELCOME",
+                    "returningUserStartMinimized": false,
+                    "showTextInputWithExternalButtons": false,
+                    "showHeaderButtonsOnFullPageMessages": false,
+                    "hideTypingIndicatorOnInternalMessages": false
+                },
+                "comments": {
+                    "commentsName": "Comments",
+                    "commentsEnabled": false,
+                    "commentsEndpoint": "http:\/\/example.com\/json-api\/v1",
+                    "commentsAuthToken": "Bearer ApiTokenValue",
+                    "commentsEntityName": "comments",
+                    "commentsTextFieldName": "comment",
+                    "commentsAuthorEntityName": "users",
+                    "commentsCreatedFieldName": "created-at",
+                    "commentsAuthorIdFieldName": "id",
+                    "commentsSectionEntityName": "posts",
+                    "commentsEnabledPathPattern": "^\\\/home\\\/posts",
+                    "commentsSectionFilterQuery": "post",
+                    "commentsSectionIdFieldName": "id",
+                    "commentsSectionPathPattern": "home\\\/posts\\\/\\d*$",
+                    "commentsAuthorNameFieldName": "name",
+                    "commentsSectionNameFieldName": "name",
+                    "commentsAuthorRelationshipName": "author",
+                    "commentsSectionRelationshipName": "post",
+                    "commentsSectionFilterPathPattern": "home\\\/posts\\\/(\\d*)\\\/?"
+                },
+                "webchatHistory": {
+                    "showHistory": true,
+                    "numberOfMessages": 10
+                }
+            },
+            "active": true
+        }
     ]
 }

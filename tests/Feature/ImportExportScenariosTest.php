@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Console\Facades\ImportExportSerializer;
+use App\Http\Controllers\API\ScenariosController;
+use App\ImportExportHelpers\PathSubstitutionHelper;
 use App\ImportExportHelpers\ScenarioImportExportHelper;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\Adapter\AbstractAdapter;
+use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
 use OpenDialogAi\Core\Conversation\Behavior;
 use OpenDialogAi\Core\Conversation\BehaviorsCollection;
 use OpenDialogAi\Core\Conversation\Condition;
@@ -379,10 +382,17 @@ class ImportExportScenariosTest extends TestCase
     public function testExportSingleScenario()
     {
         $scenario = $this->getFullTestScenario();
+        $scenarioWithUids = $this->addFakeUids($scenario);
+
+        // Create configurations for our scenario
+        ScenariosController::createDefaultConfigurationsForScenario($scenarioWithUids->getUid());
+
+        // Create configurations for some other scenario
+        ScenariosController::createDefaultConfigurationsForScenario('0x123789');
 
         // Mock storing the scenario in DGraph
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')->with($scenario)
-            ->andReturn($this->addFakeUids($scenario));
+            ->andReturn($scenarioWithUids);
         $storedScenario = ScenarioDataClient::addFullScenarioGraph($scenario);
 
         $expectedFilePath = ScenarioImportExportHelper::getScenarioFilePath($storedScenario->getOdId());
@@ -398,7 +408,22 @@ class ImportExportScenariosTest extends TestCase
         $this->disk->assertExists($expectedFilePath);
         $data = $this->disk->get($expectedFilePath);
         $decodedData = json_decode($data, JSON_THROW_ON_ERROR);
+
         $this->assertIsArray($decodedData);
+        $this->assertArrayHasKey('conversations', $decodedData);
+
+        $this->assertArrayHasKey('configurations', $decodedData);
+
+        $configurations = $decodedData['configurations'];
+        $scenarioPath = PathSubstitutionHelper::createPath($scenarioWithUids->getOdId());
+
+        $this->assertCount(2, $configurations);
+        $this->assertEquals('OpenDialog', $configurations[0]['name']);
+        $this->assertEquals('interpreter.core.opendialog', $configurations[0]['component_id']);
+        $this->assertEquals($scenarioPath, $configurations[0]['scenario_id']);
+        $this->assertEquals('Webchat', $configurations[1]['name']);
+        $this->assertEquals('platform.core.webchat', $configurations[1]['component_id']);
+        $this->assertEquals($scenarioPath, $configurations[1]['scenario_id']);
     }
 
     public function testExportMultipleScenarios()
@@ -410,6 +435,7 @@ class ImportExportScenariosTest extends TestCase
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')->with($scenarioA)
             ->andReturn($this->addFakeUids($scenarioA));
         $storedScenarioA = ScenarioDataClient::addFullScenarioGraph($scenarioA);
+        ScenariosController::createDefaultConfigurationsForScenario($storedScenarioA->getUid());
 
         // Store Scenario B (Storage mocked)
 
@@ -419,6 +445,7 @@ class ImportExportScenariosTest extends TestCase
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')->with($scenarioB)
             ->andReturn($this->addFakeUids($scenarioB));
         $storedScenarioB = ScenarioDataClient::addFullScenarioGraph($scenarioB);
+        ScenariosController::createDefaultConfigurationsForScenario($storedScenarioB->getUid());
 
         // Store Scenario C (Storage mocked)
         $scenarioC = $this->getSimpleTestScenario();
@@ -427,6 +454,7 @@ class ImportExportScenariosTest extends TestCase
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')->with($scenarioC)
             ->andReturn($this->addFakeUids($scenarioC));
         $storedScenarioC = ScenarioDataClient::addFullScenarioGraph($scenarioC);
+        ScenariosController::createDefaultConfigurationsForScenario($storedScenarioC->getUid());
 
         // Run the export (Storage mocked)
         ConversationDataClient::shouldReceive('getAllScenarios')->andReturn(new ScenarioCollection([
@@ -445,6 +473,24 @@ class ImportExportScenariosTest extends TestCase
                  ] as $storedScenario) {
             $filePath = ScenarioImportExportHelper::getScenarioFilePath($storedScenario->getOdId());
             $this->disk->assertExists($filePath);
+            $data = $this->disk->get($filePath);
+            $decodedData = json_decode($data, JSON_THROW_ON_ERROR);
+
+            $this->assertIsArray($decodedData);
+            $this->assertArrayHasKey('conversations', $decodedData);
+
+            $this->assertArrayHasKey('configurations', $decodedData);
+
+            $configurations = $decodedData['configurations'];
+            $scenarioPath = PathSubstitutionHelper::createPath($storedScenario->getOdId());
+
+            $this->assertCount(2, $configurations);
+            $this->assertEquals('OpenDialog', $configurations[0]['name']);
+            $this->assertEquals('interpreter.core.opendialog', $configurations[0]['component_id']);
+            $this->assertEquals($scenarioPath, $configurations[0]['scenario_id']);
+            $this->assertEquals('Webchat', $configurations[1]['name']);
+            $this->assertEquals('platform.core.webchat', $configurations[1]['component_id']);
+            $this->assertEquals($scenarioPath, $configurations[1]['scenario_id']);
         }
     }
 
@@ -502,8 +548,8 @@ class ImportExportScenariosTest extends TestCase
 
         // After updates are made we get the full scenario with the updates included now
         ScenarioDataClient::shouldReceive('getFullScenarioGraph')
-            ->times(3)
-            ->andReturn($storedExampleScenario, $storedExampleScenario, $storedMinimalScenario);
+            ->times(4)
+            ->andReturn($storedExampleScenario, $storedExampleScenario, $storedMinimalScenario, $storedMinimalScenario);
 
         $this->artisan('scenarios:import')
             ->expectsOutput(sprintf("Importing scenario from file %s...", $exampleScenarioFilePath))
@@ -519,14 +565,19 @@ class ImportExportScenariosTest extends TestCase
             ->once()
             ->andReturn($allStoredScenarios);
 
-        $storedScenarios = ConversationDataClient::getAllScenarios(false);
+        $storedScenarios = ConversationDataClient::getAllScenarios();
         $this->assertCount(2, $storedScenarios);
 
+        /** @var Scenario $storedExampleScenario */
         $storedExampleScenario = $storedScenarios->filter(fn ($scenario) => $scenario->getOdId() === "example_scenario");
-        $this->assertNotNull($storedExampleScenario);
+        $this->assertCount(1, $storedExampleScenario);
 
+        /** @var Scenario $storedMinimalScenario */
         $storedMinimalScenario = $storedScenarios->filter(fn ($scenario) => $scenario->getOdId() === "minimal_scenario");
-        $this->assertNotNull($storedMinimalScenario);
+        $this->assertCount(1, $storedMinimalScenario);
+
+        $this->assertCount(3, ComponentConfiguration::where(['scenario_id' => $storedExampleScenario->first()->getUid()])->get());
+        $this->assertCount(2, ComponentConfiguration::where(['scenario_id' => $storedMinimalScenario->first()->getUid()])->get());
     }
 
     public function testImportInvalidScenario()
@@ -560,8 +611,8 @@ class ImportExportScenariosTest extends TestCase
 
         // After updates are made we get the full scenario with the updates included now
         ScenarioDataClient::shouldReceive('getFullScenarioGraph')
-            ->times(3)
-            ->andReturn($storedExampleScenario, $storedExampleScenario, $storedMinimalScenario);
+            ->times(4)
+            ->andReturn($storedExampleScenario, $storedExampleScenario, $storedMinimalScenario, $storedMinimalScenario);
 
         $this->artisan('scenarios:import')
             ->expectsOutput(sprintf("Import of %s failed. Unable to decode file as json", $filePath));
@@ -594,8 +645,8 @@ class ImportExportScenariosTest extends TestCase
             ->andReturn($storedMinimalScenario);
 
         ScenarioDataClient::shouldReceive('getFullScenarioGraph')
-            ->once()
-            ->andReturn($storedMinimalScenario);
+            ->twice()
+            ->andReturn($storedMinimalScenario, $storedMinimalScenario);
 
         $this->artisan('scenarios:import')
             ->expectsOutput(sprintf(
@@ -654,8 +705,8 @@ class ImportExportScenariosTest extends TestCase
 
         // After updates are made we get the full scenario with the updates included now
         ScenarioDataClient::shouldReceive('getFullScenarioGraph')
-            ->times(3)
-            ->andReturn($storedExampleScenario, $storedExampleScenario, $storedMinimalScenario);
+            ->times(4)
+            ->andReturn($storedExampleScenario, $storedExampleScenario, $storedMinimalScenario, $storedMinimalScenario);
 
         $this->artisan('scenarios:import');
 

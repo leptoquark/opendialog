@@ -5,5 +5,25 @@
     "interpreter": "",
     "behaviors": [],
     "conditions": [],
-    "conversations": []
+    "conversations": [],
+    "configurations": [
+        {
+            "name": "OpenDialog",
+            "scenario_id": "$path:minimal_scenario",
+            "component_id": "interpreter.core.opendialog",
+            "configuration": {
+                "callbacks": {
+                    "WELCOME": "intent.core.welcome"
+                }
+            },
+            "active": true
+        },
+        {
+            "name": "Webchat",
+            "scenario_id": "$path:minimal_scenario",
+            "component_id": "platform.core.webchat",
+            "configuration": {},
+            "active": true
+        }
+    ]
 }

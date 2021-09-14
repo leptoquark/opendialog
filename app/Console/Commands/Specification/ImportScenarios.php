@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands\Specification;
 
-use App\Http\Controllers\API\ScenariosController;
 use App\ImportExportHelpers\ScenarioImportExportHelper;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
@@ -36,8 +35,7 @@ class ImportScenarios extends Command
         }
 
         try {
-            $scenario = ScenarioImportExportHelper::importScenarioFromString($scenarioData);
-            ScenariosController::createDefaultConfigurationsForScenario($scenario->getUid());
+            ScenarioImportExportHelper::importScenarioFromString($scenarioData);
         } catch (NotEncodableValueException $e) {
             $this->error(sprintf("Import of %s failed. Unable to decode file as json", $filePath));
             return;
