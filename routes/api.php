@@ -90,6 +90,7 @@ Route::namespace('API')
             Route::get('scenarios/{scenario}/key', 'ScenariosController@showDeploymentKey');
 
             Route::post('scenarios/{scenario}/duplicate', 'ScenariosController@duplicate');
+            Route::get('scenarios/{scenario}/export', 'ScenariosController@export');
 
             Route::get('scenarios/{scenario}/conversations', 'ScenariosController@showConversationsByScenario');
             Route::post('scenarios/{scenario}/conversations', 'ScenariosController@storeConversationsAgainstScenario');
@@ -152,4 +153,7 @@ Route::namespace('API')
         Route::post('{userId}/context', 'UserContextController@addToUserContext');
 
         Route::post('conversation-simulation', 'ConversationSimulationController@simulate');
+
+        Route::get('/templates', 'TemplateController@index');
+        Route::get('/templates/{id}', 'TemplateController@show');
     });
