@@ -90,6 +90,7 @@ Route::namespace('API')
             Route::get('scenarios/{scenario}/key', 'ScenariosController@showDeploymentKey');
 
             Route::post('scenarios/{scenario}/duplicate', 'ScenariosController@duplicate');
+            Route::post('scenarios/create-from-template/{template}', 'ScenariosController@duplicate');
             Route::get('scenarios/{scenario}/export', 'ScenariosController@export');
 
             Route::get('scenarios/{scenario}/conversations', 'ScenariosController@showConversationsByScenario');
