@@ -4,6 +4,11 @@ namespace App\Http\Responses;
 
 use App\Http\Responses\FrameData\BaseData;
 use Illuminate\Support\Collection;
+use OpenDialogAi\Core\Conversation\Events\BaseConversationEvent;
+use OpenDialogAi\Core\Conversation\Events\Operations\ConditionsFailed;
+use OpenDialogAi\Core\Conversation\Events\Operations\ConditionsPassed;
+use OpenDialogAi\Core\Conversation\Events\Storage\StoredEvent;
+use OpenDialogAi\Core\Conversation\Facades\ScenarioDataClient;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\ScenarioCollection;
 
@@ -27,9 +32,109 @@ abstract class FrameDataResponse
     public array $frameData = [];
     public array $connections = [];
 
+    public string $startEvent;
+    public string $endEvent;
+
+    public string $stateEventName;
+    public StoredEvent $stateEvent;
+
     public function __construct()
     {
         $this->nodes = new Collection();
+    }
+
+    /**
+     * Generates a response by filtering the set of events, setting the conversation nodes post filtering, annotating
+     * nodes with event data and then formatting
+     *
+     * @return array
+     */
+    public function generateResponse(): array
+    {
+        $this->filterEvents();
+        $this->setNodes();
+        $this->annotateNodes();
+        return $this->formatResponse();
+    }
+
+    /**
+     * Filters the list of all events by getting all events between the defined start and end events
+     */
+    protected function filterEvents()
+    {
+        $this->stateEvent = $this->getEvents($this->stateEventName)->first();
+
+        $startEventReached = false;
+        $finalEventReached = false;
+
+        $this->events = $this->events->filter(function ($event) use (&$startEventReached, &$finalEventReached) {
+            if ($event->event_class === $this->startEvent) {
+                $startEventReached = true;
+                return true;
+            }
+
+            if ($event->event_class === $this->endEvent) {
+                $finalEventReached = true;
+                return true;
+            }
+
+            return $startEventReached && !$finalEventReached;
+        });
+    }
+
+    /**
+     * After filtering, fetch and set the conversation nodes at the right level for the frame
+     */
+    protected function setNodes(): void
+    {
+        $scenarioId = $this->stateEvent->getScenarioId();
+        $this->addScenario(ScenarioDataClient::getFullScenarioGraph($scenarioId));
+
+        $this->setNodeStatus($this->stateEvent->getScenarioId(), BaseData::CONSIDERED);
+        $this->annotateNode($this->stateEvent->getScenarioId(), 'message', 'Starting State');
+
+        $this->setNodeStatus($this->stateEvent->getConversationId(), BaseData::CONSIDERED);
+        $this->annotateNode($this->stateEvent->getConversationId(), 'message', 'Starting State');
+
+        $this->setNodeStatus($this->stateEvent->getSceneId(), BaseData::CONSIDERED);
+        $this->annotateNode($this->stateEvent->getSceneId(), 'message', 'Starting State');
+
+        $this->setNodeStatus($this->stateEvent->getTurnId(), BaseData::CONSIDERED);
+        $this->annotateNode($this->stateEvent->getTurnId(), 'message', 'Starting State');
+    }
+
+    /**
+     * With the set of relevant filtered events and conversation nodes, annotate the nodes to represent the event data
+     */
+    protected function annotateNodes(): void
+    {
+        /** @var StoredEvent $event */
+        foreach ($this->events as $event) {
+            $nodeId = $event->getObjectId();
+            $nodeStatus = $event->getStatus();
+            $nodeType = $event->getObjectType();
+
+            // Add the message to the node
+            $this->annotateNode($nodeId, 'message', $event->meta_data['message']);
+
+            // Set the node status
+            $status = BaseData::CONSIDERED;
+            if ($nodeStatus === 'success') {
+                $status = BaseData::SELECTED;
+            } else if ($nodeStatus === 'error') {
+                $status = BaseData::NOT_SELECTED;
+            }
+
+            $this->setNodeStatus($nodeId, $status);
+
+            if ($event->event_class === ConditionsPassed::class) {
+                $this->annotateNode($nodeId, 'passingConditions', true);
+            }
+
+            if ($event->event_class === ConditionsFailed::class) {
+                $this->annotateNode($nodeId, 'passingConditions', false);
+            }
+        }
     }
 
     /**
@@ -58,48 +163,68 @@ abstract class FrameDataResponse
         $this->events = new Collection($events);
     }
 
-    public function annotateNode($nodeId, array $annotation)
+    public function annotateNode($nodeId, string $key, string $annotation)
     {
-        $key = array_keys($annotation) ? array_keys($annotation)[0] : null;
-        $value  = array_values($annotation) ? array_values($annotation)[0] : $annotation;
         $node = $this->getNode($nodeId);
+        if (!$node) {
+            return;
+        }
 
-        if ($key && isset($node->data[$key])) {
-            if (is_array($node->data[$key])) {
-                $mergeValue = is_array($value) ? $value : [$value];
-                $node->data[$key] = array_merge($mergeValue, $node->data[$key]);
-            } else {
-                $node->data[$key] = [$value, $node->data[$key]];
-            }
-        } else {
-            $node->data[$key] = $value;
+        if (!isset($node->data[$key])) {
+            $node->data[$key] = [];
+        }
+
+        if (!in_array($annotation, ($node->data[$key]))) {
+            // Only annotate if the same message doesn't already exist
+            $node->data[$key][] = $annotation;
         }
     }
 
     public function setNodeStatus($nodeId, $status)
     {
-        $this->getNode($nodeId)->status = $status;
+        $node = $this->getNode($nodeId);
+
+        if ($node) {
+            // Don't downgrade a nodes selected status
+            if ($node->status === BaseData::SELECTED) {
+                return;
+            }
+
+            $node->status = $status;
+
+            if ($node->type === BaseConversationEvent::INTENT && $parent = $this->getNode($node->parentId)) {
+                if ($parent->status !== BaseData::SELECTED) {
+                    $parent->status = $node->status;
+                }
+            }
+        }
     }
 
-    public function generateResponse(): array
+    public function setIntentStatus($nodeId, $status)
     {
-        $this->filterEvents();
-        $this->annotateNodes();
-        return $this->formatResponse();
+        $intent = $this->getNode($nodeId);
+        $intent->status = $status;
+        if ($parent = $this->getNode($intent->parentId)) {
+            if ($parent->status !== BaseData::SELECTED) {
+                $parent->status = $intent->status;
+            }
+        }
     }
-
-    protected abstract function filterEvents(): void;
-
-    protected abstract function annotateNodes(): void;
 
     private function formatResponse(): array
     {
         $this->nodes->each(function (BaseData $node) {
-            $this->frameData[] = ['data' => $node->toArray()];
+            $parent = $this->getNode($node->parentId);
+//            if (!$parent || $parent->status !== BaseData::NOT_CONSIDERED) {
+                $this->frameData[] = ['data' => $node->toArray()];
+//            }
         });
 
         $this->nodes->whereNotNull('parentId')->each(function (BaseData $node) {
-            $this->connections[] = $node->generateConnection();
+            $parent = $this->getNode($node->parentId);
+//            if ($parent && $parent->status !== BaseData::NOT_CONSIDERED) {
+                $this->connections[] = $node->generateConnection();
+//            }
         });
         return [
             'total_frames' => $this->totalFrames,
@@ -151,43 +276,8 @@ abstract class FrameDataResponse
         return $this->getEventProperty($eventClass, 'scenarioId');
     }
 
-    protected function getConversationIdsFromEvent($eventClass): Collection
-    {
-        return collect($this->getEventProperty($eventClass, 'conversationIds'));
-    }
-
-    protected function getConversationIdFromEvent($eventClass)
-    {
-        return $this->getEventProperty($eventClass, 'conversationId');
-    }
-
-    protected function getSceneIdsFromEvent($eventClass): Collection
-    {
-        return collect($this->getEventProperty($eventClass, 'sceneIds'));
-    }
-
-    protected function getSceneIdFromEvent($eventClass)
-    {
-        return $this->getEventProperty($eventClass, 'sceneId');
-    }
-
-    protected function getTurnIdsFromEvent($eventClass): Collection
-    {
-        return collect($this->getEventProperty($eventClass, 'turnIds'));
-    }
-
     protected function getTurnIdFromEvent($eventClass)
     {
         return $this->getEventProperty($eventClass, 'turnId');
-    }
-
-    protected function getIntentIdsFromEvent($eventClass): Collection
-    {
-        return collect($this->getEventProperty($eventClass, 'intentIds'));
-    }
-
-    protected function getIntentIdFromEvent($eventClass)
-    {
-        return $this->getEventProperty($eventClass, 'intentId');
     }
 }
