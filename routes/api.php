@@ -157,4 +157,7 @@ Route::namespace('API')
 
         Route::get('/templates', 'TemplateController@index');
         Route::get('/templates/{id}', 'TemplateController@show');
+
+        Route::get('/scenario/{scenarioId}/css', 'ExternalCssController@getScenarioCss');
+        Route::post('/external-css', 'ExternalCssController@getCss');
     });
