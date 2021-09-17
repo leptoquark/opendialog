@@ -3,27 +3,39 @@
 namespace App\Http\Controllers\API;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 class ExternalCssController
 {
+    private Client $client;
+
+    public function __construct(Client $client)
+    {
+        $this->client = $client;
+    }
+
     public function getCss(Request $request)
     {
-        $client = new Client();
         try {
             $path = $request->get('path');
 
             if ($path) {
-                return $client->get($path)
-                    ->getBody()
-                    ->getContents();
+                $response = $this->client->get($path);
+                if ($response->getHeader('Content-Type')[0] == 'text/css') {
+                    return $response
+                        ->getBody()
+                        ->getContents();
+                } else {
+                    throw new RuntimeException("The URL provided does not contain css content");
+                }
             }
-        } catch (\Exception $e) {
-            return response()
-                ->setContent(sprintf("Error fetching css content - %s", $e->getMessage()))
+        } catch (GuzzleException | \Exception $e) {
+            return response(sprintf("Error fetching css content - %s", $e->getMessage()))
                 ->setStatusCode(400);
         }
 
-        return response()->setStatusCode(404);
+        return response()->noContent(404);
     }
 }
