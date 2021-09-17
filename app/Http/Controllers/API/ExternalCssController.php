@@ -4,37 +4,24 @@ namespace App\Http\Controllers\API;
 
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
-use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
 
 class ExternalCssController
 {
-    public function getScenarioCss($scenarioId)
-    {
-        $client = new Client();
-        $query = ComponentConfiguration::query()
-            ->platforms()
-            ->byScenario($scenarioId);
-
-        $path = $query->first()->configuration['general']['chatbotCssPath'];
-
-        if ($path) {
-            return $client->get($path)
-                ->getBody()
-                ->getContents();
-        }
-
-        return response()->setStatusCode(404);
-    }
-
     public function getCss(Request $request)
     {
         $client = new Client();
-        $path = $request->get('path');
+        try {
+            $path = $request->get('path');
 
-        if ($path) {
-            return $client->get($path)
-                ->getBody()
-                ->getContents();
+            if ($path) {
+                return $client->get($path)
+                    ->getBody()
+                    ->getContents();
+            }
+        } catch (\Exception $e) {
+            return response()
+                ->setContent(sprintf("Error fetching css content - %s", $e->getMessage()))
+                ->setStatusCode(400);
         }
 
         return response()->setStatusCode(404);
