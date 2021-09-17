@@ -3,6 +3,7 @@
 namespace App\Http\Responses\FrameData;
 
 use Illuminate\Support\Collection;
+use OpenDialogAi\Core\Conversation\ConversationCollection;
 use OpenDialogAi\Core\Conversation\ConversationObject;
 use OpenDialogAi\Core\Conversation\Intent;
 use OpenDialogAi\Core\Conversation\Scenario;
@@ -14,8 +15,9 @@ abstract class BaseData
 {
     // Statuses
     public const NOT_CONSIDERED = 'not_considered';
-    public const CONSIDERED = 'considered';
-    public const SELECTED = 'selected';
+    public const CONSIDERED     = 'considered';
+    public const SELECTED       = 'selected';
+    public const NOT_SELECTED   = 'not_selected';
 
     public string $label;
 
@@ -36,7 +38,7 @@ abstract class BaseData
         $this->parentId = $parentId;
     }
 
-    public static function fromConversationObject(ConversationObject $object, string $parentId = null)
+    public static function fromConversationObject(ConversationObject $object, string $parentId = null): BaseData
     {
         return new static($object->getName(), $object->getUid(), $parentId);
     }
@@ -47,7 +49,12 @@ abstract class BaseData
 
         $nodes->add(ScenarioData::fromConversationObject($scenario));
 
-        $conversations = $scenario->getConversations();
+        return$nodes->concat(self::generateConversationNodesFromConversations($scenario->getConversations()));
+    }
+
+    public static function generateConversationNodesFromConversations(ConversationCollection $conversations): Collection
+    {
+        $nodes = new Collection();
 
         $scenes = new Collection();
         $conversations->each(function (Conversation $conversation) use (&$scenes, $nodes) {
@@ -57,6 +64,16 @@ abstract class BaseData
             $scenes = $scenes->concat($conversation->getScenes() ?? $scenes);
         });
 
+        return $nodes->concat(self::generateConversationNodesFromScenes($scenes));
+    }
+
+    /**
+     * @param $scenes
+     * @return Collection
+     */
+    public static function generateConversationNodesFromScenes($scenes)
+    {
+        $nodes = new Collection();
         $turns = new Collection();
         $scenes->each(function (Scene $scene) use (&$turns, $nodes) {
             $nodes->add(
@@ -65,20 +82,32 @@ abstract class BaseData
             $turns = $turns->concat($scene->getTurns());
         });
 
-        $intents = new Collection();
-        $turns->each(function (Turn $turn) use (&$intents, $nodes) {
+        return $nodes->concat(self::generateConversationNodesFromTurns($turns));
+    }
+
+    /**
+     * @param $turns
+     * @return Collection
+     */
+    public static function generateConversationNodesFromTurns($turns)
+    {
+        $nodes = new Collection;
+        $turns->each(function (Turn $turn) use ($nodes) {
             $nodes->add(TurnData::fromConversationObject($turn, $turn->getScene()->getUid()));
-            $nodes->add(UserIntentsData::fromTurn($turn));
-            $nodes->add(AppIntentsData::fromTurn($turn));
+            $nodes->add(RequestIntentsData::fromTurn($turn));
+            $nodes->add(ResponseIntentsData::fromTurn($turn));
 
-            $intents = $intents->concat($turn->getRequestIntents());
-            $intents = $intents->concat($turn->getResponseIntents());
-        });
+            $turn->getRequestIntents()->each(function (Intent $intent) use ($nodes) {
+                $nodes->add(
+                    IntentData::fromIntent($intent, $intent->getTurn(), 'request')
+                );
+            });
 
-        $intents->each(function (Intent $intent) use ($nodes) {
-            $nodes->add(
-                IntentData::fromIntent($intent, $intent->getTurn())
-            );
+            $turn->getResponseIntents()->each(function (Intent $intent) use ($nodes) {
+                $nodes->add(
+                    IntentData::fromIntent($intent, $intent->getTurn(), 'response')
+                );
+            });
         });
 
         return $nodes;

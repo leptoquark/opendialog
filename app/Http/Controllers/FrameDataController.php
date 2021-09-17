@@ -2,25 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Responses\NewUserInitialFrame;
-use App\Http\Responses\NewUserIncomingFrame;
-use App\Http\Responses\NewUserOutgoingFrame;
+use App\Http\Responses\InitialFrame;
+use App\Http\Responses\IncomingSelectionFrame;
+use App\Http\Responses\MiddleFrame;
+use App\Http\Responses\OutgoingSelectionSelectionFrame;
 use Illuminate\Database\Query\Builder;
 use OpenDialogAi\Core\Conversation\Events\Intent\MatchingIncomingIntent;
 use OpenDialogAi\Core\Conversation\Events\Sensor\ScenarioRequestReceived;
+use OpenDialogAi\Core\Conversation\Events\Storage\StoredEvent;
 use OpenDialogAi\Core\Conversation\Events\User\NewUser;
-use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
-use OpenDialogAi\Core\Conversation\Facades\ScenarioDataClient;
-use Spatie\EventSourcing\StoredEvents\Models\EloquentStoredEvent;
 
 class FrameDataController extends Controller
 {
     private string $requestId;
 
-    public function all()
+    public function all($requestId)
     {
-        $this->requestId = EloquentStoredEvent::all()->last()->meta_data['request_id'];
-        return $this->getAllEventsForRequest()->get()->map(function (EloquentStoredEvent $event) {
+        $this->requestId = $requestId;
+        return $this->getAllEventsForRequest()->get()->map(function (StoredEvent $event) {
             $data = [];
             foreach ($event->event_properties as $key => $value) {
                 if (!is_null($value)) {
@@ -34,30 +33,22 @@ class FrameDataController extends Controller
         });
     }
 
-    public function handle($frameNo)
+    public function handle($requestId, $frameNo)
     {
-        $this->requestId = EloquentStoredEvent::all()->last()->meta_data['request_id'];
+        $this->requestId = $requestId;
 
-        if ($this->wasNewUser()) {
-            $totalFrames = $this->calculateTotalFrames();
+        $totalFrames = 4;
 
-            if ($frameNo == 1) {
-                $response = new NewUserInitialFrame();
-                $response->addScenarios(ConversationDataClient::getAllScenarios());
-            } else if ($frameNo < $totalFrames) {
-                $response = new NewUserIncomingFrame($frameNo - 1);
-                $selectedScenarioId = $this->getSelectedScenarioId();
-                $response->addScenario(ScenarioDataClient::getFullScenarioGraph($selectedScenarioId));
-            } else if ($frameNo == $totalFrames) {
-                $response = new NewUserOutgoingFrame($frameNo - 1);
-                $selectedScenarioId = $this->getSelectedScenarioId();
-                $response->addScenario(ScenarioDataClient::getFullScenarioGraph($selectedScenarioId));
-            } else {
-                return response()->setStatusCode(404);
-            }
+        if ($frameNo == 1) {
+            $response = new InitialFrame();
+        } else if ($frameNo == 2) {
+            $response = new IncomingSelectionFrame();
+        } else if ($frameNo == 3) {
+            $response = new MiddleFrame();
         } else {
-            $totalFrames = $this->calculateTotalFrames();
+            $response = new OutgoingSelectionSelectionFrame();
         }
+
         $response->totalFrames = $totalFrames;
         $response->addEvents($this->getAllEventsForRequest()->get());
 
@@ -69,7 +60,7 @@ class FrameDataController extends Controller
      */
     private function getAllEventsForRequest()
     {
-        return EloquentStoredEvent::where('meta_data->request_id', $this->requestId)
+        return StoredEvent::where('meta_data->request_id', $this->requestId)
             ->orderBy('meta_data->timestamp');
     }
 

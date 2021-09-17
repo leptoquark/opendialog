@@ -9,12 +9,12 @@ class IntentData extends BaseData
 {
     public string $type = 'intent';
 
-    public static function fromIntent(Intent $intent, Turn $turn)
+    public static function fromIntent(Intent $intent, Turn $turn, string $type)
     {
         return new static(
-            $intent->getName(),
+            $intent->getSpeaker() . ": " . $intent->getName(),
             $intent->getUid(),
-            $turn->getUid() . "_" . strtolower($intent->getSpeaker())
+            $turn->getUid() . "_" . $type
         );
     }
 }
