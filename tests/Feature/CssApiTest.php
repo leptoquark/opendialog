@@ -32,6 +32,13 @@ class CssApiTest extends TestCase
         $data = ['path' => 'http://path-to.css'];
         $this->actingAs($this->user, 'api')
             ->json("GET", '/admin/api/external-css', $data)
+            ->assertStatus(400);
+    }
+
+    public function testGetExternalCssNoPath()
+    {
+        $this->actingAs($this->user, 'api')
+            ->json("GET", '/admin/api/external-css')
             ->assertStatus(404);
     }
 
