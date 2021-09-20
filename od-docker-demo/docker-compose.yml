@@ -17,6 +17,8 @@ services:
       - mysql
       - dgraph-server
       - dgraph-zero
+    volumes:
+      - ../../opendialog-design-system:/var/www/opendialog-design-system
   mysql:
     image: mysql:5.7.27
     restart: unless-stopped
