@@ -214,17 +214,15 @@ abstract class FrameDataResponse
     private function formatResponse(): array
     {
         $this->nodes->each(function (BaseData $node) {
-            $parent = $this->getNode($node->parentId);
-//            if (!$parent || $parent->status !== BaseData::NOT_CONSIDERED) {
+            if ($this->shouldDrawNode($node)) {
                 $this->frameData[] = ['data' => $node->toArray()];
-//            }
+            }
         });
 
         $this->nodes->whereNotNull('parentId')->each(function (BaseData $node) {
-            $parent = $this->getNode($node->parentId);
-//            if ($parent && $parent->status !== BaseData::NOT_CONSIDERED) {
+            if ($this->shouldDrawNode($node)) {
                 $this->connections[] = $node->generateConnection();
-//            }
+            }
         });
         return [
             'total_frames' => $this->totalFrames,
@@ -279,5 +277,28 @@ abstract class FrameDataResponse
     protected function getTurnIdFromEvent($eventClass)
     {
         return $this->getEventProperty($eventClass, 'turnId');
+    }
+
+    /**
+     * @param BaseData $node
+     * @return bool
+     */
+    private function shouldDrawNode(BaseData $node): bool
+    {
+        $parent = $this->getNode($node->parentId);
+
+        if (!$parent) {
+            return true;
+        }
+
+        if ($node->status !== BaseData::NOT_CONSIDERED) {
+            return true;
+        }
+
+        if ($parent->status !== BaseData::NOT_CONSIDERED) {
+            return true;
+        }
+
+        return false;
     }
 }
