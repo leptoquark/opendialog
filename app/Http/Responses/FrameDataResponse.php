@@ -224,6 +224,7 @@ abstract class FrameDataResponse
                 $this->connections[] = $node->generateConnection();
             }
         });
+
         return [
             'total_frames' => $this->totalFrames,
             'frames' => array_merge($this->frameData, $this->connections),
@@ -297,6 +298,21 @@ abstract class FrameDataResponse
 
         if ($parent->status !== BaseData::NOT_CONSIDERED) {
             return true;
+        }
+
+        return $this->hasAnyConsideredChildren($node);
+    }
+
+    private function hasAnyConsideredChildren(BaseData $node)
+    {
+        $children = $this->nodes->where('parentId', $node->id);
+
+        foreach ($children as $child) {
+            if ($child->status !== BaseData::NOT_CONSIDERED) {
+                return true;
+            }
+
+            return $this->hasAnyConsideredChildren($child);
         }
 
         return false;
