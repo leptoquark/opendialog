@@ -2991,12 +2991,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "41f67902f3f23d5213601046c5bd0f778fd59eb7"
+                "reference": "09140cd3c5288e481e93b7fa988fc72f50e80716"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/41f67902f3f23d5213601046c5bd0f778fd59eb7",
-                "reference": "41f67902f3f23d5213601046c5bd0f778fd59eb7",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/09140cd3c5288e481e93b7fa988fc72f50e80716",
+                "reference": "09140cd3c5288e481e93b7fa988fc72f50e80716",
                 "shasum": ""
             },
             "require": {
@@ -3078,7 +3078,7 @@
                 "issues": "https://github.com/opendialogai/core/issues",
                 "source": "https://github.com/opendialogai/core/tree/1.x"
             },
-            "time": "2021-09-21T08:21:52+00:00"
+            "time": "2021-09-21T12:10:45+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
