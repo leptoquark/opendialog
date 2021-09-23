@@ -32,13 +32,19 @@ class TurnResource extends JsonResource
                 Intent::UID,
                 Intent::NAME,
                 Intent::SAMPLE_UTTERANCE,
-                Intent::SPEAKER
+                Intent::SPEAKER,
+                Intent::MESSAGE_TEMPLATES => [
+                    MessageTemplate::UID,
+                ]
             ],
             Turn::RESPONSE_INTENTS => [
                 Intent::UID,
                 Intent::NAME,
                 Intent::SAMPLE_UTTERANCE,
                 Intent::SPEAKER,
+                Intent::MESSAGE_TEMPLATES => [
+                    MessageTemplate::UID,
+                ]
             ],
         ]
     ];

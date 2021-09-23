@@ -8,6 +8,7 @@ use OpenDialogAi\Core\Conversation\Behavior;
 use OpenDialogAi\Core\Conversation\Condition;
 use OpenDialogAi\Core\Conversation\Conversation;
 use OpenDialogAi\Core\Conversation\Intent;
+use OpenDialogAi\Core\Conversation\MessageTemplate;
 use OpenDialogAi\Core\Conversation\Scene;
 use OpenDialogAi\Core\Conversation\Turn;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -46,13 +47,19 @@ class ConversationResource extends JsonResource
                         Intent::UID,
                         Intent::NAME,
                         Intent::SAMPLE_UTTERANCE,
-                        Intent::SPEAKER
+                        Intent::SPEAKER,
+                        Intent::MESSAGE_TEMPLATES => [
+                            MessageTemplate::UID,
+                        ]
                     ],
                     Turn::RESPONSE_INTENTS => [
                         Intent::UID,
                         Intent::NAME,
                         Intent::SAMPLE_UTTERANCE,
                         Intent::SPEAKER,
+                        Intent::MESSAGE_TEMPLATES => [
+                            MessageTemplate::UID,
+                        ]
                     ],
                 ]
             ]
