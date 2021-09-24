@@ -152,11 +152,17 @@ class FocusedSceneResource extends JsonResource
             ->map(fn ($i) => $i['intent']);
 
         $intentsWithOutgoingTransition = $intents
-            ->filter(fn ($i) => !is_null($i['transition']) || !is_null($i['transition']['conversation']));
+            ->filter(fn ($i) => !is_null($i['transition']) && !is_null($i['transition']['conversation']))
+            ->values();
+
+        $intentsWithCompletingBehaviour = $intents
+            ->filter(fn ($i) => in_array(Behavior::COMPLETING_BEHAVIOR, $i['behaviors']))
+            ->values();
 
         $data['scenario']['conversation']['focusedScene']['_meta'] = [
             'incoming_transitions' => $intentsWithTransitionToConversation,
             'outgoing_transitions' => $intentsWithOutgoingTransition,
+            'completing_intents' => $intentsWithCompletingBehaviour,
         ];
 
         return $data;

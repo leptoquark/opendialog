@@ -334,8 +334,15 @@ class UIStateControllerTest extends TestCase
         $fakeIntent2->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
         $fakeIntent2->setTransition(new Transition($fakeConversation->getUid(), $fakeScene->getUid(), $fakeTurn->getUid()));
 
-        $intentsWithTransitions = new IntentCollection([$fakeIntent2]);
-        $fakeTurn->setResponseIntents($intentsWithTransitions);
+        $fakeIntent3 = new Intent($fakeTurn);
+        $fakeIntent3->setUid('0x9999a');
+        $fakeIntent3->setOdId('fake_intent_3');
+        $fakeIntent3->setName('fake intent 3');
+        $fakeIntent3->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent3->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent3->setBehaviors(new BehaviorsCollection([new Behavior(Behavior::COMPLETING_BEHAVIOR)]));
+
+        $fakeTurn->setResponseIntents(new IntentCollection([$fakeIntent2, $fakeIntent3]));
 
         ConversationDataClient::shouldReceive('getSceneByUid')
             ->once()
@@ -349,7 +356,7 @@ class UIStateControllerTest extends TestCase
 
         TransitionDataClient::shouldReceive('getIncomingTurnTransitions')
             ->with($fakeTurn->getUid())
-            ->andReturn($intentsWithTransitions);
+            ->andReturn(new IntentCollection([$fakeIntent2]));
 
         $this->actingAs($this->user, 'api')
             ->json('GET', '/admin/api/conversation-builder/ui-state/focused/scene/' . $fakeScene->getUid())
@@ -412,6 +419,15 @@ class UIStateControllerTest extends TestCase
                                             "conversation" => "0x0002",
                                             "scene" => "0x0003",
                                             "turn" => "0x0003",
+                                        ]
+                                    ]
+                                ],
+                                "completing_intents" => [
+                                    [
+                                        "id" => "0x9999a",
+                                        "od_id" => "fake_intent_3",
+                                        "behaviors" => [
+                                            Behavior::COMPLETING_BEHAVIOR,
                                         ]
                                     ]
                                 ],
