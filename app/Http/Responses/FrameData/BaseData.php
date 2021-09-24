@@ -21,13 +21,15 @@ abstract class BaseData
 
     public string $label;
 
+    public ?string $speaker = "";
+
+    public array $data = [];
+
     public string $id;
 
     public string $status = self::NOT_CONSIDERED;
 
     public string $type;
-
-    public array $data = [];
 
     public ?string $parentId;
 
@@ -94,8 +96,8 @@ abstract class BaseData
         $nodes = new Collection;
         $turns->each(function (Turn $turn) use ($nodes) {
             $nodes->add(TurnData::fromConversationObject($turn, $turn->getScene()->getUid()));
-            $nodes->add(RequestIntentsData::fromTurn($turn));
-            $nodes->add(ResponseIntentsData::fromTurn($turn));
+            $nodes->add(IntentCollectionData::fromTurn($turn, $turn->getRequestIntents(), 'request'));
+            $nodes->add(IntentCollectionData::fromTurn($turn, $turn->getResponseIntents(), 'response'));
 
             $turn->getRequestIntents()->each(function (Intent $intent) use ($nodes) {
                 $nodes->add(
@@ -115,13 +117,19 @@ abstract class BaseData
 
     public function toArray()
     {
-        return [
+        $data = [
             "type" => $this->type,
             "label" => $this->label,
             "id" => $this->id,
             "status" => $this->status,
             "data" => $this->data
         ];
+
+        if ($this->speaker) {
+            $data['speaker'] = $this->speaker;
+        }
+
+        return $data;
     }
 
     /**
