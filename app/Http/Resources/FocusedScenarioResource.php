@@ -8,7 +8,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use OpenDialogAi\Core\Conversation\Behavior;
 use OpenDialogAi\Core\Conversation\Condition;
 use OpenDialogAi\Core\Conversation\Conversation;
+use OpenDialogAi\Core\Conversation\Facades\TransitionDataClient;
+use OpenDialogAi\Core\Conversation\Intent;
 use OpenDialogAi\Core\Conversation\Scenario;
+use OpenDialogAi\Core\Conversation\Transition;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class FocusedScenarioResource extends JsonResource
@@ -48,6 +51,36 @@ class FocusedScenarioResource extends JsonResource
     public function toArray($request)
     {
         $normalizedScenario = Serializer::normalize($this->resource, 'json', self::$fields);
+
+        $data = $this->rearrangeData($normalizedScenario);
+
+        return $this->addMetaData($data);
+    }
+
+    /**
+     * @param $normalizedScenario
+     * @return array
+     */
+    protected function rearrangeData($normalizedScenario): array
+    {
         return ['focusedScenario' => $normalizedScenario];
+    }
+
+    protected function addMetaData(array $data)
+    {
+        $conversationUids = array_map(fn ($s) => $s['id'], $data['focusedScenario']['conversations']);
+        $intentsWithTransitionsToScenes = TransitionDataClient::getIncomingConversationTransitions(...$conversationUids);
+
+        $data['focusedScenario']['_meta'] = [
+            'incoming_transitions' => Serializer::normalize($intentsWithTransitionsToScenes, 'json', [
+                AbstractNormalizer::ATTRIBUTES => [
+                    Intent::UID,
+                    Intent::OD_ID,
+                    Intent::TRANSITION => Transition::FIELDS,
+                ],
+            ]),
+        ];
+
+        return $data;
     }
 }

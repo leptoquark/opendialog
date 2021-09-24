@@ -12,11 +12,13 @@ use OpenDialogAi\Core\Conversation\Conversation;
 use OpenDialogAi\Core\Conversation\ConversationCollection;
 use OpenDialogAi\Core\Conversation\Exceptions\ConversationObjectNotFoundException;
 use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
+use OpenDialogAi\Core\Conversation\Facades\TransitionDataClient;
 use OpenDialogAi\Core\Conversation\Intent;
 use OpenDialogAi\Core\Conversation\IntentCollection;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\Scene;
 use OpenDialogAi\Core\Conversation\SceneCollection;
+use OpenDialogAi\Core\Conversation\Transition;
 use OpenDialogAi\Core\Conversation\Turn;
 use OpenDialogAi\Core\Conversation\TurnCollection;
 use Tests\TestCase;
@@ -70,10 +72,53 @@ class UIStateControllerTest extends TestCase
 
         $fakeScenario->setConversations(new ConversationCollection([$fakeConversation]));
 
+        $fakeScene = new Scene($fakeConversation);
+        $fakeScene->setUid('0x0003');
+        $fakeScene->setName('New Example scene');
+        $fakeScene->setOdId('new_example_scene');
+        $fakeScene->setDescription("An new example scene");
+        $fakeScene->setInterpreter('interpreter.core.nlp');
+        $fakeScene->setBehaviors(new BehaviorsCollection([new Behavior(Behavior::OPEN_BEHAVIOR)]));
+        $fakeScene->setConditions(new ConditionCollection());
+        $fakeScene->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeScene->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeConversation->setScenes(new SceneCollection([$fakeScene]));
+
+        $fakeTurn = new Turn($fakeScene);
+        $fakeTurn->setUid('0x0004');
+        $fakeTurn->setName('fake turn');
+        $fakeTurn->setOdId('fake_scene');
+        $fakeTurn->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeTurn->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeScene->setTurns(new TurnCollection([$fakeTurn]));
+
+        $fakeIntent = new Intent($fakeTurn);
+        $fakeIntent->setUid('0x9998');
+        $fakeIntent->setOdId('fake_intent_1');
+        $fakeIntent->setName('fake intent 1');
+        $fakeIntent->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeTurn->setRequestIntents(new IntentCollection([$fakeIntent]));
+
+        $fakeIntent2 = new Intent($fakeTurn);
+        $fakeIntent2->setUid('0x9999');
+        $fakeIntent2->setOdId('fake_intent_2');
+        $fakeIntent2->setName('fake intent 2');
+        $fakeIntent2->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent2->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent2->setTransition(new Transition($fakeConversation->getUid(), null, null));
+
+        $intentsWithTransitions = new IntentCollection([$fakeIntent2]);
+        $fakeTurn->setRequestIntents($intentsWithTransitions);
+
         ConversationDataClient::shouldReceive('getScenarioByUid')
             ->once()
             ->with($fakeScenario->getUid(), false)
             ->andReturn($fakeScenario);
+
+        TransitionDataClient::shouldReceive('getIncomingConversationTransitions')
+            ->with($fakeConversation->getUid())
+            ->andReturn($intentsWithTransitions);
 
         $this->actingAs($this->user, 'api')
             ->json('GET', '/admin/api/conversation-builder/ui-state/focused/scenario/' . $fakeScenario->getUid())
@@ -90,6 +135,19 @@ class UIStateControllerTest extends TestCase
                             "od_id" => "new_example_conversation",
                             "description" => "An new example conversation",
                             "behaviors" => ["STARTING"],
+                        ]
+                    ],
+                     "_meta" => [
+                        "incoming_transitions" => [
+                            [
+                                "id" => "0x9999",
+                                "od_id" => "fake_intent_2",
+                                "transition" => [
+                                    "conversation" => "0x0002",
+                                    "scene" => null,
+                                    "turn" => null,
+                                ]
+                            ]
                         ]
                     ]
                 ]
@@ -126,8 +184,34 @@ class UIStateControllerTest extends TestCase
         $fakeScene->setConditions(new ConditionCollection());
         $fakeScene->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
         $fakeScene->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
-
         $fakeConversation->setScenes(new SceneCollection([$fakeScene]));
+
+        $fakeTurn = new Turn($fakeScene);
+        $fakeTurn->setUid('0x0004');
+        $fakeTurn->setName('fake turn');
+        $fakeTurn->setOdId('fake_scene');
+        $fakeTurn->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeTurn->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeScene->setTurns(new TurnCollection([$fakeTurn]));
+
+        $fakeIntent = new Intent($fakeTurn);
+        $fakeIntent->setUid('0x9998');
+        $fakeIntent->setOdId('fake_intent_1');
+        $fakeIntent->setName('fake intent 1');
+        $fakeIntent->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeTurn->setRequestIntents(new IntentCollection([$fakeIntent]));
+
+        $fakeIntent2 = new Intent($fakeTurn);
+        $fakeIntent2->setUid('0x9999');
+        $fakeIntent2->setOdId('fake_intent_2');
+        $fakeIntent2->setName('fake intent 2');
+        $fakeIntent2->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent2->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent2->setTransition(new Transition($fakeConversation->getUid(), $fakeScene->getUid(), null));
+
+        $intentsWithTransitions = new IntentCollection([$fakeIntent2]);
+        $fakeTurn->setRequestIntents($intentsWithTransitions);
 
         ConversationDataClient::shouldReceive('getConversationByUid')
             ->once()
@@ -138,6 +222,10 @@ class UIStateControllerTest extends TestCase
             ->once()
             ->with($fakeConversation->getUid())
             ->andReturn($fakeConversation);
+
+        TransitionDataClient::shouldReceive('getIncomingSceneTransitions')
+            ->with($fakeScene->getUid())
+            ->andReturn($intentsWithTransitions);
 
         $this->actingAs($this->user, 'api')
             ->json('GET', '/admin/api/conversation-builder/ui-state/focused/conversation/' . $fakeConversation->getUid())
@@ -164,6 +252,19 @@ class UIStateControllerTest extends TestCase
                                 "od_id" => "new_example_scene",
                                 "description" => "An new example scene",
                                 "behaviors" => ["OPEN"],
+                            ]
+                        ],
+                        "_meta" => [
+                            "incoming_transitions" => [
+                                [
+                                    "id" => "0x9999",
+                                    "od_id" => "fake_intent_2",
+                                    "transition" => [
+                                        "conversation" => "0x0002",
+                                        "scene" => "0x0003",
+                                        "turn" => null,
+                                    ]
+                                ]
                             ]
                         ]
                     ]
@@ -216,6 +317,25 @@ class UIStateControllerTest extends TestCase
 
         $fakeScene->setTurns(new TurnCollection([$fakeTurn]));
 
+        $fakeIntent = new Intent($fakeTurn);
+        $fakeIntent->setUid('0x9998');
+        $fakeIntent->setOdId('fake_intent_1');
+        $fakeIntent->setName('fake intent 1');
+        $fakeIntent->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeTurn->setRequestIntents(new IntentCollection([$fakeIntent]));
+
+        $fakeIntent2 = new Intent($fakeTurn);
+        $fakeIntent2->setUid('0x9999');
+        $fakeIntent2->setOdId('fake_intent_2');
+        $fakeIntent2->setName('fake intent 2');
+        $fakeIntent2->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent2->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent2->setTransition(new Transition($fakeConversation->getUid(), $fakeScene->getUid(), $fakeTurn->getUid()));
+
+        $intentsWithTransitions = new IntentCollection([$fakeIntent2]);
+        $fakeTurn->setRequestIntents($intentsWithTransitions);
+
         ConversationDataClient::shouldReceive('getSceneByUid')
             ->once()
             ->with($fakeScene->getUid(), false)
@@ -225,6 +345,10 @@ class UIStateControllerTest extends TestCase
             ->once()
             ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
+
+        TransitionDataClient::shouldReceive('getIncomingTurnTransitions')
+            ->with($fakeTurn->getUid())
+            ->andReturn($intentsWithTransitions);
 
         $this->actingAs($this->user, 'api')
             ->json('GET', '/admin/api/conversation-builder/ui-state/focused/scene/' . $fakeScene->getUid())
@@ -240,24 +364,37 @@ class UIStateControllerTest extends TestCase
                         "name" => "New Example conversation",
                         "description" => "An new example conversation",
                         "focusedScene" => [
-                             "id" => "0x0003",
-                             "od_id"=> "welcome_scene",
-                             "name"=> "Welcome scene",
-                             "description"=> "A welcome scene",
-                             "updated_at"=> "2021-02-24T09:30:00+0000",
-                             "created_at"=> "2021-02-24T09:30:00+0000",
-                             "interpreter" => 'interpreter.core.nlp',
-                             "behaviors" => [],
-                             "conditions" => [],
-                             "turns" => [
-                                 [
-                                     "id" => "0x0003",
-                                     "od_id"=> "welcome_turn",
-                                     "name"=> "Welcome turn",
-                                     "description"=> "A welcome turn",
-                                     "behaviors" => ["STARTING", "OPEN"],
-                                 ]
-                             ]
+                            "id" => "0x0003",
+                            "od_id"=> "welcome_scene",
+                            "name"=> "Welcome scene",
+                            "description"=> "A welcome scene",
+                            "updated_at"=> "2021-02-24T09:30:00+0000",
+                            "created_at"=> "2021-02-24T09:30:00+0000",
+                            "interpreter" => 'interpreter.core.nlp',
+                            "behaviors" => [],
+                            "conditions" => [],
+                            "turns" => [
+                                [
+                                    "id" => "0x0003",
+                                    "od_id"=> "welcome_turn",
+                                    "name"=> "Welcome turn",
+                                    "description"=> "A welcome turn",
+                                    "behaviors" => ["STARTING", "OPEN"],
+                                ],
+                            ],
+                            "_meta" => [
+                                "incoming_transitions" => [
+                                    [
+                                        "id" => "0x9999",
+                                        "od_id" => "fake_intent_2",
+                                        "transition" => [
+                                            "conversation" => "0x0002",
+                                            "scene" => "0x0003",
+                                            "turn" => "0x0003",
+                                        ]
+                                    ]
+                                ]
+                            ]
                         ]
                     ]
                 ]
