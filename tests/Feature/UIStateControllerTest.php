@@ -323,6 +323,7 @@ class UIStateControllerTest extends TestCase
         $fakeIntent->setName('fake intent 1');
         $fakeIntent->setCreatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
         $fakeIntent->setUpdatedAt(Carbon::parse('2021-03-12T11:57:23+0000'));
+        $fakeIntent->setTransition(new Transition('0x567', null, null));
         $fakeTurn->setRequestIntents(new IntentCollection([$fakeIntent]));
 
         $fakeIntent2 = new Intent($fakeTurn);
@@ -334,7 +335,7 @@ class UIStateControllerTest extends TestCase
         $fakeIntent2->setTransition(new Transition($fakeConversation->getUid(), $fakeScene->getUid(), $fakeTurn->getUid()));
 
         $intentsWithTransitions = new IntentCollection([$fakeIntent2]);
-        $fakeTurn->setRequestIntents($intentsWithTransitions);
+        $fakeTurn->setResponseIntents($intentsWithTransitions);
 
         ConversationDataClient::shouldReceive('getSceneByUid')
             ->once()
@@ -393,7 +394,27 @@ class UIStateControllerTest extends TestCase
                                             "turn" => "0x0003",
                                         ]
                                     ]
-                                ]
+                                ],
+                                "outgoing_transitions" => [
+                                    [
+                                        "id" => "0x9998",
+                                        "od_id" => "fake_intent_1",
+                                        "transition" => [
+                                            "conversation" => "0x567",
+                                            "scene" => null,
+                                            "turn" => null,
+                                        ]
+                                    ],
+                                    [
+                                        "id" => "0x9999",
+                                        "od_id" => "fake_intent_2",
+                                        "transition" => [
+                                            "conversation" => "0x0002",
+                                            "scene" => "0x0003",
+                                            "turn" => "0x0003",
+                                        ]
+                                    ]
+                                ],
                             ]
                         ]
                     ]

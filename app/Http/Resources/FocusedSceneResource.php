@@ -54,6 +54,22 @@ class FocusedSceneResource extends JsonResource
                 Turn::DESCRIPTION,
                 Turn::BEHAVIORS => Behavior::FIELDS,
                 Turn::CONDITIONS => Condition::FIELDS,
+                Turn::REQUEST_INTENTS => [
+                    Intent::UID,
+                    Intent::OD_ID,
+                    Intent::SPEAKER,
+                    Intent::BEHAVIORS => Behavior::FIELDS,
+                    Intent::CONDITIONS => Condition::FIELDS,
+                    Intent::TRANSITION => Transition::FIELDS,
+                ],
+                Turn::RESPONSE_INTENTS => [
+                    Intent::UID,
+                    Intent::OD_ID,
+                    Intent::SPEAKER,
+                    Intent::BEHAVIORS => Behavior::FIELDS,
+                    Intent::CONDITIONS => Condition::FIELDS,
+                    Intent::TRANSITION => Transition::FIELDS,
+                ],
             ]
         ]
     ];
@@ -119,16 +135,28 @@ class FocusedSceneResource extends JsonResource
     protected function addMetaData(array $data)
     {
         $turnUids = array_map(fn ($s) => $s['id'], $data['scenario']['conversation']['focusedScene']['turns']);
-        $intentsWithTransitionToConversation = TransitionDataClient::getIncomingTurnTransitions(...$turnUids);
-
-        $data['scenario']['conversation']['focusedScene']['_meta'] = [
-            'incoming_transitions' => Serializer::normalize($intentsWithTransitionToConversation, 'json', [
+        $intentsWithTransitionToConversation = Serializer::normalize(
+            TransitionDataClient::getIncomingTurnTransitions(...$turnUids),
+            'json',
+            [
                 AbstractNormalizer::ATTRIBUTES => [
                     Intent::UID,
                     Intent::OD_ID,
                     Intent::TRANSITION => Transition::FIELDS,
                 ],
-            ]),
+            ]
+        );
+
+        $intents = collect(array_map(fn ($t) => $t['intents'], $data['scenario']['conversation']['focusedScene']['turns']))
+            ->flatten(1)
+            ->map(fn ($i) => $i['intent']);
+
+        $intentsWithOutgoingTransition = $intents
+            ->filter(fn ($i) => !is_null($i['transition']) || !is_null($i['transition']['conversation']));
+
+        $data['scenario']['conversation']['focusedScene']['_meta'] = [
+            'incoming_transitions' => $intentsWithTransitionToConversation,
+            'outgoing_transitions' => $intentsWithOutgoingTransition,
         ];
 
         return $data;
