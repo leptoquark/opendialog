@@ -5,8 +5,6 @@ namespace App\Http\Responses;
 use App\Http\Responses\FrameData\BaseData;
 use Illuminate\Support\Collection;
 use OpenDialogAi\Core\Conversation\Events\BaseConversationEvent;
-use OpenDialogAi\Core\Conversation\Events\Operations\ConditionsFailed;
-use OpenDialogAi\Core\Conversation\Events\Operations\ConditionsPassed;
 use OpenDialogAi\Core\Conversation\Events\Storage\StoredEvent;
 use OpenDialogAi\Core\Conversation\Facades\ScenarioDataClient;
 use OpenDialogAi\Core\Conversation\Scenario;
@@ -28,12 +26,11 @@ abstract class FrameDataResponse
      */
     public Collection $events;
 
-    public int $totalFrames;
     public array $frameData = [];
     public array $connections = [];
 
-    public string $startEvent;
-    public string $endEvent;
+    public string $startEventName;
+    public string $endEventName;
 
     public string $stateEventName;
     public StoredEvent $stateEvent;
@@ -53,7 +50,6 @@ abstract class FrameDataResponse
     {
         $this->filterEvents();
         $this->setNodes();
-        $this->annotateNodes();
         return $this->formatResponse();
     }
 
@@ -68,12 +64,12 @@ abstract class FrameDataResponse
         $finalEventReached = false;
 
         $this->events = $this->events->filter(function ($event) use (&$startEventReached, &$finalEventReached) {
-            if ($event->event_class === $this->startEvent) {
+            if ($event->event_class === $this->startEventName) {
                 $startEventReached = true;
                 return true;
             }
 
-            if ($event->event_class === $this->endEvent) {
+            if ($event->event_class === $this->endEventName) {
                 $finalEventReached = true;
                 return true;
             }
@@ -91,50 +87,12 @@ abstract class FrameDataResponse
         $this->addScenario(ScenarioDataClient::getFullScenarioGraph($scenarioId));
 
         $this->setNodeStatus($this->stateEvent->getScenarioId(), BaseData::CONSIDERED);
-        $this->annotateNode($this->stateEvent->getScenarioId(), 'message', 'Starting State');
 
         $this->setNodeStatus($this->stateEvent->getConversationId(), BaseData::CONSIDERED);
-        $this->annotateNode($this->stateEvent->getConversationId(), 'message', 'Starting State');
 
         $this->setNodeStatus($this->stateEvent->getSceneId(), BaseData::CONSIDERED);
-        $this->annotateNode($this->stateEvent->getSceneId(), 'message', 'Starting State');
 
         $this->setNodeStatus($this->stateEvent->getTurnId(), BaseData::CONSIDERED);
-        $this->annotateNode($this->stateEvent->getTurnId(), 'message', 'Starting State');
-    }
-
-    /**
-     * With the set of relevant filtered events and conversation nodes, annotate the nodes to represent the event data
-     */
-    protected function annotateNodes(): void
-    {
-        /** @var StoredEvent $event */
-        foreach ($this->events as $event) {
-            $nodeId = $event->getObjectId();
-            $nodeStatus = $event->getStatus();
-            $nodeType = $event->getObjectType();
-
-            // Add the message to the node
-            $this->annotateNode($nodeId, 'message', $event->meta_data['message']);
-
-            // Set the node status
-            $status = BaseData::CONSIDERED;
-            if ($nodeStatus === 'success') {
-                $status = BaseData::SELECTED;
-            } else if ($nodeStatus === 'error') {
-                $status = BaseData::NOT_SELECTED;
-            }
-
-            $this->setNodeStatus($nodeId, $status);
-
-            if ($event->event_class === ConditionsPassed::class) {
-                $this->annotateNode($nodeId, 'passingConditions', true);
-            }
-
-            if ($event->event_class === ConditionsFailed::class) {
-                $this->annotateNode($nodeId, 'passingConditions', false);
-            }
-        }
     }
 
     /**
@@ -158,26 +116,10 @@ abstract class FrameDataResponse
     /**
      * @param $events
      */
-    public function addEvents($events)
+    public function addEvents($events): FrameDataResponse
     {
         $this->events = new Collection($events);
-    }
-
-    public function annotateNode($nodeId, string $key, string $annotation)
-    {
-        $node = $this->getNode($nodeId);
-        if (!$node) {
-            return;
-        }
-
-        if (!isset($node->data[$key])) {
-            $node->data[$key] = [];
-        }
-
-        if (!in_array($annotation, ($node->data[$key]))) {
-            // Only annotate if the same message doesn't already exist
-            $node->data[$key][] = $annotation;
-        }
+        return $this;
     }
 
     public function setNodeStatus($nodeId, $status)
@@ -215,20 +157,22 @@ abstract class FrameDataResponse
     {
         $this->nodes->each(function (BaseData $node) {
             if ($this->shouldDrawNode($node)) {
+                $node->shouldDraw = true;
                 $this->frameData[] = ['data' => $node->toArray()];
+            } else {
+                $node->shouldDraw = false;
             }
         });
 
         $this->nodes->whereNotNull('parentId')->each(function (BaseData $node) {
-            if ($this->shouldDrawNode($node)) {
+            if ($node->shouldDraw) {
                 $this->connections[] = $node->generateConnection();
             }
         });
 
         return [
-            'total_frames' => $this->totalFrames,
-            'frames' => array_merge($this->frameData, $this->connections),
-            'events' => $this->events
+            'nodes' => array_merge($this->frameData, $this->connections),
+            'data' => []
         ];
     }
 
@@ -286,17 +230,11 @@ abstract class FrameDataResponse
      */
     private function shouldDrawNode(BaseData $node): bool
     {
-        $parent = $this->getNode($node->parentId);
-
-        if (!$parent) {
+        if ($node->status !==  BaseData::NOT_CONSIDERED) {
             return true;
         }
 
-        if ($node->status !== BaseData::NOT_CONSIDERED) {
-            return true;
-        }
-
-        if ($parent->status !== BaseData::NOT_CONSIDERED) {
+        if (!$node->parentId) {
             return true;
         }
 

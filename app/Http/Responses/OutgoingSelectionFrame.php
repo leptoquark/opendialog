@@ -6,9 +6,9 @@ use OpenDialogAi\Core\Conversation\Events\ConversationalState\IncomingIntentMatc
 use OpenDialogAi\Core\Conversation\Events\ConversationalState\IncomingIntentStateUpdate;
 use OpenDialogAi\Core\Conversation\Events\Messages\SelectedMessage;
 
-class OutgoingSelectionSelectionFrame extends IncomingSelectionFrame
+class OutgoingSelectionFrame extends IncomingSelectionFrame
 {
-    public string $startEvent     = IncomingIntentMatched::class;
-    public string $endEvent       = SelectedMessage::class;
+    public string $startEventName     = IncomingIntentMatched::class;
+    public string $endEventName       = SelectedMessage::class;
     public string $stateEventName = IncomingIntentStateUpdate::class;
 }

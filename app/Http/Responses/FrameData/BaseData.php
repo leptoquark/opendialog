@@ -23,8 +23,6 @@ abstract class BaseData
 
     public ?string $speaker = "";
 
-    public array $data = [];
-
     public string $id;
 
     public string $status = self::NOT_CONSIDERED;
@@ -32,6 +30,8 @@ abstract class BaseData
     public string $type;
 
     public ?string $parentId;
+
+    public ?bool $shouldDraw = null;
 
     public function __construct(string $label, string $id, ?string $parentId = null)
     {
@@ -122,7 +122,6 @@ abstract class BaseData
             "label" => $this->label,
             "id" => $this->id,
             "status" => $this->status,
-            "data" => $this->data
         ];
 
         if ($this->speaker) {

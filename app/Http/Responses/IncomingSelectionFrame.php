@@ -8,7 +8,7 @@ use OpenDialogAi\Core\Conversation\Events\Sensor\ScenarioRequestReceived;
 
 class IncomingSelectionFrame extends FrameDataResponse
 {
-    public string $startEvent     = MatchingIncomingIntent::class;
-    public string $endEvent       = IncomingIntentMatched::class;
+    public string $startEventName     = MatchingIncomingIntent::class;
+    public string $endEventName       = IncomingIntentMatched::class;
     public string $stateEventName = ScenarioRequestReceived::class;
 }
