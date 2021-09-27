@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Responses\InitialFrame;
+use App\Http\Responses\IncomingAvailableIntentsFrame;
 use App\Http\Responses\IncomingSelectionFrame;
-use App\Http\Responses\MiddleFrame;
-use App\Http\Responses\OutgoingSelectionSelectionFrame;
+use App\Http\Responses\OutgoingAvailableIntentsFrame;
+use App\Http\Responses\OutgoingSelectionFrame;
 use Illuminate\Database\Query\Builder;
-use OpenDialogAi\Core\Conversation\Events\Intent\MatchingIncomingIntent;
-use OpenDialogAi\Core\Conversation\Events\Sensor\ScenarioRequestReceived;
 use OpenDialogAi\Core\Conversation\Events\Storage\StoredEvent;
-use OpenDialogAi\Core\Conversation\Events\User\NewUser;
 
 class FrameDataController extends Controller
 {
@@ -33,26 +30,27 @@ class FrameDataController extends Controller
         });
     }
 
-    public function handle($requestId, $frameNo)
+    public function handle($requestId)
     {
         $this->requestId = $requestId;
 
         $totalFrames = 4;
+        $allEvents = $this->getAllEventsForRequest()->get();
 
-        if ($frameNo == 1) {
-            $response = new InitialFrame();
-        } else if ($frameNo == 2) {
-            $response = new IncomingSelectionFrame();
-        } else if ($frameNo == 3) {
-            $response = new MiddleFrame();
-        } else {
-            $response = new OutgoingSelectionSelectionFrame();
-        }
+        $incomingAvailable = (new IncomingAvailableIntentsFrame())->addEvents($allEvents)->generateResponse();
+        $incomingSelection = (new IncomingSelectionFrame())->addEvents($allEvents)->generateResponse();
+        $outgoingAvailable = (new OutgoingAvailableIntentsFrame())->addEvents($allEvents)->generateResponse();
+        $outgoingSelection = (new OutgoingSelectionFrame())->addEvents($allEvents)->generateResponse();
 
-        $response->totalFrames = $totalFrames;
-        $response->addEvents($this->getAllEventsForRequest()->get());
-
-        return $response->generateResponse();
+        return [
+            'total_frames' => $totalFrames,
+            'frames' => [
+                $incomingAvailable,
+                $incomingSelection,
+                $outgoingAvailable,
+                $outgoingSelection
+            ]
+        ];
     }
 
     /**
@@ -62,31 +60,5 @@ class FrameDataController extends Controller
     {
         return StoredEvent::where('meta_data->request_id', $this->requestId)
             ->orderBy('meta_data->timestamp');
-    }
-
-    /**
-     * @return bool
-     */
-    private function wasNewUser()
-    {
-        return $this->getAllEventsForRequest()
-            ->where('event_class', NewUser::class)
-            ->count() > 0;
-    }
-
-    private function calculateTotalFrames()
-    {
-        return $this->getAllEventsForRequest()
-            ->where('event_class', MatchingIncomingIntent::class)
-            ->count() + 2;
-    }
-
-    private function getSelectedScenarioId()
-    {
-        $scenarioRequest = $this->getAllEventsForRequest()
-            ->where('event_class', ScenarioRequestReceived::class)
-            ->first();
-
-        return $scenarioRequest ? $scenarioRequest->event_properties['scenarioId'] : null;
     }
 }
