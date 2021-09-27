@@ -8,8 +8,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use OpenDialogAi\Core\Conversation\Behavior;
 use OpenDialogAi\Core\Conversation\Condition;
 use OpenDialogAi\Core\Conversation\Conversation;
+use OpenDialogAi\Core\Conversation\Facades\TransitionDataClient;
+use OpenDialogAi\Core\Conversation\Intent;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\Scene;
+use OpenDialogAi\Core\Conversation\Transition;
 use OpenDialogAi\Core\Conversation\Turn;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
@@ -51,6 +54,22 @@ class FocusedSceneResource extends JsonResource
                 Turn::DESCRIPTION,
                 Turn::BEHAVIORS => Behavior::FIELDS,
                 Turn::CONDITIONS => Condition::FIELDS,
+                Turn::REQUEST_INTENTS => [
+                    Intent::UID,
+                    Intent::OD_ID,
+                    Intent::SPEAKER,
+                    Intent::BEHAVIORS => Behavior::FIELDS,
+                    Intent::CONDITIONS => Condition::FIELDS,
+                    Intent::TRANSITION => Transition::FIELDS,
+                ],
+                Turn::RESPONSE_INTENTS => [
+                    Intent::UID,
+                    Intent::OD_ID,
+                    Intent::SPEAKER,
+                    Intent::BEHAVIORS => Behavior::FIELDS,
+                    Intent::CONDITIONS => Condition::FIELDS,
+                    Intent::TRANSITION => Transition::FIELDS,
+                ],
             ]
         ]
     ];
@@ -65,6 +84,18 @@ class FocusedSceneResource extends JsonResource
     {
         // reshape the response renaming conversation to focussedConversation
         $normalizedScene = Serializer::normalize($this->resource, 'json', self::$fields);
+
+        $data = $this->rearrangeData($normalizedScene);
+
+        return $this->addMetaData($data);
+    }
+
+    /**
+     * @param $normalizedScene
+     * @return array
+     */
+    protected function rearrangeData($normalizedScene): array
+    {
         $normalizedFocusedScene = [];
         $normalizedFocusedScene['scenario'] =
             $normalizedScene['conversation']['scenario'];
@@ -99,5 +130,41 @@ class FocusedSceneResource extends JsonResource
             $normalizedScene['turns'];
 
         return $normalizedFocusedScene;
+    }
+
+    protected function addMetaData(array $data)
+    {
+        $turnUids = array_map(fn ($s) => $s['id'], $data['scenario']['conversation']['focusedScene']['turns']);
+        $intentsWithTransitionToConversation = Serializer::normalize(
+            TransitionDataClient::getIncomingTurnTransitions(...$turnUids),
+            'json',
+            [
+                AbstractNormalizer::ATTRIBUTES => [
+                    Intent::UID,
+                    Intent::OD_ID,
+                    Intent::TRANSITION => Transition::FIELDS,
+                ],
+            ]
+        );
+
+        $intents = collect(array_map(fn ($t) => $t['intents'], $data['scenario']['conversation']['focusedScene']['turns']))
+            ->flatten(1)
+            ->map(fn ($i) => $i['intent']);
+
+        $intentsWithOutgoingTransition = $intents
+            ->filter(fn ($i) => !is_null($i['transition']) && !is_null($i['transition']['conversation']))
+            ->values();
+
+        $intentsWithCompletingBehaviour = $intents
+            ->filter(fn ($i) => in_array(Behavior::COMPLETING_BEHAVIOR, $i['behaviors']))
+            ->values();
+
+        $data['scenario']['conversation']['focusedScene']['_meta'] = [
+            'incoming_transitions' => $intentsWithTransitionToConversation,
+            'outgoing_transitions' => $intentsWithOutgoingTransition,
+            'completing_intents' => $intentsWithCompletingBehaviour,
+        ];
+
+        return $data;
     }
 }
