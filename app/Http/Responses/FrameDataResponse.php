@@ -42,6 +42,8 @@ abstract class FrameDataResponse
     /** @var StoredEvent The actual event */
     public StoredEvent $stateEvent;
 
+    public string $name = "";
+
     public const AVAILABLE_INTENTS = "Available Intents";
     public const SELECTED = 'Selected';
     public const REJECTED = 'Rejected';
@@ -172,6 +174,7 @@ abstract class FrameDataResponse
         });
 
         return [
+            'name' => $this->name,
             'nodes' => array_merge($this->frameData, $this->connections),
             'data' => $this->annotations,
             'events' => $this->events->map(fn (StoredEvent $event) => $event->getEventClass())
