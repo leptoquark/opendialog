@@ -11,7 +11,7 @@ use OpenDialogAi\Core\Conversation\Conversation;
 use OpenDialogAi\Core\Conversation\Scene;
 use OpenDialogAi\Core\Conversation\Turn;
 
-abstract class BaseData
+abstract class BaseNode
 {
     // Statuses
     public const NOT_CONSIDERED = 'not_considered';
@@ -40,7 +40,7 @@ abstract class BaseData
         $this->parentId = $parentId;
     }
 
-    public static function fromConversationObject(ConversationObject $object, string $parentId = null): BaseData
+    public static function fromConversationObject(ConversationObject $object, string $parentId = null): BaseNode
     {
         return new static($object->getName(), $object->getUid(), $parentId);
     }
@@ -49,7 +49,7 @@ abstract class BaseData
     {
         $nodes = new Collection();
 
-        $nodes->add(ScenarioData::fromConversationObject($scenario));
+        $nodes->add(ScenarioNode::fromConversationObject($scenario));
 
         return$nodes->concat(self::generateConversationNodesFromConversations($scenario->getConversations()));
     }
@@ -61,7 +61,7 @@ abstract class BaseData
         $scenes = new Collection();
         $conversations->each(function (Conversation $conversation) use (&$scenes, $nodes) {
             $nodes->add(
-                ConversationData::fromConversationObject($conversation, $conversation->getScenario()->getUid())
+                ConversationNode::fromConversationObject($conversation, $conversation->getScenario()->getUid())
             );
             $scenes = $scenes->concat($conversation->getScenes() ?? $scenes);
         });
@@ -79,7 +79,7 @@ abstract class BaseData
         $turns = new Collection();
         $scenes->each(function (Scene $scene) use (&$turns, $nodes) {
             $nodes->add(
-                SceneData::fromConversationObject($scene, $scene->getConversation()->getUid())
+                SceneNode::fromConversationObject($scene, $scene->getConversation()->getUid())
             );
             $turns = $turns->concat($scene->getTurns());
         });
@@ -95,19 +95,19 @@ abstract class BaseData
     {
         $nodes = new Collection;
         $turns->each(function (Turn $turn) use ($nodes) {
-            $nodes->add(TurnData::fromConversationObject($turn, $turn->getScene()->getUid()));
-            $nodes->add(IntentCollectionData::fromTurn($turn, $turn->getRequestIntents(), 'request'));
-            $nodes->add(IntentCollectionData::fromTurn($turn, $turn->getResponseIntents(), 'response'));
+            $nodes->add(TurnNode::fromConversationObject($turn, $turn->getScene()->getUid()));
+            $nodes->add(IntentCollectionNode::fromTurn($turn, $turn->getRequestIntents(), 'request'));
+            $nodes->add(IntentCollectionNode::fromTurn($turn, $turn->getResponseIntents(), 'response'));
 
             $turn->getRequestIntents()->each(function (Intent $intent) use ($nodes) {
                 $nodes->add(
-                    IntentData::fromIntent($intent, $intent->getTurn(), 'request')
+                    IntentNode::fromIntent($intent, $intent->getTurn(), 'request')
                 );
             });
 
             $turn->getResponseIntents()->each(function (Intent $intent) use ($nodes) {
                 $nodes->add(
-                    IntentData::fromIntent($intent, $intent->getTurn(), 'response')
+                    IntentNode::fromIntent($intent, $intent->getTurn(), 'response')
                 );
             });
         });

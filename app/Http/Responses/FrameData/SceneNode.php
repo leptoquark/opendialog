@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses\FrameData;
 
-class SceneData extends BaseData
+class SceneNode extends BaseNode
 {
     public string $type = 'scene';
 }
