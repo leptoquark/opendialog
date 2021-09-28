@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses\FrameData;
 
-class ConversationData extends BaseData
+class ConversationNode extends BaseNode
 {
     public string $type = 'conversation';
 }

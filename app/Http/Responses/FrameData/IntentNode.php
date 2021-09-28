@@ -5,7 +5,7 @@ namespace App\Http\Responses\FrameData;
 use OpenDialogAi\Core\Conversation\Intent;
 use OpenDialogAi\Core\Conversation\Turn;
 
-class IntentData extends BaseData
+class IntentNode extends BaseNode
 {
     public string $type = 'intent';
 

@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses\FrameData;
 
-class TurnData extends BaseData
+class TurnNode extends BaseNode
 {
     public string $type = 'turn';
 }

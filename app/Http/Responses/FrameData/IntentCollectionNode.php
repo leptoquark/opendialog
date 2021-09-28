@@ -5,7 +5,7 @@ namespace App\Http\Responses\FrameData;
 use OpenDialogAi\Core\Conversation\IntentCollection;
 use OpenDialogAi\Core\Conversation\Turn;
 
-class IntentCollectionData extends BaseData
+class IntentCollectionNode extends BaseNode
 {
     public static function fromTurn(Turn $turn, IntentCollection $intents, $type)
     {
