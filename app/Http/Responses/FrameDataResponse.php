@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses;
 
-use App\Http\Responses\FrameData\BaseData;
+use App\Http\Responses\FrameData\BaseNode;
 use Illuminate\Support\Collection;
 use OpenDialogAi\Core\Conversation\Events\BaseConversationEvent;
 use OpenDialogAi\Core\Conversation\Events\Storage\StoredEvent;
@@ -28,12 +28,23 @@ abstract class FrameDataResponse
 
     public array $frameData = [];
     public array $connections = [];
+    public array $annotations = [];
 
+    /** @var string The name of the first relevant event to the frame */
     public string $startEventName;
+
+    /** @var string The name of the final relevant event to the frame */
     public string $endEventName;
 
+    /** @var string The name of the event that holds state data */
     public string $stateEventName;
+
+    /** @var StoredEvent The actual event */
     public StoredEvent $stateEvent;
+
+    public const AVAILABLE_INTENTS = "Available Intents";
+    public const SELECTED = 'Selected';
+    public const REJECTED = 'Rejected';
 
     public function __construct()
     {
@@ -50,6 +61,7 @@ abstract class FrameDataResponse
     {
         $this->filterEvents();
         $this->setNodes();
+        $this->annotate();
         return $this->formatResponse();
     }
 
@@ -86,35 +98,33 @@ abstract class FrameDataResponse
         $scenarioId = $this->stateEvent->getScenarioId();
         $this->addScenario(ScenarioDataClient::getFullScenarioGraph($scenarioId));
 
-        $this->setNodeStatus($this->stateEvent->getScenarioId(), BaseData::CONSIDERED);
+        $this->setNodeStatus($this->stateEvent->getScenarioId(), BaseNode::CONSIDERED);
 
-        $this->setNodeStatus($this->stateEvent->getConversationId(), BaseData::CONSIDERED);
+        $this->setNodeStatus($this->stateEvent->getConversationId(), BaseNode::CONSIDERED);
 
-        $this->setNodeStatus($this->stateEvent->getSceneId(), BaseData::CONSIDERED);
+        $this->setNodeStatus($this->stateEvent->getSceneId(), BaseNode::CONSIDERED);
 
-        $this->setNodeStatus($this->stateEvent->getTurnId(), BaseData::CONSIDERED);
+        $this->setNodeStatus($this->stateEvent->getTurnId(), BaseNode::CONSIDERED);
     }
 
     /**
-     * @param ScenarioCollection $scenarios
+     * Loop through the events relevant to this frame and compile the annotation data
+     *
+     * @return void
      */
-    public function addScenarios(ScenarioCollection $scenarios)
-    {
-        $scenarios->each(function (Scenario $scenario) {
-            $this->addScenario($scenario);
-        });
-    }
+    public abstract function annotate(): void;
 
     /**
      * @param Scenario $scenario
      */
     public function addScenario(Scenario $scenario)
     {
-        $this->nodes = $this->nodes->concat(BaseData::generateConversationNodesFromScenario($scenario));
+        $this->nodes = $this->nodes->concat(BaseNode::generateConversationNodesFromScenario($scenario));
     }
 
     /**
      * @param $events
+     * @return FrameDataResponse
      */
     public function addEvents($events): FrameDataResponse
     {
@@ -122,40 +132,41 @@ abstract class FrameDataResponse
         return $this;
     }
 
+    /**
+     * Sets the status on a node with the given ID if the node exists.
+     * Will not downgrade a node from selected if it already has that status
+     *
+     * @param $nodeId
+     * @param $status
+     */
     public function setNodeStatus($nodeId, $status)
     {
         $node = $this->getNode($nodeId);
 
         if ($node) {
             // Don't downgrade a nodes selected status
-            if ($node->status === BaseData::SELECTED) {
+            if ($node->status === BaseNode::SELECTED) {
                 return;
             }
 
             $node->status = $status;
 
             if ($node->type === BaseConversationEvent::INTENT && $parent = $this->getNode($node->parentId)) {
-                if ($parent->status !== BaseData::SELECTED) {
+                if ($parent->status !== BaseNode::SELECTED) {
                     $parent->status = $node->status;
                 }
             }
         }
     }
 
-    public function setIntentStatus($nodeId, $status)
-    {
-        $intent = $this->getNode($nodeId);
-        $intent->status = $status;
-        if ($parent = $this->getNode($intent->parentId)) {
-            if ($parent->status !== BaseData::SELECTED) {
-                $parent->status = $intent->status;
-            }
-        }
-    }
-
+    /**
+     * Adds each node and its connections if it should be drawn
+     *
+     * @return array
+     */
     private function formatResponse(): array
     {
-        $this->nodes->each(function (BaseData $node) {
+        $this->nodes->each(function (BaseNode $node) {
             if ($this->shouldDrawNode($node)) {
                 $node->shouldDraw = true;
                 $this->frameData[] = ['data' => $node->toArray()];
@@ -164,7 +175,7 @@ abstract class FrameDataResponse
             }
         });
 
-        $this->nodes->whereNotNull('parentId')->each(function (BaseData $node) {
+        $this->nodes->whereNotNull('parentId')->each(function (BaseNode $node) {
             if ($node->shouldDraw) {
                 $this->connections[] = $node->generateConnection();
             }
@@ -172,15 +183,15 @@ abstract class FrameDataResponse
 
         return [
             'nodes' => array_merge($this->frameData, $this->connections),
-            'data' => []
+            'data' => $this->annotations
         ];
     }
 
     /**
      * @param $id
-     * @return BaseData
+     * @return BaseNode
      */
-    protected function getNode($id): ?BaseData
+    protected function getNode($id): ?BaseNode
     {
         return $this->nodes->where('id', $id)->first();
     }
@@ -209,28 +220,21 @@ abstract class FrameDataResponse
         return $scenarioEvent ? $scenarioEvent->event_properties[$property] ?? null : null;
     }
 
-    protected function getScenarioIdsFromEvent($eventClass): Collection
-    {
-        return collect($this->getEventProperty($eventClass, 'scenarioIds'));
-    }
-
     protected function getScenarioIdFromEvent($eventClass)
     {
         return $this->getEventProperty($eventClass, 'scenarioId');
     }
 
-    protected function getTurnIdFromEvent($eventClass)
-    {
-        return $this->getEventProperty($eventClass, 'turnId');
-    }
-
     /**
-     * @param BaseData $node
+     * A node should be drawn if its status is anything apart from not_conisdered, it doesn't have a parent,  or
+     * any of its children have been considered
+     *
+     * @param BaseNode $node
      * @return bool
      */
-    private function shouldDrawNode(BaseData $node): bool
+    private function shouldDrawNode(BaseNode $node): bool
     {
-        if ($node->status !==  BaseData::NOT_CONSIDERED) {
+        if ($node->status !==  BaseNode::NOT_CONSIDERED) {
             return true;
         }
 
@@ -241,12 +245,19 @@ abstract class FrameDataResponse
         return $this->hasAnyConsideredChildren($node);
     }
 
-    private function hasAnyConsideredChildren(BaseData $node)
+    /**
+     * Recusrsively checks all of a nodes children and returns true if any have a status other that
+     * not_considered
+     *
+     * @param BaseNode $node
+     * @return bool
+     */
+    private function hasAnyConsideredChildren(BaseNode $node): bool
     {
         $children = $this->nodes->where('parentId', $node->id);
 
         foreach ($children as $child) {
-            if ($child->status !== BaseData::NOT_CONSIDERED) {
+            if ($child->status !== BaseNode::NOT_CONSIDERED) {
                 return true;
             }
 
