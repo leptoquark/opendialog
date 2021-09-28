@@ -22,7 +22,7 @@ class ContextResponse
     public function setContextEvent(StoredEvent $event): ContextResponse
     {
         $this->contextEvent = $event;
-        $this->intent = IntentDataClient::getFullIntentGraph($event->getIntentId());
+        $this->intent = IntentDataClient::getFullIntentGraph($event->getObjectId());
         return $this;
     }
 
