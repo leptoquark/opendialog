@@ -103,15 +103,9 @@ class FocusedConversationResource extends JsonResource
         $scenes = $scenes->map(function ($scene) use ($intentsWithTransitionsToScenes) {
             $intent = $intentsWithTransitionsToScenes
                 ->filter(fn (Intent $i) => $i->getTransition() && $i->getTransition()->getScene() == $scene['id'])
-                ->first();
+                ->values();
 
-            $scene['_meta']['incoming_transitions'] = [];
-
-            if (is_null($intent)) {
-                return $scene;
-            }
-
-            $scene['_meta']['incoming_transitions'][] = Serializer::normalize($intent, 'json', [
+            $scene['_meta']['incoming_transitions'] = Serializer::normalize($intent, 'json', [
                 AbstractNormalizer::ATTRIBUTES => [
                     Intent::UID,
                     Intent::OD_ID,

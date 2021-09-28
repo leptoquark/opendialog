@@ -144,14 +144,6 @@ class FocusedSceneResource extends JsonResource
                 ->filter(fn (Intent $i) => $i->getTransition() && $i->getTransition()->getTurn() == $turn['id'])
                 ->values();
 
-            $turn['_meta']['incoming_transitions'] = [];
-            $turn['_meta']['outgoing_transitions'] = [];
-            $turn['_meta']['completing_intents'] = [];
-
-            if (count($intentsWithTransitionsToTurn) < 1) {
-                return $turn;
-            }
-
             $intents = collect($turn['intents'])
                 ->map(fn ($i) => $i['intent']);
 
