@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Responses\IncomingAvailableIntentsFrame;
+use App\Http\Responses\ContextResponse;
 use App\Http\Responses\IncomingSelectionFrame;
 use App\Http\Responses\OutgoingAvailableIntentsFrame;
 use App\Http\Responses\OutgoingSelectionFrame;
 use Illuminate\Database\Query\Builder;
+use OpenDialogAi\Core\Conversation\Events\ConversationalState\IncomingIntentStateUpdate;
+use OpenDialogAi\Core\Conversation\Events\ConversationalState\OutgoingIntentStateUpdate;
 use OpenDialogAi\Core\Conversation\Events\Storage\StoredEvent;
 
 class FrameDataController extends Controller
@@ -42,7 +45,14 @@ class FrameDataController extends Controller
         $outgoingAvailable = (new OutgoingAvailableIntentsFrame())->addEvents($allEvents)->generateResponse();
         $outgoingSelection = (new OutgoingSelectionFrame())->addEvents($allEvents)->generateResponse();
 
+        $incomingContextEvent = $allEvents->where('event_class', IncomingIntentStateUpdate::class)->first();
+        $incomingContextFrame = (new ContextResponse())->setContextEvent($incomingContextEvent);
+        $outgoingContextEvent = $allEvents->where('event_class', OutgoingIntentStateUpdate::class)->first();
+        $outgoingContextFrame = (new ContextResponse())->setContextEvent($outgoingContextEvent);
+
         return [
+            'incoming_context' => $incomingContextFrame->generateResponse(),
+            'outgoing_context' => $outgoingContextFrame->generateResponse(),
             'total_frames' => $totalFrames,
             'frames' => [
                 $incomingAvailable,
