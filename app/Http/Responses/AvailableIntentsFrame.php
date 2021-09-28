@@ -2,12 +2,9 @@
 
 namespace App\Http\Responses;
 
-use App\Http\Responses\FrameData\BaseData;
+use App\Http\Responses\FrameData\BaseNode;
 use OpenDialogAi\ConversationEngine\Simulator\ConversationSimulator;
 use OpenDialogAi\ConversationEngine\Simulator\ConversationSimulatorResponseIntentStatePair;
-use OpenDialogAi\Core\Conversation\Events\Intent\MatchingIncomingIntent;
-use OpenDialogAi\Core\Conversation\Events\Interpretation\InterpretingIncomingUtteranceForIntent;
-use OpenDialogAi\Core\Conversation\Events\Sensor\RequestReceived;
 use OpenDialogAi\Core\Conversation\Events\Sensor\ScenarioRequestReceived;
 use OpenDialogAi\Core\Conversation\Facades\ScenarioDataClient;
 use OpenDialogAi\Core\Conversation\Intent;
@@ -20,6 +17,11 @@ abstract class AvailableIntentsFrame extends FrameDataResponse
 
     public string $speaker = Intent::USER;
 
+    public array $availableIntents = [];
+
+    /**
+     * Override this method, as we want to run the conversational state through the simulator
+     */
     protected function setNodes(): void
     {
         // If this is an initial request, we will not have a scenario ID - take one from the ScenarioRequestReceived event
@@ -32,11 +34,21 @@ abstract class AvailableIntentsFrame extends FrameDataResponse
         $conversationalState = $this->stateEvent->convertToConversationalState($this->speaker);
         ConversationSimulator::simulate($conversationalState)->getIntentStatePairs()
             ->each(function (ConversationSimulatorResponseIntentStatePair $intentState) {
-                $this->setNodeStatus($intentState->getIntent()->getScenario()->getUid(), BaseData::CONSIDERED);
-                $this->setNodeStatus($intentState->getIntent()->getConversation()->getUid(), BaseData::CONSIDERED);
-                $this->setNodeStatus($intentState->getIntent()->getScene()->getUid(), BaseData::CONSIDERED);
-                $this->setNodeStatus($intentState->getIntent()->getTurn()->getUid(), BaseData::CONSIDERED);
-                $this->setNodeStatus($intentState->getIntent()->getUid(), BaseData::CONSIDERED);
+                $this->availableIntents[] = $intentState->getIntent()->getName();
+
+                $this->setNodeStatus($intentState->getIntent()->getScenario()->getUid(), BaseNode::CONSIDERED);
+                $this->setNodeStatus($intentState->getIntent()->getConversation()->getUid(), BaseNode::CONSIDERED);
+                $this->setNodeStatus($intentState->getIntent()->getScene()->getUid(), BaseNode::CONSIDERED);
+                $this->setNodeStatus($intentState->getIntent()->getTurn()->getUid(), BaseNode::CONSIDERED);
+                $this->setNodeStatus($intentState->getIntent()->getUid(), BaseNode::CONSIDERED);
             });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function annotate(): void
+    {
+        $this->annotations[self::AVAILABLE_INTENTS] = $this->availableIntents;
     }
 }

@@ -11,4 +11,9 @@ class IncomingSelectionFrame extends FrameDataResponse
     public string $startEventName     = MatchingIncomingIntent::class;
     public string $endEventName       = IncomingIntentMatched::class;
     public string $stateEventName = ScenarioRequestReceived::class;
+
+    public function annotate(): void
+    {
+        // TODO: Implement annotate() method.
+    }
 }
