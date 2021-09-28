@@ -92,20 +92,10 @@ abstract class FrameDataResponse
 
     /**
      * After filtering, fetch and set the conversation nodes at the right level for the frame
+     *
+     * @return void
      */
-    protected function setNodes(): void
-    {
-        $scenarioId = $this->stateEvent->getScenarioId();
-        $this->addScenario(ScenarioDataClient::getFullScenarioGraph($scenarioId));
-
-        $this->setNodeStatus($this->stateEvent->getScenarioId(), BaseNode::CONSIDERED);
-
-        $this->setNodeStatus($this->stateEvent->getConversationId(), BaseNode::CONSIDERED);
-
-        $this->setNodeStatus($this->stateEvent->getSceneId(), BaseNode::CONSIDERED);
-
-        $this->setNodeStatus($this->stateEvent->getTurnId(), BaseNode::CONSIDERED);
-    }
+    protected abstract function setNodes(): void;
 
     /**
      * Loop through the events relevant to this frame and compile the annotation data
@@ -183,7 +173,8 @@ abstract class FrameDataResponse
 
         return [
             'nodes' => array_merge($this->frameData, $this->connections),
-            'data' => $this->annotations
+            'data' => $this->annotations,
+            'events' => $this->events->map(fn (StoredEvent $event) => $event->getEventClass())
         ];
     }
 
@@ -246,7 +237,7 @@ abstract class FrameDataResponse
     }
 
     /**
-     * Recusrsively checks all of a nodes children and returns true if any have a status other that
+     * Recursively checks all of a nodes children and returns true if any have a status other that
      * not_considered
      *
      * @param BaseNode $node
