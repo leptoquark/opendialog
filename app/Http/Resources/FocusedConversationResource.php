@@ -95,18 +95,34 @@ class FocusedConversationResource extends JsonResource
 
     protected function addMetaData(array $data)
     {
-        $sceneUids = array_map(fn ($s) => $s['id'], $data['scenario']['focusedConversation']['scenes']);
+        $scenes = collect($data['scenario']['focusedConversation']['scenes']);
+        $sceneUids = $scenes->pluck('id');
+
         $intentsWithTransitionsToScenes = TransitionDataClient::getIncomingSceneTransitions(...$sceneUids);
 
-        $data['scenario']['focusedConversation']['_meta'] = [
-            'incoming_transitions' => Serializer::normalize($intentsWithTransitionsToScenes, 'json', [
+        $scenes = $scenes->map(function ($scene) use ($intentsWithTransitionsToScenes) {
+            $intent = $intentsWithTransitionsToScenes
+                ->filter(fn (Intent $i) => $i->getTransition() && $i->getTransition()->getScene() == $scene['id'])
+                ->first();
+
+            $scene['_meta']['incoming_transitions'] = [];
+
+            if (is_null($intent)) {
+                return $scene;
+            }
+
+            $scene['_meta']['incoming_transitions'][] = Serializer::normalize($intent, 'json', [
                 AbstractNormalizer::ATTRIBUTES => [
                     Intent::UID,
                     Intent::OD_ID,
                     Intent::TRANSITION => Transition::FIELDS,
                 ],
-            ]),
-        ];
+            ]);
+
+            return $scene;
+        });
+
+        $data['scenario']['focusedConversation']['scenes'] = $scenes;
 
         return $data;
     }

@@ -135,17 +135,17 @@ class UIStateControllerTest extends TestCase
                             "od_id" => "new_example_conversation",
                             "description" => "An new example conversation",
                             "behaviors" => ["STARTING"],
-                        ]
-                    ],
-                     "_meta" => [
-                        "incoming_transitions" => [
-                            [
-                                "id" => "0x9999",
-                                "od_id" => "fake_intent_2",
-                                "transition" => [
-                                    "conversation" => "0x0002",
-                                    "scene" => null,
-                                    "turn" => null,
+                            "_meta" => [
+                                "incoming_transitions" => [
+                                    [
+                                        "id" => "0x9999",
+                                        "od_id" => "fake_intent_2",
+                                        "transition" => [
+                                            "conversation" => "0x0002",
+                                            "scene" => null,
+                                            "turn" => null,
+                                        ]
+                                    ]
                                 ]
                             ]
                         ]
@@ -252,17 +252,17 @@ class UIStateControllerTest extends TestCase
                                 "od_id" => "new_example_scene",
                                 "description" => "An new example scene",
                                 "behaviors" => ["OPEN"],
-                            ]
-                        ],
-                        "_meta" => [
-                            "incoming_transitions" => [
-                                [
-                                    "id" => "0x9999",
-                                    "od_id" => "fake_intent_2",
-                                    "transition" => [
-                                        "conversation" => "0x0002",
-                                        "scene" => "0x0003",
-                                        "turn" => null,
+                                "_meta" => [
+                                    "incoming_transitions" => [
+                                        [
+                                            "id" => "0x9999",
+                                            "od_id" => "fake_intent_2",
+                                            "transition" => [
+                                                "conversation" => "0x0002",
+                                                "scene" => "0x0003",
+                                                "turn" => null,
+                                            ]
+                                        ]
                                     ]
                                 ]
                             ]
@@ -388,47 +388,47 @@ class UIStateControllerTest extends TestCase
                                     "name"=> "Welcome turn",
                                     "description"=> "A welcome turn",
                                     "behaviors" => ["STARTING", "OPEN"],
-                                ],
-                            ],
-                            "_meta" => [
-                                "incoming_transitions" => [
-                                    [
-                                        "id" => "0x9999",
-                                        "od_id" => "fake_intent_2",
-                                        "transition" => [
-                                            "conversation" => "0x0002",
-                                            "scene" => "0x0003",
-                                            "turn" => "0x0003",
-                                        ]
-                                    ]
-                                ],
-                                "outgoing_transitions" => [
-                                    [
-                                        "id" => "0x9998",
-                                        "od_id" => "fake_intent_1",
-                                        "transition" => [
-                                            "conversation" => "0x567",
-                                            "scene" => null,
-                                            "turn" => null,
-                                        ]
-                                    ],
-                                    [
-                                        "id" => "0x9999",
-                                        "od_id" => "fake_intent_2",
-                                        "transition" => [
-                                            "conversation" => "0x0002",
-                                            "scene" => "0x0003",
-                                            "turn" => "0x0003",
-                                        ]
-                                    ]
-                                ],
-                                "completing_intents" => [
-                                    [
-                                        "id" => "0x9999a",
-                                        "od_id" => "fake_intent_3",
-                                        "behaviors" => [
-                                            Behavior::COMPLETING_BEHAVIOR,
-                                        ]
+                                    "_meta" => [
+                                        "incoming_transitions" => [
+                                            [
+                                                "id" => "0x9999",
+                                                "od_id" => "fake_intent_2",
+                                                "transition" => [
+                                                    "conversation" => "0x0002",
+                                                    "scene" => "0x0003",
+                                                    "turn" => "0x0003",
+                                                ]
+                                            ]
+                                        ],
+                                        "outgoing_transitions" => [
+                                            [
+                                                "id" => "0x9998",
+                                                "od_id" => "fake_intent_1",
+                                                "transition" => [
+                                                    "conversation" => "0x567",
+                                                    "scene" => null,
+                                                    "turn" => null,
+                                                ]
+                                            ],
+                                            [
+                                                "id" => "0x9999",
+                                                "od_id" => "fake_intent_2",
+                                                "transition" => [
+                                                    "conversation" => "0x0002",
+                                                    "scene" => "0x0003",
+                                                    "turn" => "0x0003",
+                                                ]
+                                            ]
+                                        ],
+                                        "completing_intents" => [
+                                            [
+                                                "id" => "0x9999a",
+                                                "od_id" => "fake_intent_3",
+                                                "behaviors" => [
+                                                    Behavior::COMPLETING_BEHAVIOR,
+                                                ]
+                                            ]
+                                        ],
                                     ]
                                 ],
                             ]

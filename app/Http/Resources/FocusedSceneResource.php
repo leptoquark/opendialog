@@ -134,36 +134,49 @@ class FocusedSceneResource extends JsonResource
 
     protected function addMetaData(array $data)
     {
-        $turnUids = array_map(fn ($s) => $s['id'], $data['scenario']['conversation']['focusedScene']['turns']);
-        $intentsWithTransitionToConversation = Serializer::normalize(
-            TransitionDataClient::getIncomingTurnTransitions(...$turnUids),
-            'json',
-            [
+        $turns = collect($data['scenario']['conversation']['focusedScene']['turns']);
+        $turnUids = $turns->pluck('id');
+
+        $intentsWithTransitionsToTurns = TransitionDataClient::getIncomingTurnTransitions(...$turnUids);
+
+        $turns = $turns->map(function ($turn) use ($intentsWithTransitionsToTurns) {
+            $intentsWithTransitionsToTurn = $intentsWithTransitionsToTurns
+                ->filter(fn (Intent $i) => $i->getTransition() && $i->getTransition()->getTurn() == $turn['id'])
+                ->values();
+
+            $turn['_meta']['incoming_transitions'] = [];
+            $turn['_meta']['outgoing_transitions'] = [];
+            $turn['_meta']['completing_intents'] = [];
+
+            if (count($intentsWithTransitionsToTurn) < 1) {
+                return $turn;
+            }
+
+            $intents = collect($turn['intents'])
+                ->map(fn ($i) => $i['intent']);
+
+            $intentsWithOutgoingTransition = $intents
+                ->filter(fn ($i) => !is_null($i['transition']) && !is_null($i['transition']['conversation']))
+                ->values();
+
+            $intentsWithCompletingBehaviour = $intents
+                ->filter(fn ($i) => in_array(Behavior::COMPLETING_BEHAVIOR, $i['behaviors']))
+                ->values();
+
+            $turn['_meta']['incoming_transitions'] = Serializer::normalize($intentsWithTransitionsToTurn, 'json', [
                 AbstractNormalizer::ATTRIBUTES => [
                     Intent::UID,
                     Intent::OD_ID,
                     Intent::TRANSITION => Transition::FIELDS,
                 ],
-            ]
-        );
+            ]);
+            $turn['_meta']['outgoing_transitions'] = $intentsWithOutgoingTransition;
+            $turn['_meta']['completing_intents'] = $intentsWithCompletingBehaviour;
 
-        $intents = collect(array_map(fn ($t) => $t['intents'], $data['scenario']['conversation']['focusedScene']['turns']))
-            ->flatten(1)
-            ->map(fn ($i) => $i['intent']);
+            return $turn;
+        });
 
-        $intentsWithOutgoingTransition = $intents
-            ->filter(fn ($i) => !is_null($i['transition']) && !is_null($i['transition']['conversation']))
-            ->values();
-
-        $intentsWithCompletingBehaviour = $intents
-            ->filter(fn ($i) => in_array(Behavior::COMPLETING_BEHAVIOR, $i['behaviors']))
-            ->values();
-
-        $data['scenario']['conversation']['focusedScene']['_meta'] = [
-            'incoming_transitions' => $intentsWithTransitionToConversation,
-            'outgoing_transitions' => $intentsWithOutgoingTransition,
-            'completing_intents' => $intentsWithCompletingBehaviour,
-        ];
+        $data['scenario']['conversation']['focusedScene']['turns'] = $turns;
 
         return $data;
     }
