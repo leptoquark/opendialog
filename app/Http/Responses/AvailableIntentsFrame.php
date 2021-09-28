@@ -19,6 +19,8 @@ abstract class AvailableIntentsFrame extends FrameDataResponse
 
     public array $availableIntents = [];
 
+    public string $name = "Considered Path";
+
     /**
      * Override this method, as we want to run the conversational state through the simulator
      */

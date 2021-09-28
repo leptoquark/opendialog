@@ -22,6 +22,8 @@ abstract class SelectionFrame extends FrameDataResponse
         InterpretationFailed::class
     ];
 
+    public string $name = "Selected Path";
+
     /**
      * @inheritDoc
      */
