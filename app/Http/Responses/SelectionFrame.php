@@ -62,6 +62,7 @@ abstract class SelectionFrame extends FrameDataResponse
         // Find all failure events and annotate
         $this->events->whereIn('event_class', $this->rejectionEvents)
             ->filter(fn ($event) => !is_null($event->getSubject()))
+            ->filter(fn (StoredEvent $event) => $event->getObjectType() !== 'scenario')
             ->each(fn ($event) => $this->addRejectionEvent($event));
     }
 
