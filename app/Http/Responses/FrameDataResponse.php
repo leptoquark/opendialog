@@ -258,7 +258,8 @@ abstract class FrameDataResponse
             return true;
         }
 
-        if (!$node->parentId) {
+        $parent = $this->getNode($node->parentId);
+        if (!$parent || $parent->status !== BaseNode::NOT_CONSIDERED) {
             return true;
         }
 
