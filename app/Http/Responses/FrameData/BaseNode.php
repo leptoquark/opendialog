@@ -139,14 +139,23 @@ abstract class BaseNode
      *
      * @return array The connect data for response
      */
-    public function generateConnection(): array
+    public function generateConnection(BaseNode $parent): array
     {
+        $connectionStatus = self::CONSIDERED;
+        if ($parent->status == $this->status) {
+            $connectionStatus = $parent->status;
+        }
+
+        if ($this->status == self::NOT_SELECTED || $this->status == self::NOT_CONSIDERED) {
+            $connectionStatus = $this->status;
+        }
+
         return [
             'data' => [
                 'id' => $this->parentId . '-' . $this->id,
                 'source' => $this->parentId,
                 'target' => $this->id,
-                'status' => $this->status,
+                'status' => $connectionStatus,
                 'parent' => $this->parentId,
             ]
         ];

@@ -63,8 +63,8 @@ abstract class FrameDataResponse
     {
         $this->filterEvents();
         $this->setNodes();
-        $this->annotate();
         $this->setStartPoint();
+        $this->annotate();
         return $this->formatResponse();
     }
 
@@ -144,7 +144,8 @@ abstract class FrameDataResponse
 
             $node->status = $status;
 
-            if ($node->parentId) {
+            // Only draw up the tree if this is not a starting state node and there is a parent
+            if (!$node->startingState && $node->parentId) {
                 $this->setNodeStatus($node->parentId, $status);
             }
         }
@@ -195,7 +196,7 @@ abstract class FrameDataResponse
 
         $this->nodes->whereNotNull('parentId')->each(function (BaseNode $node) {
             if ($node->shouldDraw) {
-                $this->connections[] = $node->generateConnection();
+                $this->connections[] = $node->generateConnection($this->getNode($node->parentId));
             }
         });
 
