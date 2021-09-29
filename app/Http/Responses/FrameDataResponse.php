@@ -64,6 +64,7 @@ abstract class FrameDataResponse
         $this->filterEvents();
         $this->setNodes();
         $this->annotate();
+        $this->setStartPoint();
         return $this->formatResponse();
     }
 
@@ -146,6 +147,33 @@ abstract class FrameDataResponse
             if ($node->parentId) {
                 $this->setNodeStatus($node->parentId, $status);
             }
+        }
+    }
+
+    public function setStartPoint()
+    {
+        if ($this->stateEvent->getTurnId() && $this->stateEvent->getTurnId() !== 'undefined') {
+            $this->setNodeAsStartPoint($this->stateEvent->getTurnId());
+        } else if ($this->stateEvent->getSceneId() && $this->stateEvent->getSceneId() !== 'undefined') {
+            $this->setNodeAsStartPoint($this->stateEvent->getSceneId());
+        } else if ($this->stateEvent->getConversationId() && $this->stateEvent->getConversationId() !== 'undefined') {
+            $this->setNodeAsStartPoint($this->stateEvent->getConversationId());
+        } else if ($this->stateEvent->getScenarioId() && $this->stateEvent->getScenarioId() !== 'undefined') {
+            $this->setNodeAsStartPoint($this->stateEvent->getScenarioId());
+        }
+    }
+
+    /**
+     * Sets the node with given ID as the starting point if it exists
+     *
+     * @param $nodeId
+     */
+    public function setNodeAsStartPoint($nodeId)
+    {
+        $node = $this->getNode($nodeId);
+
+        if ($node) {
+            $node->startingState = true;
         }
     }
 
