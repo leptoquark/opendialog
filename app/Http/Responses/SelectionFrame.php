@@ -24,6 +24,8 @@ abstract class SelectionFrame extends FrameDataResponse
 
     public string $name = "Selected Path";
 
+    public string $selectedIntentId;
+
     /**
      * @inheritDoc
      */
@@ -49,6 +51,7 @@ abstract class SelectionFrame extends FrameDataResponse
         if ($matchedIntent) {
             $intentId = $matchedIntent->getObjectId();
             $intentName = $matchedIntent->getObjectName();
+            $this->selectedIntentId = $intentId;
 
             $events = $this->getAllEventsForObject($intentId);
             $data = $events
@@ -61,7 +64,9 @@ abstract class SelectionFrame extends FrameDataResponse
 
         // Find all failure events and annotate
         $this->events->whereIn('event_class', $this->rejectionEvents)
-            ->filter(fn ($event) => !is_null($event->getSubject()))
+            ->unique(fn ($event) => $event->getObjectId())
+            ->filter(fn (StoredEvent $event) => !is_null($event->getSubject()))
+            ->filter(fn (StoredEvent $event) => $event->getObjectId() !== $this->selectedIntentId)
             ->filter(fn (StoredEvent $event) => $event->getObjectType() !== 'scenario')
             ->each(fn ($event) => $this->addRejectionEvent($event));
     }
@@ -74,6 +79,7 @@ abstract class SelectionFrame extends FrameDataResponse
 
         $events = $this->getAllEventsForObject($objectId);
         $data = $events
+            ->unique(fn ($event) => $event->getMessage())
             ->filter(fn ($event) => !is_null($event->getSubject()))
             ->map(fn ($event) => $this->extractData($event))->values();
 
@@ -98,7 +104,7 @@ abstract class SelectionFrame extends FrameDataResponse
     protected function extractData(StoredEvent $event): array
     {
         return [
-            'label' => $event->getSubject(),
+            'label' => ucwords($event->getSubject()),
             'message' => [
                 'success' => $event->getStatus() !== 'error',
                 'message' => $event->getMessage()
