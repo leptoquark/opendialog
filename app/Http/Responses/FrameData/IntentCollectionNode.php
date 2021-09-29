@@ -14,7 +14,7 @@ class IntentCollectionNode extends BaseNode
             sprintf('%s_%s', $turn->getUid(), $type),
             $turn->getUid()
         );
-        $requestIntents->speaker = $intents->first() ? $intents->first()->getSpeaker() : null;
+        $requestIntents->speaker = $intents->first() ? $intents->first()->getSpeaker() : "empty";
         $requestIntents->type = sprintf('%s_intents', $type);
 
         return $requestIntents;
