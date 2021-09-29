@@ -40,10 +40,12 @@ class FrameDataController extends Controller
         $totalFrames = 4;
         $allEvents = $this->getAllEventsForRequest()->get();
 
-        $incomingAvailable = (new IncomingAvailableIntentsFrame())->addEvents($allEvents)->generateResponse();
-        $incomingSelection = (new IncomingSelectionFrame())->addEvents($allEvents)->generateResponse();
-        $outgoingAvailable = (new OutgoingAvailableIntentsFrame())->addEvents($allEvents)->generateResponse();
-        $outgoingSelection = (new OutgoingSelectionFrame())->addEvents($allEvents)->generateResponse();
+        $frames = [
+            1 => (new IncomingAvailableIntentsFrame())->addEvents($allEvents)->generateResponse(),
+            2 => (new IncomingSelectionFrame())->addEvents($allEvents)->generateResponse(),
+            3 => (new OutgoingAvailableIntentsFrame())->addEvents($allEvents)->generateResponse(),
+            4 => (new OutgoingSelectionFrame())->addEvents($allEvents)->generateResponse()
+        ];
 
         $incomingContextEvent = $allEvents->where('event_class', IncomingIntentStateUpdate::class)->first();
         $incomingContextFrame = (new ContextResponse())->setContextEvent($incomingContextEvent);
@@ -54,12 +56,7 @@ class FrameDataController extends Controller
             'incoming_context' => $incomingContextFrame->generateResponse(),
             'outgoing_context' => $outgoingContextFrame->generateResponse(),
             'total_frames' => $totalFrames,
-            'frames' => [
-                $incomingAvailable,
-                $incomingSelection,
-                $outgoingAvailable,
-                $outgoingSelection
-            ]
+            'frames' => $frames
         ];
     }
 

@@ -123,8 +123,8 @@ abstract class SelectionFrame extends FrameDataResponse
         return $condensed;
     }
 
-    private function getAllEventsForObject($intentId): Collection
+    private function getAllEventsForObject($objectId): Collection
     {
-        return $this->events->filter(fn ($event) => $event->getObjectId() == $intentId);
+        return $this->events->filter(fn ($event) => $event->getObjectId() == $objectId);
     }
 }
