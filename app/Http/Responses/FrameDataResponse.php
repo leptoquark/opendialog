@@ -143,10 +143,8 @@ abstract class FrameDataResponse
 
             $node->status = $status;
 
-            if ($node->type === BaseConversationEvent::INTENT && $parent = $this->getNode($node->parentId)) {
-                if ($parent->status !== BaseNode::SELECTED) {
-                    $parent->status = $node->status;
-                }
+            if ($node->parentId) {
+                $this->setNodeStatus($node->parentId, $status);
             }
         }
     }

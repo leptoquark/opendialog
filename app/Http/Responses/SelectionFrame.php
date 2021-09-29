@@ -41,7 +41,6 @@ abstract class SelectionFrame extends FrameDataResponse
         $this->setNodeStatus($this->stateEvent->getTurnId(), BaseNode::CONSIDERED);
     }
 
-
     public function annotate(): void
     {
         // Find the matched intent from the events
@@ -57,6 +56,7 @@ abstract class SelectionFrame extends FrameDataResponse
                 ->map(fn ($event) => $this->extractData($event))->values();
 
             $this->addAnnotation($intentId, $intentName, 'intent', $data);
+            $this->setNodeStatus($intentId, BaseNode::SELECTED);
         }
 
         // Find all failure events and annotate
@@ -77,6 +77,7 @@ abstract class SelectionFrame extends FrameDataResponse
             ->map(fn ($event) => $this->extractData($event))->values();
 
         $this->addAnnotation($objectId, $objectName, $type, $data, self::REJECTED);
+        $this->setNodeStatus($objectId, BaseNode::NOT_SELECTED);
     }
 
     protected function addAnnotation($objectId, $objectName, $type, $data, $level = self::SELECTED)
