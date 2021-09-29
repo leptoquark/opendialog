@@ -55,24 +55,25 @@ abstract class AvailableIntentsFrame extends FrameDataResponse
     public function annotate(): void
     {
         $availableIntents =
-
-        $this->availableIntents->map(fn (Intent $intent) => [
-            'label' => $intent->getName(),
-            'type' => 'intent',
-            'id' => $intent->getUid(),
-            'data' => [
-                'messages' => [
+            $this->availableIntents->map(fn(Intent $intent) => [
+                'label' => $intent->getName(),
+                'type' => 'intent',
+                'id' => $intent->getUid(),
+                'data' => [
                     [
-                        "success" => true,
-                        "message" => "Has the correct behaviour"
-                    ],
-                    [
-                        "success" => true,
-                        "message" => sprintf("Participant %s", $intent->getSpeaker())
+                        'messages' => [
+                            [
+                                "success" => true,
+                                "message" => "Has the correct behaviour"
+                            ],
+                            [
+                                "success" => true,
+                                "message" => sprintf("Participant %s", $intent->getSpeaker())
+                            ]
+                        ]
                     ]
                 ]
-            ]
-        ]);
+            ]);
 
         $this->annotations[self::AVAILABLE_INTENTS] = $availableIntents;
     }
