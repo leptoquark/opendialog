@@ -3,6 +3,7 @@
 namespace App\Http\Responses;
 
 use App\Http\Responses\FrameData\BaseNode;
+use Illuminate\Support\Collection;
 use OpenDialogAi\ConversationEngine\Simulator\ConversationSimulator;
 use OpenDialogAi\ConversationEngine\Simulator\ConversationSimulatorResponseIntentStatePair;
 use OpenDialogAi\Core\Conversation\Events\Sensor\ScenarioRequestReceived;
@@ -17,7 +18,7 @@ abstract class AvailableIntentsFrame extends FrameDataResponse
 
     public string $speaker = Intent::USER;
 
-    public array $availableIntents = [];
+    public Collection $availableIntents;
 
     public string $name = "Considered Path";
 
@@ -33,10 +34,12 @@ abstract class AvailableIntentsFrame extends FrameDataResponse
 
         $this->addScenario(ScenarioDataClient::getFullScenarioGraph($this->stateEvent->getScenarioId()));
 
+        $this->availableIntents = new Collection();
+
         $conversationalState = $this->stateEvent->convertToConversationalState($this->speaker);
         ConversationSimulator::simulate($conversationalState)->getIntentStatePairs()
             ->each(function (ConversationSimulatorResponseIntentStatePair $intentState) {
-                $this->availableIntents[] = $intentState->getIntent()->getName();
+                $this->availableIntents->add($intentState->getIntent());
 
                 $this->setNodeStatus($intentState->getIntent()->getScenario()->getUid(), BaseNode::CONSIDERED);
                 $this->setNodeStatus($intentState->getIntent()->getConversation()->getUid(), BaseNode::CONSIDERED);
@@ -51,6 +54,26 @@ abstract class AvailableIntentsFrame extends FrameDataResponse
      */
     public function annotate(): void
     {
-        $this->annotations[self::AVAILABLE_INTENTS] = $this->availableIntents;
+        $availableIntents =
+
+        $this->availableIntents->map(fn (Intent $intent) => [
+            'label' => $intent->getName(),
+            'type' => 'intent',
+            'id' => $intent->getUid(),
+            'data' => [
+                'messages' => [
+                    [
+                        "success" => true,
+                        "message" => "Has the correct behaviour"
+                    ],
+                    [
+                        "success" => true,
+                        "message" => sprintf("Participant %s", $intent->getSpeaker())
+                    ]
+                ]
+            ]
+        ]);
+
+        $this->annotations[self::AVAILABLE_INTENTS] = $availableIntents;
     }
 }

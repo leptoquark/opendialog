@@ -29,6 +29,8 @@ abstract class BaseNode
 
     public string $type;
 
+    public bool $startingState = false;
+
     public ?string $parentId;
 
     public ?bool $shouldDraw = null;
@@ -122,6 +124,7 @@ abstract class BaseNode
             "label" => $this->label,
             "id" => $this->id,
             "status" => $this->status,
+            'starting_state' => $this->startingState
         ];
 
         if ($this->speaker) {
@@ -144,7 +147,7 @@ abstract class BaseNode
                 'source' => $this->parentId,
                 'target' => $this->id,
                 'status' => $this->status,
-                'parent' => $this->parentId
+                'parent' => $this->parentId,
             ]
         ];
     }
