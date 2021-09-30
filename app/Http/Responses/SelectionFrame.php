@@ -15,7 +15,7 @@ abstract class SelectionFrame extends FrameDataResponse
     public string $endEventName;
     public string $stateEventName;
 
-    public string $matchedIntentEvent;
+    public string $selectedIntentEvent;
 
     public array $rejectionEvents = [
         ConditionsFailed::class,
@@ -47,7 +47,7 @@ abstract class SelectionFrame extends FrameDataResponse
     {
         // Find the matched intent from the events
         /** @var StoredEvent $matchedIntent */
-        $matchedIntent = $this->getEvents($this->matchedIntentEvent)->first();
+        $matchedIntent = $this->getEvents($this->selectedIntentEvent)->first();
         if ($matchedIntent) {
             $intentId = $matchedIntent->getObjectId();
             $intentName = $matchedIntent->getObjectName();
@@ -55,7 +55,8 @@ abstract class SelectionFrame extends FrameDataResponse
 
             $events = $this->getAllEventsForObject($intentId);
             $data = $events
-                ->filter(fn ($event) => !is_null($event->getSubject()))
+                ->unique(fn ($event) => $event->getMessage()) // Avoid duplicated messages
+                ->filter(fn ($event) => !is_null($event->getSubject())) // Only events that have subjects
                 ->map(fn ($event) => $this->extractData($event))->values();
 
             $this->addAnnotation($intentId, $intentName, 'intent', $data);
@@ -64,10 +65,10 @@ abstract class SelectionFrame extends FrameDataResponse
 
         // Find all failure events and annotate
         $this->events->whereIn('event_class', $this->rejectionEvents)
-            ->unique(fn ($event) => $event->getObjectId())
-            ->filter(fn (StoredEvent $event) => !is_null($event->getSubject()))
-            ->filter(fn (StoredEvent $event) => $event->getObjectId() !== $this->selectedIntentId)
-            ->filter(fn (StoredEvent $event) => $event->getObjectType() !== 'scenario')
+            ->unique(fn ($event) => $event->getObjectId()) // only 1 rejection event per node
+            ->filter(fn (StoredEvent $event) => !is_null($event->getSubject())) // only events with subjects
+            ->filter(fn (StoredEvent $event) => $event->getObjectId() !== $this->selectedIntentId) // No events for the selected
+            ->filter(fn (StoredEvent $event) => $event->getObjectType() !== 'scenario') // No Scenario level events
             ->each(fn ($event) => $this->addRejectionEvent($event));
     }
 
@@ -79,8 +80,8 @@ abstract class SelectionFrame extends FrameDataResponse
 
         $events = $this->getAllEventsForObject($objectId);
         $data = $events
-            ->unique(fn ($event) => $event->getMessage())
-            ->filter(fn ($event) => !is_null($event->getSubject()))
+            ->unique(fn ($event) => $event->getMessage()) // avoid duplicate messages
+            ->filter(fn ($event) => !is_null($event->getSubject())) // Only events that have subjects
             ->map(fn ($event) => $this->extractData($event))->values();
 
         $this->addAnnotation($objectId, $objectName, $type, $data, self::REJECTED);
