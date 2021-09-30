@@ -13,5 +13,5 @@ class IncomingSelectionFrame extends SelectionFrame
     public string $endEventName       = IncomingIntentMatched::class;
     public string $stateEventName     = ScenarioRequestReceived::class;
 
-    public string $matchedIntentEvent = TopRankedIntent::class;
+    public string $selectedIntentEvent = TopRankedIntent::class;
 }
