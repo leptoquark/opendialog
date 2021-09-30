@@ -20,6 +20,9 @@ class  OutgoingAvailableIntentsFrame extends AvailableIntentsFrame
 
     public string $speaker = Intent::USER;
 
+    /**
+     * Also get transition data for the outgoing frame
+     */
     protected function setNodes(): void
     {
         parent::setNodes();
@@ -39,6 +42,26 @@ class  OutgoingAvailableIntentsFrame extends AvailableIntentsFrame
                     'target' => $transitionsTo->id,
                     'status' => 'transition',
                     'parent' => $transitionNode->id,
+                ]
+            ];
+
+            $this->annotations[self::TRANSITION] = [
+                [
+                    'label' => $transitionEvent->getObjectName(),
+                    'type' => 'intent',
+                    'id' => $transitionEvent->getObjectId(),
+                    'data' => [
+                        'Transitions to' => [
+                            'label' => 'Transitions to',
+                            'messages' => [
+                                [
+                                    "success" => true,
+                                    "message" => $transitionsTo->label
+                                ]
+                            ]
+                        ]
+                    ]
+
                 ]
             ];
         }
