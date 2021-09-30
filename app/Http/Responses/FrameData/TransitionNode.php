@@ -16,6 +16,7 @@ class TransitionNode extends BaseNode
         );
 
         $transitionNode->status = 'transition';
+        $transitionNode->shouldDraw = true;
 
         return $transitionNode;
     }

@@ -4,7 +4,10 @@ namespace App\Http\Responses;
 
 use App\Http\Responses\FrameData\BaseNode;
 use Illuminate\Support\Collection;
+use OpenDialogAi\Core\Conversation\Events\Interpretation\CouldNotInterpret;
+use OpenDialogAi\Core\Conversation\Events\Interpretation\FewerExtractedAttributes;
 use OpenDialogAi\Core\Conversation\Events\Interpretation\InterpretationFailed;
+use OpenDialogAi\Core\Conversation\Events\Interpretation\LowerConfidenceLevel;
 use OpenDialogAi\Core\Conversation\Events\Operations\ConditionsFailed;
 use OpenDialogAi\Core\Conversation\Events\Storage\StoredEvent;
 use OpenDialogAi\Core\Conversation\Facades\ScenarioDataClient;
@@ -19,7 +22,10 @@ abstract class SelectionFrame extends FrameDataResponse
 
     public array $rejectionEvents = [
         ConditionsFailed::class,
-        InterpretationFailed::class
+        InterpretationFailed::class,
+        CouldNotInterpret::class,
+        LowerConfidenceLevel::class,
+        FewerExtractedAttributes::class
     ];
 
     public string $name = "Selected Path";

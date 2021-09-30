@@ -4,11 +4,8 @@ namespace App\Http\Responses;
 
 use App\Http\Responses\FrameData\BaseNode;
 use Illuminate\Support\Collection;
-use OpenDialogAi\Core\Conversation\Events\BaseConversationEvent;
 use OpenDialogAi\Core\Conversation\Events\Storage\StoredEvent;
-use OpenDialogAi\Core\Conversation\Facades\ScenarioDataClient;
 use OpenDialogAi\Core\Conversation\Scenario;
-use OpenDialogAi\Core\Conversation\ScenarioCollection;
 
 /**
  * This is a base class that frame response classes should extend.
@@ -44,9 +41,10 @@ abstract class FrameDataResponse
 
     public string $name = "";
 
+    public const TRANSITION        = "Transition";
     public const AVAILABLE_INTENTS = "Available Intents";
-    public const SELECTED = 'Selected';
-    public const REJECTED = 'Rejected';
+    public const SELECTED          = 'Selected';
+    public const REJECTED          = 'Rejected';
 
     public function __construct()
     {
@@ -143,6 +141,9 @@ abstract class FrameDataResponse
             }
 
             $node->status = $status;
+            if ($status !== BaseNode::NOT_CONSIDERED) {
+                $node->shouldDraw = true;
+            }
 
             // Only draw up the tree if this is not a starting state node and there is a parent
             if (!$node->startingState && $node->parentId) {
@@ -151,7 +152,10 @@ abstract class FrameDataResponse
         }
     }
 
-    public function setStartPoint()
+    /**
+     * Sets the start point on a node based on the $stateEvent
+     */
+    public function setStartPoint(): void
     {
         if ($this->stateEvent->getTurnId() && $this->stateEvent->getTurnId() !== 'undefined') {
             $this->setNodeAsStartPoint($this->stateEvent->getTurnId());
@@ -185,12 +189,20 @@ abstract class FrameDataResponse
      */
     private function formatResponse(): array
     {
+        // Expand should draw to show siblings for clarity
+        $parentIds = $this->nodes
+            ->where('shouldDraw', true)
+            ->whereNotNull('parentId')
+            ->map(fn ($node) => $node->parentId)
+            ->unique();
+
+        $this->nodes
+            ->whereIn('parentId', $parentIds->values())
+            ->each(fn ($node) => $node->shouldDraw = true);
+
         $this->nodes->each(function (BaseNode $node) {
-            if ($this->shouldDrawNode($node)) {
-                $node->shouldDraw = true;
+            if ($node->shouldDraw) {
                 $this->frameData[] = ['data' => $node->toArray()];
-            } else {
-                $node->shouldDraw = false;
             }
         });
 
@@ -244,48 +256,5 @@ abstract class FrameDataResponse
     protected function getScenarioIdFromEvent($eventClass)
     {
         return $this->getEventProperty($eventClass, 'scenarioId');
-    }
-
-    /**
-     * A node should be drawn if its status is anything apart from not_conisdered, it doesn't have a parent,  or
-     * any of its children have been considered
-     *
-     * @param BaseNode $node
-     * @return bool
-     */
-    private function shouldDrawNode(BaseNode $node): bool
-    {
-        if ($node->status !==  BaseNode::NOT_CONSIDERED) {
-            return true;
-        }
-
-        $parent = $this->getNode($node->parentId);
-        if (!$parent || $parent->status !== BaseNode::NOT_CONSIDERED) {
-            return true;
-        }
-
-        return $this->hasAnyConsideredChildren($node);
-    }
-
-    /**
-     * Recursively checks all of a nodes children and returns true if any have a status other that
-     * not_considered
-     *
-     * @param BaseNode $node
-     * @return bool
-     */
-    private function hasAnyConsideredChildren(BaseNode $node): bool
-    {
-        $children = $this->nodes->where('parentId', $node->id);
-
-        foreach ($children as $child) {
-            if ($child->status !== BaseNode::NOT_CONSIDERED) {
-                return true;
-            }
-
-            return $this->hasAnyConsideredChildren($child);
-        }
-
-        return false;
     }
 }
