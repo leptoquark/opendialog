@@ -714,10 +714,10 @@
     consola "^2.15.0"
     node-fetch "^2.6.1"
 
-"@opendialogai/opendialog-design-system-pkg@v1.1.1-2":
-  version "1.1.1-2"
-  resolved "https://registry.yarnpkg.com/@opendialogai/opendialog-design-system-pkg/-/opendialog-design-system-pkg-1.1.1-2.tgz#e0356304482b5caf1c2950b5d1bb0c754f14c93e"
-  integrity sha512-r8oG9hFmn74J8swf6XhzU/I6+M/hB2nah2inR7jm5hXbGrZM6TXDi/sbevQ/mVrEeFsVYfRhIldf1xQPOv8Z+g==
+"@opendialogai/opendialog-design-system-pkg@v1.1.2-1":
+  version "1.1.2-1"
+  resolved "https://registry.yarnpkg.com/@opendialogai/opendialog-design-system-pkg/-/opendialog-design-system-pkg-1.1.2-1.tgz#275a3edc99cafe7071dc026fb137e5d90ec3b812"
+  integrity sha512-WEMfkcMEbvv4o8FoCjgsaO/HvBzSx5LgLh/2vJavsHObeGrGcZSZT8kTU0Mi9pWZNWpWNsQCOPbh9i0hMQ1OBQ==
   dependencies:
     "@coreui/coreui" "^2.1.12"
     "@coreui/coreui-plugin-chartjs-custom-tooltips" "^1.3.1"
@@ -733,6 +733,7 @@
     cluster "^0.7.7"
     core-js "^3.1.4"
     cytoscape-dagre "^2.3.2"
+    cytoscape-node-html-label "^1.2.2"
     cytoscape-popper "^2.0.0"
     font-awesome "^4.7.0"
     he "^1.2.0"
@@ -2484,6 +2485,11 @@ cytoscape-dagre@^2.3.2:
   integrity sha512-dL9+RvGkatSlIdOKXiFwHpnpTo8ydFMqIYzZFkImJXNbDci3feyYxR46wFoaG9GFiWimc6XD9Lm0x29b1wvWpw==
   dependencies:
     dagre "^0.8.5"
+
+cytoscape-node-html-label@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/cytoscape-node-html-label/-/cytoscape-node-html-label-1.2.2.tgz#cad4942a52be2075f55521b3ea376daadc67d65f"
+  integrity sha512-oUVwrlsIlaJJ8QrQFSMdv3uXVXPg6tMH/Tfofr8JuZIovqI4fPqBi6sQgCMcVpS6k9Td0TTjowBsNRw32CESWg==
 
 cytoscape-popper@^2.0.0:
   version "2.0.0"
