@@ -21,11 +21,11 @@ abstract class SelectionFrame extends FrameDataResponse
     public string $selectedIntentEvent;
 
     public array $rejectionEvents = [
+        LowerConfidenceLevel::class,
+        FewerExtractedAttributes::class,
         ConditionsFailed::class,
         InterpretationFailed::class,
-        CouldNotInterpret::class,
-        LowerConfidenceLevel::class,
-        FewerExtractedAttributes::class
+        CouldNotInterpret::class
     ];
 
     public string $name = "Selected Path";

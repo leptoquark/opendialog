@@ -157,13 +157,13 @@ abstract class FrameDataResponse
      */
     public function setStartPoint(): void
     {
-        if ($this->stateEvent->getTurnId() && $this->stateEvent->getTurnId() !== 'undefined') {
+        if ($this->stateEvent->getTurnId() !== 'undefined' && $this->stateEvent->getTurnStatus() !== 'OUT_OF_TURN') {
             $this->setNodeAsStartPoint($this->stateEvent->getTurnId());
-        } else if ($this->stateEvent->getSceneId() && $this->stateEvent->getSceneId() !== 'undefined') {
+        } else if ($this->stateEvent->getSceneId() !== 'undefined') {
             $this->setNodeAsStartPoint($this->stateEvent->getSceneId());
-        } else if ($this->stateEvent->getConversationId() && $this->stateEvent->getConversationId() !== 'undefined') {
+        } else if ($this->stateEvent->getConversationId() !== 'undefined') {
             $this->setNodeAsStartPoint($this->stateEvent->getConversationId());
-        } else if ($this->stateEvent->getScenarioId() && $this->stateEvent->getScenarioId() !== 'undefined') {
+        } else if ($this->stateEvent->getScenarioId() !== 'undefined') {
             $this->setNodeAsStartPoint($this->stateEvent->getScenarioId());
         }
     }
