@@ -17,7 +17,7 @@
         "laravel/tinker": "^2.6",
         "laravel/ui": "^3.2",
         "maennchen/zipstream-php": "^2.0",
-        "opendialogai/core": "dev-OPNDLG-1004_preview_logs_poc",
+        "opendialogai/core": "dev-feature/OPNDLG-890_preview_conv_logs",
         "opendialogai/dgraph-docker": "21.03.0.2",
         "opendialogai/webchat": "dev-feature/request-id",
         "phalcongelist/php-diff": "^2.0",
