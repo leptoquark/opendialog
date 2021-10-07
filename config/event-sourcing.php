@@ -3,6 +3,16 @@
 return [
 
     /*
+     * OD Custom. Custom config specifically for the OD app
+     */
+
+    /*
+     * The time to live for events. This is the time in minutes the events are valid for.
+     * Used in the stored-events:clear command. Any events older than this will be deleted
+     */
+    'time_to_live' => env('CONVERSATION_EVENTS_TTL', 60),
+
+    /*
      * These directories will be scanned for projectors and reactors. They
      * will be registered to Projectionist automatically.
      */
@@ -59,7 +69,7 @@ return [
      * can change this to a class of your own. The only restriction is that
      * it should implement \Spatie\EventSourcing\StoredEvents\Repositories\EloquentStoredEventRepository.
      */
-    'stored_event_repository' => Spatie\EventSourcing\StoredEvents\Repositories\EloquentStoredEventRepository::class,
+    'stored_event_repository' => \OpenDialogAi\Core\Conversation\Events\Storage\StoredEventRepository::class,
 
     /*
      * This class is responsible for storing snapshots. To add extra behaviour you
