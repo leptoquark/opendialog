@@ -10,30 +10,6 @@ use Tests\TestCase;
 
 class ClearStoredEventsTest extends TestCase
 {
-    public function testDeleteEventsNoUserId()
-    {
-
-        $events = [];
-        for ($i = 0; $i < 100; $i++) {
-             $events[] = [
-                 'event_class' => ScenarioRequestReceived::class,
-                 'event_properties' => "{}",
-                 'meta_data' => "{}",
-                 'user_id' => null,
-                 'request_id' => uniqid(),
-                 'created_at' => now()
-             ];
-        }
-
-        StoredEvent::withoutEvents(fn () => StoredEvent::insert($events));
-
-        $this->assertDatabaseCount('stored_events', 100);
-
-        Artisan::call('stored-events:clear');
-
-        $this->assertDatabaseCount('stored_events', 0);
-    }
-
     public function testDeleteOldEvents()
     {
         $events = [];
