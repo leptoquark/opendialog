@@ -2991,12 +2991,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "88cf7a97a770c89c91d4ef9083613f161b653173"
+                "reference": "a549dbfb628c88a2b7dc021ca742a80249245d5e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/88cf7a97a770c89c91d4ef9083613f161b653173",
-                "reference": "88cf7a97a770c89c91d4ef9083613f161b653173",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/a549dbfb628c88a2b7dc021ca742a80249245d5e",
+                "reference": "a549dbfb628c88a2b7dc021ca742a80249245d5e",
                 "shasum": ""
             },
             "require": {
@@ -3079,7 +3079,7 @@
                 "issues": "https://github.com/opendialogai/core/issues",
                 "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-890_preview_conv_logs"
             },
-            "time": "2021-10-06T10:17:48+00:00"
+            "time": "2021-10-07T15:12:41+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
