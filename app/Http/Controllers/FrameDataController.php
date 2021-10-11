@@ -65,7 +65,7 @@ class FrameDataController extends Controller
      */
     private function getAllEventsForRequest()
     {
-        return StoredEvent::where('meta_data->request_id', $this->requestId)
+        return config('event-sourcing.stored_event_model')::where('meta_data->request_id', $this->requestId)
             ->orderBy('meta_data->timestamp');
     }
 }

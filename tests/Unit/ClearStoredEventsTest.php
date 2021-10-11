@@ -5,7 +5,6 @@ namespace Tests\Unit;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use OpenDialogAi\Core\Conversation\Events\Sensor\ScenarioRequestReceived;
-use OpenDialogAi\Core\Conversation\Events\Storage\StoredEvent;
 use Tests\TestCase;
 
 class ClearStoredEventsTest extends TestCase
@@ -35,7 +34,9 @@ class ClearStoredEventsTest extends TestCase
             ];
         }
 
-        StoredEvent::withoutEvents(fn () => StoredEvent::insert($events));
+        config('event-sourcing.stored_event_model')::withoutEvents(
+            fn () => config('event-sourcing.stored_event_model')::insert($events)
+        );
 
         $this->assertDatabaseCount('stored_events', 100);
 
@@ -71,7 +72,9 @@ class ClearStoredEventsTest extends TestCase
             ];
         }
 
-        StoredEvent::withoutEvents(fn () => StoredEvent::insert($events));
+        config('event-sourcing.stored_event_model')::withoutEvents(
+            fn () => config('event-sourcing.stored_event_model')::insert($events)
+        );
 
         $this->assertDatabaseCount('stored_events', 100);
 
