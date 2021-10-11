@@ -19,7 +19,9 @@ class ClearStoredEvents extends Command
 
         $this->info(sprintf("Deleting all events older than %d minutes", $timeToLive));
 
-        $deleted = StoredEvent::where('created_at', '<=', now()->subMinutes($timeToLive))->delete();
+        $deleted = config('event-sourcing.stored_event_model')::where('created_at', '<=', now()
+            ->subMinutes($timeToLive))
+            ->delete();
 
         $this->info(sprintf("Deleted %d events", $deleted));
 

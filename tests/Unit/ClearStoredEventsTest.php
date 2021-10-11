@@ -38,12 +38,12 @@ class ClearStoredEventsTest extends TestCase
             fn () => config('event-sourcing.stored_event_model')::insert($events)
         );
 
-        $this->assertDatabaseCount('stored_events', 100);
+        $this->assertCount(100, config('event-sourcing.stored_event_model')::all());
 
         Artisan::call('stored-events:clear');
 
         // 50 should be less than 1 hour old
-        $this->assertDatabaseCount('stored_events', 50);
+        $this->assertCount(50, config('event-sourcing.stored_event_model')::all());
     }
 
     public function testTimeToLive()
@@ -76,11 +76,11 @@ class ClearStoredEventsTest extends TestCase
             fn () => config('event-sourcing.stored_event_model')::insert($events)
         );
 
-        $this->assertDatabaseCount('stored_events', 100);
+        $this->assertCount(100, config('event-sourcing.stored_event_model')::all());
 
         Artisan::call('stored-events:clear');
 
         // 50 should be less than 5 minutes old
-        $this->assertDatabaseCount('stored_events', 50);
+        $this->assertCount(50, config('event-sourcing.stored_event_model')::all());
     }
 }
