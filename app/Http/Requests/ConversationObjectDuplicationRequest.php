@@ -29,7 +29,8 @@ class ConversationObjectDuplicationRequest extends FormRequest
     {
         return $this->odIdRule() + [
             'name' => ['bail', 'string', 'filled'],
-            'od_id' => ['bail', 'string', 'filled']
+            'od_id' => ['bail', 'string', 'filled'],
+            'description' => ['bail', 'string', 'filled'],
         ];
     }
 
@@ -66,6 +67,18 @@ class ConversationObjectDuplicationRequest extends FormRequest
 
         $object->setOdId($odId);
         $object->setName($name);
+
+        return $object;
+    }
+
+    /**
+     * @param ConversationObject $object
+     * @return ConversationObject
+     */
+    public function setDescription(ConversationObject $object): ConversationObject
+    {
+        $description = $this->get('description', $object->getDescription());
+        $object->setDescription($description);
 
         return $object;
     }
