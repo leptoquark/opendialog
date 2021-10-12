@@ -40,6 +40,10 @@ class FrameDataController extends Controller
         $totalFrames = 4;
         $allEvents = $this->getAllEventsForRequest()->get();
 
+        if (!$allEvents->count()) {
+            return response("no events", 404);
+        }
+
         $frames = [
             1 => (new IncomingAvailableIntentsFrame())->addEvents($allEvents)->generateResponse(),
             2 => (new IncomingSelectionFrame())->addEvents($allEvents)->generateResponse(),
@@ -51,6 +55,8 @@ class FrameDataController extends Controller
         $incomingContextFrame = (new ContextResponse())->setContextEvent($incomingContextEvent);
         $outgoingContextEvent = $allEvents->where('event_class', OutgoingIntentStateUpdate::class)->first();
         $outgoingContextFrame = (new ContextResponse())->setContextEvent($outgoingContextEvent);
+
+        config('event-sourcing.stored_event_model')::destroy($allEvents->map(fn ($event) => $event->id));
 
         return [
             'incoming_context' => $incomingContextFrame->generateResponse(),
@@ -65,7 +71,7 @@ class FrameDataController extends Controller
      */
     private function getAllEventsForRequest()
     {
-        return config('event-sourcing.stored_event_model')::where('meta_data->request_id', $this->requestId)
+        return config('event-sourcing.stored_event_model')::where('request_id', $this->requestId)
             ->orderBy('meta_data->timestamp');
     }
 }

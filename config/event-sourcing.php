@@ -7,6 +7,11 @@ return [
      */
 
     /*
+     * Global override for whether events should be stored or not
+     */
+    'store_events' => env('STORE_CONVERSATION_EVENTS', true),
+
+    /*
      * The time to live for events. This is the time in minutes the events are valid for.
      * Used in the stored-events:clear command. Any events older than this will be deleted
      */
