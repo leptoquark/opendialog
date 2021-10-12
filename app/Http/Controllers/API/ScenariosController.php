@@ -13,8 +13,8 @@ use App\Http\Resources\ScenarioDeploymentKeyResource;
 use App\Http\Resources\ScenarioResource;
 use App\ImportExportHelpers\PathSubstitutionHelper;
 use App\ImportExportHelpers\ScenarioImportExportHelper;
-use App\Template;
 use App\ScenarioAccessToken;
+use App\Template;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -313,10 +313,14 @@ class ScenariosController extends Controller
             $tempScenario = new Scenario();
             $tempScenario->setOdId($originalTemplateOdId);
             $tempScenario->setName($data['name']);
+            $tempScenario->setDescription($data['description']);
 
             $tempScenario = $request->setUniqueOdId($tempScenario, null, false, true);
+            $tempScenario = $request->setDescription($tempScenario);
+
             $data['od_id'] = $tempScenario->getOdId();
             $data['name'] = $tempScenario->getName();
+            $data['description'] = $tempScenario->getDescription();
 
             $oldPath = PathSubstitutionHelper::createPath($originalTemplateOdId);
             $newPath = PathSubstitutionHelper::createPath($tempScenario->getOdId());
