@@ -40,7 +40,7 @@ class ClearStoredEventsTest extends TestCase
 
         $this->assertCount(100, config('event-sourcing.stored_event_model')::all());
 
-        Artisan::call('stored-events:clear');
+        Artisan::call('stored-events:clear', ['--yes' => true]);
 
         // 50 should be less than 1 hour old
         $this->assertCount(50, config('event-sourcing.stored_event_model')::all());
@@ -78,7 +78,7 @@ class ClearStoredEventsTest extends TestCase
 
         $this->assertCount(100, config('event-sourcing.stored_event_model')::all());
 
-        Artisan::call('stored-events:clear');
+        Artisan::call('stored-events:clear', ['--yes' => true]);
 
         // 50 should be less than 5 minutes old
         $this->assertCount(50, config('event-sourcing.stored_event_model')::all());

@@ -8,7 +8,7 @@ use OpenDialogAi\Core\Conversation\Events\Storage\StoredEvent;
 
 class ClearStoredEvents extends Command
 {
-    protected $signature = 'stored-events:clear';
+    protected $signature = 'stored-events:clear {--y|yes}';
 
     protected $description = 'Clears out all stored events that either have no user id or all up until the most recent request for
                               events that have a user id';
@@ -16,6 +16,15 @@ class ClearStoredEvents extends Command
     public function handle()
     {
         $timeToLive = config('event-sourcing.time_to_live');
+
+        $confirmPreparationText = sprintf(
+            "Are you sure you want to prepare stored events older than %d minutes for deletion?",
+            $timeToLive
+        );
+
+        if (!$this->option("yes") && !$this->confirm($confirmPreparationText)) {
+            return;
+        }
 
         $this->info(sprintf("Deleting all events older than %d minutes", $timeToLive));
 
