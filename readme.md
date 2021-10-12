@@ -19,16 +19,19 @@ For all the details of how OpenDialog helps you build sophisticated conversation
 
 # Trying out OpenDialog
 
-If you want to see OpenDialog in action you can try out the latest version through our automatically produced Docker image. 
+If you want to see OpenDialog in action you can try out the latest version through our automatically produced Docker image.
+
+The [OpenDialog Quick Start Repo](https://github.com/opendialogai/quick-start) contains a `docker-compose.yml` file that will pull in the latest OpenDialog docker image and spin it up alongside all other containers needed to test out OpenDialog
 
 As long as you have Docker installed on your local machine you can do:
-- `cd od-docker-demo`
+- `git clone https://github.com/opendialogai/quick-start.git`
+- `cd quick-start`
 - `docker-compose up -d app`
 - `docker-compose exec app bash docker/scripts/update-docker.sh`
 
 You can then visit http://localhost and login to OpenDialog with admin@example.com / opendialog - you can also view the full page webchat experience on http://localhost/web-chat
 
-There are more detailed instructions in readme the `od-docker-demo` directory
+There are more detailed instructions in readme the `quick-start` repo
 
 # Learning about OpenDialog
 
