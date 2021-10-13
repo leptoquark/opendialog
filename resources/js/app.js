@@ -12,6 +12,7 @@ import router from '@/router/index'
 
 import OpenDialogAdmin from '@opendialogai/opendialog-design-system-pkg/src'
 import PerfectScrollbar from 'vue2-perfect-scrollbar'
+import VueCytoscape from 'vue-cytoscape'
 
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import VueCookies from 'vue-cookies'
@@ -24,6 +25,7 @@ window.Vue.use(BootstrapVue);
 window.Vue.use(BootstrapVueIcons);
 window.Vue.use(VueCookies);
 window.Vue.use(PerfectScrollbar)
+window.Vue.use(VueCytoscape)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

@@ -9,6 +9,7 @@ use OpenDialogAi\Core\Conversation\Behavior;
 use OpenDialogAi\Core\Conversation\Condition;
 use OpenDialogAi\Core\Conversation\Conversation;
 use OpenDialogAi\Core\Conversation\Intent;
+use OpenDialogAi\Core\Conversation\MessageTemplate;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\Scene;
 use OpenDialogAi\Core\Conversation\Turn;
@@ -45,6 +46,9 @@ class FocusedTurnResource extends JsonResource
                 Intent::SPEAKER,
                 Intent::BEHAVIORS => Behavior::FIELDS,
                 Intent::CONDITIONS => Condition::FIELDS,
+                Intent::MESSAGE_TEMPLATES => [
+                    MessageTemplate::UID,
+                ]
             ],
             Turn::RESPONSE_INTENTS => [
                 Intent::UID,
@@ -55,6 +59,9 @@ class FocusedTurnResource extends JsonResource
                 Intent::SPEAKER,
                 Intent::BEHAVIORS => Behavior::FIELDS,
                 Intent::CONDITIONS => Condition::FIELDS,
+                Intent::MESSAGE_TEMPLATES => [
+                    MessageTemplate::UID,
+                ]
             ],
             Turn::SCENE => [
                 Scene::UID,

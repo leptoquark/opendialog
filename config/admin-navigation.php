@@ -46,6 +46,11 @@ return [
         ],
     'help' => [
         [
+            'title' => 'Watch Tutorials',
+            'url' => 'https://docs.opendialog.ai/getting-started-1/getting-started-with-opendialog',
+            'icon' => 'tutorials'
+        ],
+        [
             'title' => 'Documentation',
             'url' => 'https://docs.opendialog.ai',
             'icon' => 'document'

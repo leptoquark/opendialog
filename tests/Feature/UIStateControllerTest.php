@@ -15,6 +15,8 @@ use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
 use OpenDialogAi\Core\Conversation\Facades\TransitionDataClient;
 use OpenDialogAi\Core\Conversation\Intent;
 use OpenDialogAi\Core\Conversation\IntentCollection;
+use OpenDialogAi\Core\Conversation\MessageTemplate;
+use OpenDialogAi\Core\Conversation\MessageTemplateCollection;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\Scene;
 use OpenDialogAi\Core\Conversation\SceneCollection;
@@ -623,6 +625,34 @@ class UIStateControllerTest extends TestCase
     {
         $fakeTurn = $this->createFakeConversation('0x0001', '0x0002', '0x0003', '0x0004');
 
+        $fakeIntent = new Intent($fakeTurn);
+        $fakeIntent->setUid('0x0004');
+        $fakeIntent->setOdId('first_intent');
+        $fakeIntent->setName('First intent');
+        $fakeIntent->setDescription('The first intent');
+        $fakeIntent->setCreatedAt($fakeTurn->getCreatedAt());
+        $fakeIntent->setUpdatedAt($fakeTurn->getUpdatedAt());
+
+        $fakeTurn->setRequestIntents(new IntentCollection([$fakeIntent]));
+
+        $message1 = new MessageTemplate();
+        $message1->setIntent($fakeIntent);
+        $message1->setUid('0x0005');
+        $message1->setOdId('first');
+        $message1->setName('First');
+        $message1->setCreatedAt($fakeIntent->getCreatedAt());
+        $message1->setUpdatedAt($fakeIntent->getUpdatedAt());
+
+        $message2 = new MessageTemplate();
+        $message2->setIntent($fakeIntent);
+        $message2->setUid('0x0006');
+        $message2->setOdId('second');
+        $message2->setName('Second');
+        $message2->setCreatedAt($fakeIntent->getCreatedAt());
+        $message2->setUpdatedAt($fakeIntent->getUpdatedAt());
+
+        $fakeIntent->setMessageTemplates(new MessageTemplateCollection([$message1, $message2]));
+
         ConversationDataClient::shouldReceive('getTurnByUid')
             ->once()
             ->with($fakeTurn->getUid(), false)
@@ -661,9 +691,28 @@ class UIStateControllerTest extends TestCase
                                 "created_at"=> "2021-02-24T09:30:00+0000",
                                 "behaviors" => [],
                                 "conditions" => [],
-                                "intents" => []
+                                "intents" => [
+                                    [
+                                        "order" => "REQUEST",
+                                        "intent" => [
+                                            "id" => "0x0004",
+                                            "od_id" => "first_intent",
+                                            "name" => "First intent",
+                                            "description" => "The first intent",
+                                            "behaviors" => [],
+                                            "conditions" => [],
+                                            "message_templates" => [
+                                                [
+                                                    "id" => "0x0005",
+                                                ],
+                                                [
+                                                    "id" => "0x0006",
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ]
                             ]
-
                         ]
                     ]
                 ]
@@ -831,6 +880,7 @@ class UIStateControllerTest extends TestCase
                             "speaker" => "USER",
                             "behaviors" => [],
                             "conditions" => [],
+                            "message_templates" => [],
                         ],
                         "order" => "RESPONSE"
                     ],
@@ -844,6 +894,7 @@ class UIStateControllerTest extends TestCase
                             "speaker" => "APP",
                             "behaviors" => [],
                             "conditions" => [],
+                            "message_templates" => [],
                         ],
                         "order" => "REQUEST"
                     ]
