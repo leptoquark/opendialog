@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8394766ef93fc23e6343278f2230feb3",
+    "content-hash": "ab229b898798c412fbbea2f70c244441",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3117,16 +3117,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "dev-feature/OPNDLG-890_preview_conv_logs",
+            "version": "1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "5cb0b6f80ecf9bae1f832613b6cae1b3113dacd5"
+                "reference": "e12c496d6439489e9631c24319ee43cbaee5cf9c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/5cb0b6f80ecf9bae1f832613b6cae1b3113dacd5",
-                "reference": "5cb0b6f80ecf9bae1f832613b6cae1b3113dacd5",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/e12c496d6439489e9631c24319ee43cbaee5cf9c",
+                "reference": "e12c496d6439489e9631c24319ee43cbaee5cf9c",
                 "shasum": ""
             },
             "require": {
@@ -3206,9 +3206,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-890_preview_conv_logs"
+                "source": "https://github.com/opendialogai/core/tree/1.5.0"
             },
-            "time": "2021-10-12T06:57:42+00:00"
+            "time": "2021-10-12T11:10:51+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -3252,16 +3252,16 @@
         },
         {
             "name": "opendialogai/webchat",
-            "version": "dev-feature/request-id",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "4ba9119f3f04a99256a06f9e7f6b909cc6cba3e7"
+                "reference": "b9bf605f2db4b3e98a858e161b4333301eb06f4b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/4ba9119f3f04a99256a06f9e7f6b909cc6cba3e7",
-                "reference": "4ba9119f3f04a99256a06f9e7f6b909cc6cba3e7",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/b9bf605f2db4b3e98a858e161b4333301eb06f4b",
+                "reference": "b9bf605f2db4b3e98a858e161b4333301eb06f4b",
                 "shasum": ""
             },
             "require": {
@@ -3269,7 +3269,7 @@
                 "php": "^7.4 || ^8.0"
             },
             "require-dev": {
-                "opendialogai/core": "1.2.0",
+                "opendialogai/core": "1.5.0",
                 "orchestra/testbench": "^6.0",
                 "phpunit/phpunit": "^9.0",
                 "squizlabs/php_codesniffer": "^3.4"
@@ -3303,9 +3303,9 @@
             "description": "Webchat front end component for the Open Dialog project",
             "support": {
                 "issues": "https://github.com/opendialogai/webchat/issues",
-                "source": "https://github.com/opendialogai/webchat/tree/feature/request-id"
+                "source": "https://github.com/opendialogai/webchat/tree/1.3.0"
             },
-            "time": "2021-09-09T15:59:55+00:00"
+            "time": "2021-10-12T11:24:07+00:00"
         },
         {
             "name": "opis/closure",
@@ -11949,10 +11949,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "opendialogai/core": 20,
-        "opendialogai/webchat": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
