@@ -3476,12 +3476,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "db4166f01aa14069d7cf077a6f6ad9c8eea33b93"
+                "reference": "27da5f6ea8ae4763dccd8a2f5533b7bfd56fa2c3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/db4166f01aa14069d7cf077a6f6ad9c8eea33b93",
-                "reference": "db4166f01aa14069d7cf077a6f6ad9c8eea33b93",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/27da5f6ea8ae4763dccd8a2f5533b7bfd56fa2c3",
+                "reference": "27da5f6ea8ae4763dccd8a2f5533b7bfd56fa2c3",
                 "shasum": ""
             },
             "require": {
@@ -3525,7 +3525,7 @@
                 "issues": "https://github.com/opendialogai/webchat/issues",
                 "source": "https://github.com/opendialogai/webchat/tree/feature/OPNDLG-1021_typing_indicator_on_send"
             },
-            "time": "2021-10-20T17:03:57+00:00"
+            "time": "2021-10-20T17:07:19+00:00"
         },
         {
             "name": "opis/closure",
