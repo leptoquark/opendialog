@@ -54,7 +54,6 @@
       <script>
         window.openDialogSettings = {
           url: "{{ URL::to('/') }}",
-          validPath: 'admin/demo',
           user: {
             custom: {
               selected_scenario: "{{request()->get('selected_scenario')}}"
