@@ -37,19 +37,17 @@
       <app></app>
     </div>
 
-    @if (request()->route()->getName() == 'webchat-demo' && request()->get('selected_scenario'))
-      <script>
-        window.openDialogSettings = {
-          url: "{{ URL::to('/') }}",
-          user: {
-            custom: {
-              selected_scenario: "{{request()->get('selected_scenario')}}"
-            }
-          },
-        };
-      </script>
 
-      <script src="{{ URL::to('/') }}/vendor/webchat/js/opendialog-bot.js"></script>
-    @endif
+    <script>
+      window.openDialogSettings = {
+        url: "{{ env("APP_URL") }}",
+        user: {
+          custom: {
+            selected_scenario: "{{request()->get('scenario')}}"
+          }
+        },
+      };
+    </script>
+
   </body>
 </html>
