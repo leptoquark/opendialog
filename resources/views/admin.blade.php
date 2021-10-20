@@ -37,19 +37,6 @@
       <app></app>
     </div>
 
-
-    <script>
-      window.openDialogSettings = {
-        url: "{{ env("APP_URL") }}",
-        validPath: 'admin/demo',
-        user: {
-          custom: {
-            selected_scenario: "{{request()->get('scenario')}}"
-          }
-        },
-      };
-    </script>
-
     @if (request()->route()->getName() == 'webchat-demo' && request()->get('selected_scenario'))
       <script>
         window.openDialogSettings = {
