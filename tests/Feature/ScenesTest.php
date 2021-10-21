@@ -39,9 +39,9 @@ class ScenesTest extends TestCase
 
     public function testGetSceneNotFound()
     {
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with('test', false)
+            ->with('test')
             ->andThrow(new ConversationObjectNotFoundException());
 
         $this->actingAs($this->user, 'api')
@@ -192,9 +192,9 @@ class ScenesTest extends TestCase
         $fakeScene->setUpdatedAt(Carbon::parse('2021-02-24T09:30:00+0000'));
         $fakeScene->setTurns(new TurnCollection());
 
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with($fakeScene->getUid(), false)
+            ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
 
         $this->actingAs($this->user, 'api')
@@ -240,9 +240,9 @@ class ScenesTest extends TestCase
         $fakeSceneUpdated->setTurns(new TurnCollection());
 
 
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with($fakeScene->getUid(), false)
+            ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
 
         ConversationDataClient::shouldReceive('updateScene')
@@ -278,9 +278,9 @@ class ScenesTest extends TestCase
         $fakeScene->setName('Welcome scene');
         $fakeScene->setDescription('A welcome scene');
 
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with($fakeScene->getUid(), false)
+            ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
 
         ConversationDataClient::shouldReceive('deleteSceneByUid')
@@ -306,9 +306,9 @@ class ScenesTest extends TestCase
         $fakeScene->setName('Welcome scene');
         $fakeScene->setDescription('A welcome scene');
 
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with($fakeScene->getUid(), false)
+            ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
 
         ConversationDataClient::shouldReceive('deleteSceneByUid')
@@ -335,9 +335,9 @@ class ScenesTest extends TestCase
         $fakeScene->setName('Welcome scene');
         $fakeScene->setDescription('A welcome scene');
 
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with($fakeScene->getUid(), false)
+            ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
 
         ConversationDataClient::shouldReceive('deleteSceneByUid')
@@ -379,9 +379,9 @@ class ScenesTest extends TestCase
         $fakeScene->setName('Welcome scene');
         $fakeScene->setDescription('A welcome scene');
 
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with($fakeScene->getUid(), false)
+            ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
 
         ConversationDataClient::shouldReceive('deleteSceneByUid')
@@ -411,7 +411,7 @@ class ScenesTest extends TestCase
         $scene = $conversation->getScenes()->getObjectsWithId('example_scene')->first();
 
         // Called during route binding
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
             ->andReturn($scene);
 

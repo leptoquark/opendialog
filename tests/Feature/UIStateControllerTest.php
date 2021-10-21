@@ -12,6 +12,7 @@ use OpenDialogAi\Core\Conversation\Conversation;
 use OpenDialogAi\Core\Conversation\ConversationCollection;
 use OpenDialogAi\Core\Conversation\Exceptions\ConversationObjectNotFoundException;
 use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
+use OpenDialogAi\Core\Conversation\Facades\SceneDataClient;
 use OpenDialogAi\Core\Conversation\Facades\TransitionDataClient;
 use OpenDialogAi\Core\Conversation\Intent;
 use OpenDialogAi\Core\Conversation\IntentCollection;
@@ -381,9 +382,9 @@ class UIStateControllerTest extends TestCase
 
         $fakeTurn->setResponseIntents(new IntentCollection([$fakeIntent2, $fakeIntent3]));
 
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with($fakeScene->getUid(), false)
+            ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
 
         ConversationDataClient::shouldReceive('getScenarioWithFocusedScene')
@@ -546,9 +547,9 @@ class UIStateControllerTest extends TestCase
 
         $fakeTurn->setResponseIntents(new IntentCollection([$fakeIntent2, $fakeIntent3]));
 
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with($fakeScene->getUid(), false)
+            ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
 
         ConversationDataClient::shouldReceive('getScenarioWithFocusedScene')
