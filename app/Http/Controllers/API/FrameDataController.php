@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Responses\IncomingAvailableIntentsFrame;
 use App\Http\Responses\ContextResponse;
 use App\Http\Responses\IncomingSelectionFrame;
