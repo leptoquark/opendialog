@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d8ef8f28a88e7230458dcf9d7a3156ef",
+    "content-hash": "22084caa7ca97a506cc2756d77aea0ed",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3335,16 +3335,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "1.6.0",
+            "version": "dev-bug/intent-transition-event-fix",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "10e57b334a35134bf2265f29d5fdb34f20f3bfe7"
+                "reference": "77e3a3b0c5a1145fc48f665d096ae8d1397f9bf5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/10e57b334a35134bf2265f29d5fdb34f20f3bfe7",
-                "reference": "10e57b334a35134bf2265f29d5fdb34f20f3bfe7",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/77e3a3b0c5a1145fc48f665d096ae8d1397f9bf5",
+                "reference": "77e3a3b0c5a1145fc48f665d096ae8d1397f9bf5",
                 "shasum": ""
             },
             "require": {
@@ -3425,9 +3425,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/1.6.0"
+                "source": "https://github.com/opendialogai/core/tree/bug/intent-transition-event-fix"
             },
-            "time": "2021-10-20T12:27:58+00:00"
+            "time": "2021-10-21T12:34:57+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -12114,7 +12114,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "opendialogai/core": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
