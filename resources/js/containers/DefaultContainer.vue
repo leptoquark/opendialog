@@ -4,6 +4,9 @@
       <Sidebar :navigationItems="navigationItems" :user="user" :minimized="false"/>
       <main class="main">
           <router-view></router-view>
+          <transition name="loader">
+            <Loader v-if="loading"></Loader>
+          </transition>
       </main>
     </div>
   </div>
@@ -14,6 +17,22 @@
 export default {
   name: 'DefaultContainer',
   components: {},
+  data() {
+    return {
+      loading: false
+    }
+  },
+  created() {
+    this.loading = this.$store.state.loading
+    this.unsubscribe = this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'toggleLoading') {
+        this.loading = state.loading
+      }
+    })
+  },
+  beforeDestroy() {
+    this.unsubscribe()
+  },
   computed: {
     navigationItems () {
       return window.NavigationItems
@@ -26,6 +45,27 @@ export default {
         image: '/images/logo.svg'
       };
     }
-  },
+  }
 }
 </script>
+
+<style lang="scss" scoped>
+.loader-enter {
+  opacity: 0;
+}
+.loader-enter-active {
+  transition: opacity 0.2s ease-in;
+}
+.loader-enter-to {
+  opacity: 1;
+}
+.loader-leave {
+  opacity: 1;
+}
+.loader-leave-active {
+  transition: opacity 0.2s ease-out;
+}
+.loader-leave-to {
+  opacity: 0;
+}
+</style>
