@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use OpenDialogAi\Core\Conversation\DataClients\MessageTemplateDataClient;
 use OpenDialogAi\Core\Conversation\Exceptions\ConversationObjectNotFoundException;
 use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
+use OpenDialogAi\Core\Conversation\Facades\SceneDataClient;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -46,7 +47,7 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::bind('scene', function ($value) {
             try {
-                return ConversationDataClient::getSceneByUid($value, false);
+                return SceneDataClient::getFullSceneGraph($value);
             } catch (ConversationObjectNotFoundException $exception) {
                 throw new ModelNotFoundException(sprintf('Scene with ID %s not found', $value));
             }
