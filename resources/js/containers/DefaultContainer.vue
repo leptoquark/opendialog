@@ -2,10 +2,10 @@
   <div class="app">
     <div class="app-body">
       <Sidebar :navigationItems="navigationItems" :user="user" :minimized="false"/>
-      <main class="main">
-          <router-view></router-view>
-          <transition name="loader">
-            <Loader v-if="loading"></Loader>
+      <main :class="['main', {'main--loading': loading}]">
+          <transition name="loader" mode="out-in">
+            <router-view v-if="!loading"></router-view>
+            <Loader v-else></Loader>
           </transition>
       </main>
     </div>
