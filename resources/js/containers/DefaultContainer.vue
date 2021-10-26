@@ -2,10 +2,12 @@
   <div class="app">
     <div class="app-body">
       <Sidebar :navigationItems="navigationItems" :user="user" :minimized="false"/>
-      <main :class="['main', {'main--loading': loading}]">
-          <transition name="loader" mode="out-in">
-            <router-view v-if="!loading"></router-view>
-            <Loader v-else></Loader>
+      <main class="main">
+          <div :class="['main__view-container', {'main__view-container--loading': loading}]">
+            <router-view ></router-view>
+          </div>
+          <transition name="loader">
+            <Loader v-show="loading"></Loader>
           </transition>
       </main>
     </div>
@@ -50,6 +52,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.main__view-container {
+  height: 100%;
+
+  &--loading {
+    overflow: hidden;
+  }
+}
+
+
 .loader-enter {
   opacity: 0;
 }
