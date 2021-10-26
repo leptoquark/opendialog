@@ -236,6 +236,31 @@ class CreateCoreConfigurationsTest extends TestCase
         ])->first());
     }
 
+    public function testAddTypingIndicatorOnSend()
+    {
+        $this->artisan('configurations:create up -u 1 --non-interactive')
+            ->assertExitCode(0)
+            ->run();
+
+        $this->assertCount(1, ComponentConfiguration::all());
+
+        $this->assertNotNull(ComponentConfiguration::where([
+            'name' => ConfigurationDataHelper::DEFAULT_CALLBACK,
+            'scenario_id' => '',
+        ])->first());
+
+        $this->artisan('configurations:create down -u 1 --non-interactive')
+            ->assertExitCode(0)
+            ->run();
+
+        $this->assertCount(0, ComponentConfiguration::all());
+
+        $this->assertNull(ComponentConfiguration::where([
+            'name' => ConfigurationDataHelper::DEFAULT_CALLBACK,
+            'scenario_id' => '',
+        ])->first());
+    }
+
     public function testNothingToRun()
     {
         $this->mockWebchatSettings();
