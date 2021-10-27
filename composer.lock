@@ -3339,12 +3339,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "e60f51fba030a4d1717c2685442158584b3cb0d6"
+                "reference": "4e8dc9df53e978d844f07e20de19d699ca53a09c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/e60f51fba030a4d1717c2685442158584b3cb0d6",
-                "reference": "e60f51fba030a4d1717c2685442158584b3cb0d6",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/4e8dc9df53e978d844f07e20de19d699ca53a09c",
+                "reference": "4e8dc9df53e978d844f07e20de19d699ca53a09c",
                 "shasum": ""
             },
             "require": {
@@ -3427,7 +3427,7 @@
                 "issues": "https://github.com/opendialogai/core/issues",
                 "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-1020_fullpage_chat_auth"
             },
-            "time": "2021-10-20T16:40:30+00:00"
+            "time": "2021-10-27T10:35:10+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -3475,12 +3475,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "af4dd77aa6f62a1f8514b14773839a504a25b426"
+                "reference": "51ca7154143d32c66aa414ee2521eea8f90a0080"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/af4dd77aa6f62a1f8514b14773839a504a25b426",
-                "reference": "af4dd77aa6f62a1f8514b14773839a504a25b426",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/51ca7154143d32c66aa414ee2521eea8f90a0080",
+                "reference": "51ca7154143d32c66aa414ee2521eea8f90a0080",
                 "shasum": ""
             },
             "require": {
@@ -3524,7 +3524,7 @@
                 "issues": "https://github.com/opendialogai/webchat/issues",
                 "source": "https://github.com/opendialogai/webchat/tree/feature/OPNDLG-1020_full_page_chat_scenario_id"
             },
-            "time": "2021-10-20T14:50:06+00:00"
+            "time": "2021-10-20T14:53:13+00:00"
         },
         {
             "name": "opis/closure",
@@ -12126,5 +12126,5 @@
         "ext-simplexml": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.1.0"
 }
