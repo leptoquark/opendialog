@@ -157,4 +157,7 @@ Route::namespace('API')
 
         Route::get('/templates', 'TemplateController@index');
         Route::get('/templates/{id}', 'TemplateController@show');
+
+        Route::get('request/{requestId}/frames/all', 'FrameDataController@all');
+        Route::get('request/{requestId}/visualise', 'FrameDataController@handle');
     });

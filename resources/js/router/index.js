@@ -259,7 +259,7 @@ const router = new VueRouter({
           props: true,
         },
         {
-          path: 'global-contexts',
+          path: 'global-contexts/',
           name: 'global-contexts',
           component: GlobalContextView,
           meta: {
