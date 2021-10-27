@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Console\Commands\ConfigurationUpdates\AllUpdatesHaveRunException;
 use App\Console\Commands\ConfigurationUpdates\BaseConfigurationUpdate;
+use App\Console\Commands\ConfigurationUpdates\Updates\AddWebchatConfigurationTypingOnSend;
 use App\Console\Commands\ConfigurationUpdates\Updates\CreateDefaultCallbackInterpreter;
 use App\Console\Commands\ConfigurationUpdates\Updates\CreateWebchatPlatforms;
 use App\Console\Commands\ConfigurationUpdates\Updates\ScopeConfigurationsByScenario;
@@ -41,6 +42,7 @@ class CreateCoreConfigurations extends Command
         UpdateDefaultCallbackToOpenDialogInterpreter::class,
         ScopeConfigurationsByScenario::class,
         CreateWebchatPlatforms::class,
+        AddWebchatConfigurationTypingOnSend::class
     ];
 
     /**

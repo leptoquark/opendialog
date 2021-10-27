@@ -11,6 +11,7 @@ use OpenDialogAi\Core\Conversation\Conversation;
 use OpenDialogAi\Core\Conversation\Exceptions\ConversationObjectNotFoundException;
 use OpenDialogAi\Core\Conversation\Facades\ConversationDataClient;
 use OpenDialogAi\Core\Conversation\Facades\IntentDataClient;
+use OpenDialogAi\Core\Conversation\Facades\SceneDataClient;
 use OpenDialogAi\Core\Conversation\Facades\TurnDataClient;
 use OpenDialogAi\Core\Conversation\Intent;
 use OpenDialogAi\Core\Conversation\IntentCollection;
@@ -87,9 +88,9 @@ class TurnsTest extends TestCase
         $fakeTurnCollection->addObject($fakeTurn1);
         $fakeTurnCollection->addObject($fakeTurn2);
 
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with($fakeScene->getUid(), false)
+            ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
 
         ConversationDataClient::shouldReceive('getAllTurnsByScene')
@@ -151,9 +152,9 @@ class TurnsTest extends TestCase
             ->withAnyArgs()
             ->andReturn($fakeTurn);
 
-        ConversationDataClient::shouldReceive('getSceneByUid')
+        SceneDataClient::shouldReceive('getFullSceneGraph')
             ->once()
-            ->with($fakeScene->getUid(), false)
+            ->with($fakeScene->getUid())
             ->andReturn($fakeScene);
 
         $this->actingAs($this->user, 'api')

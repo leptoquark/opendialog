@@ -255,7 +255,7 @@ class ScenariosController extends Controller
             'name' => ConfigurationDataHelper::WEBCHAT_PLATFORM,
             'scenario_id' => $scenarioId,
             'component_id' => WebchatPlatform::getComponentId(),
-            'configuration' => self::getDefaultWebchatSettings(env('APP_URL')),
+            'configuration' => self::getDefaultWebchatSettings(),
             'active' => true,
         ]);
     }
@@ -606,23 +606,21 @@ class ScenariosController extends Controller
      * that method (and class) shouldn't be changed (instead a new update class that edits existing settings
      * should be created)
      *
-     * @param string $odUrl
      * @return array
      */
-    public static function getDefaultWebchatSettings(string $odUrl): array
+    public static function getDefaultWebchatSettings(): array
     {
         $commentsUrl = 'http://example.com';
         $token = 'ApiTokenValue';
 
         return [
             WebchatSetting::GENERAL => [
-                WebchatSetting::URL => "$odUrl/web-chat",
                 WebchatSetting::OPEN => true,
                 WebchatSetting::TEAM_NAME => "",
-                WebchatSetting::LOGO => "$odUrl/images/homepage-logo.svg",
+                WebchatSetting::LOGO => "/images/homepage-logo.svg",
                 WebchatSetting::MESSAGE_DELAY => '500',
                 WebchatSetting::COLLECT_USER_IP => true,
-                WebchatSetting::CHATBOT_AVATAR_PATH => "$odUrl/vendor/webchat/images/avatar.svg",
+                WebchatSetting::CHATBOT_AVATAR_PATH => "/vendor/webchat/images/avatar.svg",
                 WebchatSetting::CHATBOT_NAME => 'OpenDialog',
                 WebchatSetting::DISABLE_CLOSE_CHAT => false,
                 WebchatSetting::USE_HUMAN_AVATAR => false,
