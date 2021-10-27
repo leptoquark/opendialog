@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9232fa3fbc5d84ad9dc5392a55b007a5",
+    "content-hash": "c7d2fd37caf33f0383e57e54583bb33f",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3335,16 +3335,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "dev-feature/OPNDLG-1020_fullpage_chat_auth",
+            "version": "1.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "4e8dc9df53e978d844f07e20de19d699ca53a09c"
+                "reference": "1ebb0af91d78cb921e693e50107a85a3f508c4af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/4e8dc9df53e978d844f07e20de19d699ca53a09c",
-                "reference": "4e8dc9df53e978d844f07e20de19d699ca53a09c",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/1ebb0af91d78cb921e693e50107a85a3f508c4af",
+                "reference": "1ebb0af91d78cb921e693e50107a85a3f508c4af",
                 "shasum": ""
             },
             "require": {
@@ -3425,9 +3425,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-1020_fullpage_chat_auth"
+                "source": "https://github.com/opendialogai/core/tree/1.6.2"
             },
-            "time": "2021-10-27T10:35:10+00:00"
+            "time": "2021-10-27T14:01:45+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -3471,16 +3471,16 @@
         },
         {
             "name": "opendialogai/webchat",
-            "version": "dev-feature/OPNDLG-1020_full_page_chat_scenario_id",
+            "version": "1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/webchat.git",
-                "reference": "51ca7154143d32c66aa414ee2521eea8f90a0080"
+                "reference": "73d85e539f5595717662e0d98f18794e33a9ce02"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/51ca7154143d32c66aa414ee2521eea8f90a0080",
-                "reference": "51ca7154143d32c66aa414ee2521eea8f90a0080",
+                "url": "https://api.github.com/repos/opendialogai/webchat/zipball/73d85e539f5595717662e0d98f18794e33a9ce02",
+                "reference": "73d85e539f5595717662e0d98f18794e33a9ce02",
                 "shasum": ""
             },
             "require": {
@@ -3488,7 +3488,7 @@
                 "php": "^7.4 || ^8.0"
             },
             "require-dev": {
-                "opendialogai/core": "1.6.0",
+                "opendialogai/core": "1.6.2",
                 "orchestra/testbench": "^6.0",
                 "phpunit/phpunit": "^9.0",
                 "squizlabs/php_codesniffer": "^3.4"
@@ -3522,9 +3522,9 @@
             "description": "Webchat front end component for the Open Dialog project",
             "support": {
                 "issues": "https://github.com/opendialogai/webchat/issues",
-                "source": "https://github.com/opendialogai/webchat/tree/feature/OPNDLG-1020_full_page_chat_scenario_id"
+                "source": "https://github.com/opendialogai/webchat/tree/1.5.0"
             },
-            "time": "2021-10-20T14:53:13+00:00"
+            "time": "2021-10-27T14:11:49+00:00"
         },
         {
             "name": "opis/closure",
@@ -12114,9 +12114,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "opendialogai/webchat": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -12125,5 +12123,5 @@
         "ext-simplexml": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.0.0"
 }
