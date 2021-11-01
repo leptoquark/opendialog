@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c7d2fd37caf33f0383e57e54583bb33f",
+    "content-hash": "e1aca27f8ee65a370dea6af8bfdecee3",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3335,16 +3335,16 @@
         },
         {
             "name": "opendialogai/core",
-            "version": "1.6.2",
+            "version": "dev-feature/OPNDLG-1114_template_performance",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opendialogai/core.git",
-                "reference": "1ebb0af91d78cb921e693e50107a85a3f508c4af"
+                "reference": "b4d1049ed660837ebf3bec2168d2754ba912a6f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opendialogai/core/zipball/1ebb0af91d78cb921e693e50107a85a3f508c4af",
-                "reference": "1ebb0af91d78cb921e693e50107a85a3f508c4af",
+                "url": "https://api.github.com/repos/opendialogai/core/zipball/b4d1049ed660837ebf3bec2168d2754ba912a6f7",
+                "reference": "b4d1049ed660837ebf3bec2168d2754ba912a6f7",
                 "shasum": ""
             },
             "require": {
@@ -3425,9 +3425,9 @@
             "description": "The OpenDialog Core package",
             "support": {
                 "issues": "https://github.com/opendialogai/core/issues",
-                "source": "https://github.com/opendialogai/core/tree/1.6.2"
+                "source": "https://github.com/opendialogai/core/tree/feature/OPNDLG-1114_template_performance"
             },
-            "time": "2021-10-27T14:01:45+00:00"
+            "time": "2021-11-01T16:35:07+00:00"
         },
         {
             "name": "opendialogai/dgraph-docker",
@@ -12114,7 +12114,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "opendialogai/core": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
