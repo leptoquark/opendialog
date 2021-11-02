@@ -212,11 +212,12 @@ class ScenarioImportExportHelper extends BaseImportExportHelper
             ConversationDataClient::updateScenario($scenarioPatch);
         }
 
-        foreach ($scenarioWithPathsSubstituted->getConversations() as $cIdx => $conversationWithPathsSubstituted) {
+        foreach ($scenarioWithPathsSubstituted->getConversations() as $conversationWithPathsSubstituted) {
             /** @var Conversation $conversationWithPathsSubstituted */
 
             /** @var Conversation $persistedConversation */
-            $persistedConversation = $persistedScenario->getConversations()[$cIdx];
+            $persistedConversation = $persistedScenario->getConversations()
+                ->getObjectsWithId($conversationWithPathsSubstituted->getOdId())->first();
 
             self::patchConversation($persistedConversation, $conversationWithPathsSubstituted);
         }
@@ -240,11 +241,12 @@ class ScenarioImportExportHelper extends BaseImportExportHelper
             ConversationDataClient::updateConversation($conversationPatch);
         }
 
-        foreach ($conversationWithPathsSubstituted->getScenes() as $sIdx => $sceneWithPathsSubstituted) {
+        foreach ($conversationWithPathsSubstituted->getScenes() as $sceneWithPathsSubstituted) {
             /** @var Scene $sceneWithPathsSubstituted */
 
             /** @var Scene $persistedScene */
-            $persistedScene = $persistedConversation->getScenes()[$sIdx];
+            $persistedScene = $persistedConversation->getScenes()
+                ->getObjectsWithId($sceneWithPathsSubstituted->getOdId())->first();
 
             self::patchScene($persistedScene, $sceneWithPathsSubstituted);
         }
@@ -261,11 +263,11 @@ class ScenarioImportExportHelper extends BaseImportExportHelper
             ConversationDataClient::updateScene($scenePatch);
         }
 
-        foreach ($sceneWithPathsSubstituted->getTurns() as $tIdx => $turnWithPathsSubstituted) {
+        foreach ($sceneWithPathsSubstituted->getTurns() as $turnWithPathsSubstituted) {
             /** @var Turn $turnWithPathsSubstituted */
 
             /** @var Turn $persistedTurn */
-            $persistedTurn = $persistedScene->getTurns()[$tIdx];
+            $persistedTurn = $persistedScene->getTurns()->getObjectsWithId($turnWithPathsSubstituted->getOdId())->first();
 
             self::patchTurn($persistedTurn, $turnWithPathsSubstituted);
         }

@@ -326,13 +326,13 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   if (store.state.hasScenarios === null) {
     await store.dispatch('fetchScenarios').then(hasScenarios => {
-      if (!hasScenarios) {
+      if (!hasScenarios && (to.path === '/admin' || to.meta.requiresScenario)) {
         next('/admin/create-new-scenario')
       }
     }).catch(err => {
       next('/admin/create-new-scenario')
     })
-  } else if (store.state.hasScenarios === false && to.path !== '/admin/create-new-scenario') {
+  } else if (store.state.hasScenarios === false && to.path !== '/admin/create-new-scenario' && to.meta.requiresScenario) {
     next('/admin/create-new-scenario')
   }
 
