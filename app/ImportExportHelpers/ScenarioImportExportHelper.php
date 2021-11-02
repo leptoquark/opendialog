@@ -216,9 +216,7 @@ class ScenarioImportExportHelper extends BaseImportExportHelper
             /** @var Conversation $conversationWithPathsSubstituted */
 
             /** @var Conversation $persistedConversation */
-            $persistedConversation = $persistedScenario->getConversations()->filter(
-                fn (Conversation $conversation) => $conversation->getOdId() === $conversationWithPathsSubstituted->getOdId()
-            )->first();
+            $persistedConversation = $persistedScenario->getConversations()->getObjectsWithId($conversationWithPathsSubstituted->getOdId())->first();
 
             self::patchConversation($persistedConversation, $conversationWithPathsSubstituted);
         }
