@@ -22,15 +22,15 @@ class TemplateCollectionTest extends TestCase
     public function testView()
     {
         /** @var TemplateCollection $collection */
-        $collection = factory(TemplateCollection::class)->create();
+        $collection = TemplateCollection::factory()->create();
         for ($i = 0; $i < 10; $i++) {
-            factory(Template::class)->create([
+            Template::factory()->create([
                 'template_collection_id' => $collection->id
             ]);
         }
 
         // Add one inactive template to ensure its not returned
-        factory(Template::class)->create([
+        Template::factory()->create([
             'template_collection_id' => $collection->id,
             'active' => false
         ]);
@@ -65,28 +65,28 @@ class TemplateCollectionTest extends TestCase
     public function testViewAll()
     {
         /** @var TemplateCollection $collection1 */
-        $collection1 = factory(TemplateCollection::class)->create();
+        $collection1 = TemplateCollection::factory()->create();
         for ($i = 0; $i < 10; $i++) {
-            factory(Template::class)->create([
+            Template::factory()->create([
                 'template_collection_id' => $collection1->id
             ]);
         }
         // Add inactive template
-        factory(Template::class)->create([
+        Template::factory()->create([
             'template_collection_id' => $collection1->id,
             'active' => 0
         ]);
 
         /** @var TemplateCollection $collection2 */
-        $collection2 = factory(TemplateCollection::class)->create();
+        $collection2 = TemplateCollection::factory()->create();
         for ($i = 0; $i < 10; $i++) {
-            factory(Template::class)->create([
+            Template::factory()->create([
                 'template_collection_id' => $collection2->id
             ]);
         }
 
         // Inactive collection shouldn't show
-        factory(TemplateCollection::class)->create(
+        TemplateCollection::factory()->create(
             ['active' => 0]
         );
 
@@ -123,14 +123,14 @@ class TemplateCollectionTest extends TestCase
     public function testAllPlatforms()
     {
         /** @var TemplateCollection $collection */
-        $collection = factory(TemplateCollection::class)->create();
+        $collection = TemplateCollection::factory()->create();
 
-        factory(Template::class)->create([
+        Template::factory()->create([
             'template_collection_id' => $collection->id,
             'platform_id' => 'platform.core.webchat',
         ]);
 
-        factory(Template::class)->create([
+        Template::factory()->create([
             'template_collection_id' => $collection->id,
             'platform_id' => 'platform.core.alexa',
         ]);

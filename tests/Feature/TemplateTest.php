@@ -21,10 +21,10 @@ class TemplateTest extends TestCase
     public function testView()
     {
         /** @var TemplateCollection $collection */
-        $collection = factory(TemplateCollection::class)->create();
+        $collection = TemplateCollection::factory()->create();
 
         /** @var Template $template */
-        $template = factory(Template::class)->create([
+        $template = Template::factory()->create([
             'template_collection_id' => $collection->id
         ]);
 
@@ -45,15 +45,15 @@ class TemplateTest extends TestCase
     public function testViewAll()
     {
         /** @var TemplateCollection $collection */
-        $collection = factory(TemplateCollection::class)->create();
+        $collection = TemplateCollection::factory()->create();
 
         for ($i = 0; $i < 51; $i++) {
-            factory(Template::class)->create([
+            Template::factory()->create([
                 'template_collection_id' => $collection->id
             ]);
         }
 
-        factory(Template::class)->create([
+        Template::factory()->create([
             'active' => false,
             'template_collection_id' => $collection->id
         ]);
