@@ -297,140 +297,36 @@ class ScenariosTest extends TestCase
             ]);
     }
 
-    public function testDuplicateScenarioSuccess()
+    public function testDuplicateScenarioSuccessUsingDeprecatedEndpoint()
     {
-        $scenario = self::getFakeScenarioForDuplication();
-
-        // Called during route binding
-        ConversationDataClient::shouldReceive('getScenarioByUid')
-            ->once()
-            ->andReturn($scenario);
-
-        // Called in request validation, and in importing
-        ConversationDataClient::shouldReceive('getAllScenarios')
-            ->twice()
-            ->andReturn(new ScenarioCollection([]));
-
-        $duplicated = null;
-        ScenarioDataClient::shouldReceive('addFullScenarioGraph')
-            ->once()
-            ->andReturnUsing(function ($scenario) use (&$duplicated) {
-                $scenario = $scenario->copy();
-                $scenario->setUid('0x9999');
-                $duplicated = $scenario;
-                return $scenario;
-            });
-
-        // Called in controller
-        ScenarioDataClient::shouldReceive('getFullScenarioGraph')
-            ->times(3)
-            ->andReturnUsing(
-                fn () => $scenario,
-                function ($uid) use (&$duplicated) {
-                    return $duplicated;
-                },
-                function ($uid) use (&$duplicated) {
-                    $duplicated->setConditions(new ConditionCollection([new Condition(
-                        'eq',
-                        ['attribute' => 'user.selected_scenario'],
-                        ['value' => $uid]
-                    )]));
-
-                    return $duplicated;
-                }
-            );
-
-        // Called when patching the scenario's condition
-        ConversationDataClient::shouldReceive('updateScenario')
-            ->once()
-            ->andReturnUsing(fn ($scenario) => $scenario);
-
-        /** @var ComponentConfiguration $openDialogInterpreter */
-        $openDialogInterpreter = ComponentConfiguration::create([
-            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
-            'scenario_id' => '0x0001',
-            'component_id' => OpenDialogInterpreter::getComponentId(),
-            'configuration' => [
-                OpenDialogInterpreterConfiguration::CALLBACKS => [
-                    'hello' => 'world',
-                ],
-            ],
-            'active' => true,
-        ]);
-
-        /** @var ComponentConfiguration $otherInterpreter */
-        $otherInterpreter = ComponentConfiguration::create([
-            'name' => 'other',
-            'scenario_id' => '0x0001',
-            'component_id' => OpenDialogInterpreter::getComponentId(),
-            'configuration' => [
-                OpenDialogInterpreterConfiguration::CALLBACKS => [
-                    'open' => 'dialog',
-                ],
-            ],
-            'active' => false,
-        ]);
-
-        // Attempt to duplicate with different ID
-        $this->actingAs($this->user, 'api')
-            ->json('POST', '/admin/api/conversation-builder/scenarios/' . $scenario->getUid() . '/duplicate')
-            ->assertStatus(200)
-            ->assertJson([
-                'name' => 'Example scenario copy',
-                'od_id' => 'example_scenario_copy',
-                'id'=> '0x9999',
-                "conditions" => [
-                    [
-                        "operation" => "eq",
-                        "operationAttributes" => [
-                            [
-                                "id" => "attribute",
-                                "value" => "user.selected_scenario"
-                            ]
-                        ],
-                        "parameters" => [
-                            [
-                                "id" => "value",
-                                "value" => "0x9999"
+        $this->mockAndAssertScenarioDuplication(function ($uid) {
+            // Attempt to duplicate with different ID
+            $this->actingAs($this->user, 'api')
+                ->json('POST', '/admin/api/conversation-builder/scenarios/' . $uid . '/duplicate')
+                ->assertStatus(200)
+                ->assertJson([
+                    'name' => 'Example scenario copy',
+                    'od_id' => 'example_scenario_copy',
+                    'id'=> '0x9999',
+                    "conditions" => [
+                        [
+                            "operation" => "eq",
+                            "operationAttributes" => [
+                                [
+                                    "id" => "attribute",
+                                    "value" => "user.selected_scenario"
+                                ]
+                            ],
+                            "parameters" => [
+                                [
+                                    "id" => "value",
+                                    "value" => "0x9999"
+                                ]
                             ]
                         ]
                     ]
-                ]
-            ]);
-
-        // The default interpreter and platform should have been duplicated too
-        $this->assertCount(4, ComponentConfiguration::all());
-
-        $this->assertNotNull(
-            ComponentConfiguration::where([
-                'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
-                'scenario_id' => '0x0001'
-            ])->first()
-        );
-
-        $this->assertNotNull(
-            ComponentConfiguration::where([
-                'name' => 'other',
-                'scenario_id' => '0x0001'
-            ])->first()
-        );
-
-        /** @var ComponentConfiguration $newConfiguration1 */
-        $newConfiguration1 = ComponentConfiguration::where([
-            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
-            'scenario_id' => '0x9999'
-        ])->first();
-        $this->assertNotNull($newConfiguration1);
-        $this->assertEquals($openDialogInterpreter->configuration, $newConfiguration1->configuration);
-        $this->assertEquals($openDialogInterpreter->active, $newConfiguration1->active);
-
-        $newConfiguration2 = ComponentConfiguration::where([
-            'name' => 'other',
-            'scenario_id' => '0x9999'
-        ])->first();
-        $this->assertNotNull($newConfiguration2);
-        $this->assertEquals($otherInterpreter->configuration, $newConfiguration2->configuration);
-        $this->assertEquals($otherInterpreter->active, $newConfiguration2->active);
+                ]);
+        });
     }
 
     public function testUpdateScenarioNotFound()
@@ -792,5 +688,116 @@ class ScenariosTest extends TestCase
         $this->assertCount(2, $configurations);
         $this->assertContains(OpenDialogInterpreter::getComponentId(), $configurations->pluck('component_id'));
         $this->assertContains(WebchatPlatform::getComponentId(), $configurations->pluck('component_id'));
+    }
+
+    protected function mockAndAssertScenarioDuplication(callable $duplicate)
+    {
+        $scenario = self::getFakeScenarioForDuplication();
+
+        // Called during route binding
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once()
+            ->andReturn($scenario);
+
+        // Called in request validation, and in importing
+        ConversationDataClient::shouldReceive('getAllScenarios')
+            ->twice()
+            ->andReturn(new ScenarioCollection([]));
+
+        $duplicated = null;
+        ScenarioDataClient::shouldReceive('addFullScenarioGraph')
+            ->once()
+            ->andReturnUsing(function ($scenario) use (&$duplicated) {
+                $scenario = $scenario->copy();
+                $scenario->setUid('0x9999');
+                $duplicated = $scenario;
+                return $scenario;
+            });
+
+        // Called in controller
+        ScenarioDataClient::shouldReceive('getFullScenarioGraph')
+            ->times(3)
+            ->andReturnUsing(
+                fn () => $scenario,
+                function ($uid) use (&$duplicated) {
+                    return $duplicated;
+                },
+                function ($uid) use (&$duplicated) {
+                    $duplicated->setConditions(new ConditionCollection([new Condition(
+                        'eq',
+                        ['attribute' => 'user.selected_scenario'],
+                        ['value' => $uid]
+                    )]));
+
+                    return $duplicated;
+                }
+            );
+
+        // Called when patching the scenario's condition
+        ConversationDataClient::shouldReceive('updateScenario')
+            ->once()
+            ->andReturnUsing(fn ($scenario) => $scenario);
+
+        /** @var ComponentConfiguration $openDialogInterpreter */
+        $openDialogInterpreter = ComponentConfiguration::create([
+            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+            'scenario_id' => '0x0001',
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [
+                OpenDialogInterpreterConfiguration::CALLBACKS => [
+                    'hello' => 'world',
+                ],
+            ],
+            'active' => true,
+        ]);
+
+        /** @var ComponentConfiguration $otherInterpreter */
+        $otherInterpreter = ComponentConfiguration::create([
+            'name' => 'other',
+            'scenario_id' => '0x0001',
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [
+                OpenDialogInterpreterConfiguration::CALLBACKS => [
+                    'open' => 'dialog',
+                ],
+            ],
+            'active' => false,
+        ]);
+
+        $duplicate($scenario->getUid());
+
+        // The default interpreter and platform should have been duplicated too
+        $this->assertCount(4, ComponentConfiguration::all());
+
+        $this->assertNotNull(
+            ComponentConfiguration::where([
+                'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+                'scenario_id' => '0x0001'
+            ])->first()
+        );
+
+        $this->assertNotNull(
+            ComponentConfiguration::where([
+                'name' => 'other',
+                'scenario_id' => '0x0001'
+            ])->first()
+        );
+
+        /** @var ComponentConfiguration $newConfiguration1 */
+        $newConfiguration1 = ComponentConfiguration::where([
+            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+            'scenario_id' => '0x9999'
+        ])->first();
+        $this->assertNotNull($newConfiguration1);
+        $this->assertEquals($openDialogInterpreter->configuration, $newConfiguration1->configuration);
+        $this->assertEquals($openDialogInterpreter->active, $newConfiguration1->active);
+
+        $newConfiguration2 = ComponentConfiguration::where([
+            'name' => 'other',
+            'scenario_id' => '0x9999'
+        ])->first();
+        $this->assertNotNull($newConfiguration2);
+        $this->assertEquals($otherInterpreter->configuration, $newConfiguration2->configuration);
+        $this->assertEquals($otherInterpreter->active, $newConfiguration2->active);
     }
 }
