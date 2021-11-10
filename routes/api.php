@@ -160,4 +160,7 @@ Route::namespace('API')
 
         Route::get('request/{requestId}/frames/all', 'FrameDataController@all');
         Route::get('request/{requestId}/visualise', 'FrameDataController@handle');
+
+        Route::get('/template-collections/{template_collection_id}', 'TemplateCollectionController@handle');
+        Route::get('/template-collections', 'TemplateCollectionController@all');
     });

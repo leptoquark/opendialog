@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Template;
+use App\TemplateCollection;
 use App\User;
 use Tests\TestCase;
 
@@ -19,8 +20,13 @@ class TemplateTest extends TestCase
 
     public function testView()
     {
+        /** @var TemplateCollection $collection */
+        $collection = factory(TemplateCollection::class)->create();
+
         /** @var Template $template */
-        $template = factory(Template::class)->create();
+        $template = factory(Template::class)->create([
+            'template_collection_id' => $collection->id
+        ]);
 
         $this->get('/admin/api/templates/'.$template->id)
             ->assertStatus(302);
@@ -32,17 +38,24 @@ class TemplateTest extends TestCase
                 'name' => $template->name,
                 'description' => $template->description,
                 'data' => $template->data,
+                'platform_id' => $template->platform_id
             ]);
     }
 
     public function testViewAll()
     {
+        /** @var TemplateCollection $collection */
+        $collection = factory(TemplateCollection::class)->create();
+
         for ($i = 0; $i < 51; $i++) {
-            factory(Template::class)->create();
+            factory(Template::class)->create([
+                'template_collection_id' => $collection->id
+            ]);
         }
 
         factory(Template::class)->create([
             'active' => false,
+            'template_collection_id' => $collection->id
         ]);
 
         $templates = Template::all();

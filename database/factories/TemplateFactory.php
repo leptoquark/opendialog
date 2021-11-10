@@ -14,5 +14,6 @@ $factory->define(Template::class, function (Faker $faker) {
             'configurations' => [],
         ],
         'active' => true,
+        'platform_id' => sprintf('platform.core.%s', $faker->word)
     ];
 });
