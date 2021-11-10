@@ -3,7 +3,6 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -15,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Template[] $templates
  * @property Template[] $templatesNoData
  */
-class TemplateCollection extends Model
+class TemplateCollection extends VariableConnectionModel
 {
     use HasFactory;
 
@@ -24,6 +23,16 @@ class TemplateCollection extends Model
         'preview' => 'array',
         'active' => 'boolean'
     ];
+
+    /**
+     * Ensure that we delete the child templates when a template collection is deleted
+     */
+    protected static function booted()
+    {
+        static::deleting(function (TemplateCollection $templateCollection) {
+            $templateCollection->templates()->delete();
+        });
+    }
 
     public function templates(): HasMany
     {

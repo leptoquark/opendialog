@@ -18,6 +18,9 @@ class TemplateCollectionResource extends JsonResource
     {
         $root = parent::toArray($request);
 
+        // Strip any array keys from the description data
+        $root['description'] = array_values($this->resource->description);
+
         $platforms = $this->resource->templates->transform(
             fn (Template $template) => $template->platform_id
         );

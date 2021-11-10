@@ -163,4 +163,41 @@ class TemplateCollectionTest extends TestCase
                 'all' => false
             ]);
     }
+
+    public function testChildTemplatesAreDeleted()
+    {
+        /** @var TemplateCollection $collection */
+        $collection = TemplateCollection::factory()->create();
+        for ($i = 0; $i < 10; $i++) {
+            Template::factory()->create([
+                'template_collection_id' => $collection->id
+            ]);
+        }
+
+        $this->assertDatabaseCount('template_collections', 1);
+        $this->assertDatabaseCount('templates', 10);
+
+        $collection->delete();
+
+        $this->assertDatabaseCount('template_collections', 0);
+        $this->assertDatabaseCount('templates', 0);
+    }
+
+    public function testDescriptionKeysRemoved()
+    {
+        /** @var TemplateCollection $collection */
+        $collection = TemplateCollection::factory()->create([
+            'description' => [
+                'line_1' => '1',
+                'line_2' => '2',
+                'line_3' => '3'
+            ]
+        ]);
+
+        $this->actingAs($this->user, 'api')
+            ->json('GET', '/admin/api/template-collections/' . $collection->id)
+            ->assertJsonFragment([
+                'description' => ['1', '2', '3']
+            ]);
+    }
 }
