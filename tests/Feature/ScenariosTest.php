@@ -193,6 +193,26 @@ class ScenariosTest extends TestCase
         });
     }
 
+    public function testCreateNewScenario()
+    {
+        $this->mockAndAssertScenarioCreation(function ($scenarioOdId, $scenarioUid, $conversationUid) {
+            $this->actingAs($this->user, 'api')
+                ->json('POST', '/admin/api/conversation-builder/scenarios?creation_type=default&object_id=platform.core.webchat', [
+                    'name' => 'Example scenario',
+                    'odId' => $scenarioOdId,
+                    'description' =>  'An example scenario'
+                ])
+                ->assertStatus(201)
+                ->assertJson([
+                    'name' => 'Example scenario',
+                    'uid'=> $scenarioUid,
+                    'odId' => $scenarioOdId,
+                    'description' =>  'An example scenario',
+                    'conversations' => [['id' => $conversationUid]]
+                ]);
+        });
+    }
+
     public function testDuplicateScenarioFailure()
     {
         $scenario = self::getFakeScenarioForDuplication();
@@ -216,7 +236,7 @@ class ScenariosTest extends TestCase
             ->assertStatus(422);
     }
 
-    public function testCreateScenarioFromTemplateUsingDeprecatedApi()
+    public function testCreateScenarioFromTemplateUsingDeprecatedEndpoint()
     {
         $this->mockAndAssertScenarioCreationFromTemplate(function ($templateId, $persistedScenarioId) {
             // Attempt to create from template with different od id
@@ -255,12 +275,86 @@ class ScenariosTest extends TestCase
         });
     }
 
+    public function testCreateScenarioFromTemplate()
+    {
+        $this->mockAndAssertScenarioCreationFromTemplate(function ($templateId, $persistedScenarioId) {
+            // Attempt to create from template with different od id
+            $this->actingAs($this->user, 'api')
+                ->json(
+                    'POST',
+                    "/admin/api/conversation-builder/scenarios?creation_type=from-template&object_id=$templateId",
+                    [
+                        'name' => 'My scenario',
+                        'od_id' => 'my_scenario'
+                    ]
+                )
+                ->assertStatus(200)
+                ->assertJson([
+                    'name' => 'My scenario',
+                    'od_id' => 'my_scenario',
+                    'id'=> $persistedScenarioId,
+                    "conditions" => [
+                        [
+                            "operation" => "eq",
+                            "operationAttributes" => [
+                                [
+                                    "id" => "attribute",
+                                    "value" => "user.selected_scenario"
+                                ]
+                            ],
+                            "parameters" => [
+                                [
+                                    "id" => "value",
+                                    "value" => $persistedScenarioId
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+        });
+    }
+
     public function testDuplicateScenarioSuccessUsingDeprecatedEndpoint()
     {
         $this->mockAndAssertScenarioDuplication(function ($uid) {
             // Attempt to duplicate with different ID
             $this->actingAs($this->user, 'api')
                 ->json('POST', '/admin/api/conversation-builder/scenarios/' . $uid . '/duplicate')
+                ->assertStatus(200)
+                ->assertJson([
+                    'name' => 'Example scenario copy',
+                    'od_id' => 'example_scenario_copy',
+                    'id'=> '0x9999',
+                    "conditions" => [
+                        [
+                            "operation" => "eq",
+                            "operationAttributes" => [
+                                [
+                                    "id" => "attribute",
+                                    "value" => "user.selected_scenario"
+                                ]
+                            ],
+                            "parameters" => [
+                                [
+                                    "id" => "value",
+                                    "value" => "0x9999"
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+        });
+    }
+
+    public function testDuplicateScenarioSuccess()
+    {
+        $this->mockAndAssertScenarioDuplication(function ($uid) {
+            // Attempt to duplicate with different ID
+            $this->actingAs($this->user, 'api')
+                ->json(
+                    'POST',
+                    "/admin/api/conversation-builder/scenarios?creation_type=duplicate&object_id=$uid",
+                )
                 ->assertStatus(200)
                 ->assertJson([
                     'name' => 'Example scenario copy',
