@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use App\Template;
 use Illuminate\Http\Resources\Json\JsonResource;
-use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
+use OpenDialogAi\Core\Reflection\Helper\ReflectionHelperInterface;
 
 class TemplateCollectionResource extends JsonResource
 {
@@ -28,19 +28,18 @@ class TemplateCollectionResource extends JsonResource
         $allPlatforms = $this->getRegisteredPlatforms();
 
         $root['platforms'] = $platforms->toArray();
-        $root['all'] = count(array_diff($allPlatforms->toArray(), $platforms->toArray())) === 0;
+
+        $root['all'] = count(array_diff($allPlatforms, $platforms->toArray())) === 0;
 
         return $root;
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    protected function getRegisteredPlatforms()
+    protected function getRegisteredPlatforms(): array
     {
-        return ComponentConfiguration::where('component_id', 'like', 'platform.%')
-            ->get()
-            ->unique('component_id')
-            ->map(fn($config) => $config->component_id);
+        $platformEngineReflection = resolve(ReflectionHelperInterface::class)->getPlatformEngineReflection();
+        return array_keys($platformEngineReflection->getAvailablePlatforms()->toArray());
     }
 }

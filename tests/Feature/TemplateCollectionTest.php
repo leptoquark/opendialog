@@ -5,7 +5,8 @@ namespace Tests\Feature;
 use App\Template;
 use App\TemplateCollection;
 use App\User;
-use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
+use Ds\Map;
+use OpenDialogAi\Core\Reflection\Reflections\PlatformEngineReflectionInterface;
 use Tests\TestCase;
 
 class TemplateCollectionTest extends TestCase
@@ -122,6 +123,17 @@ class TemplateCollectionTest extends TestCase
 
     public function testAllPlatforms()
     {
+        $this->app->singleton(PlatformEngineReflectionInterface::class, function () {
+            $mock = \Mockery::mock(PlatformEngineReflectionInterface::class);
+            $mock->shouldReceive('getAvailablePlatforms')
+                ->andReturn(new Map([
+                    'platform.core.webchat' => 'Webchat',
+                    'platform.core.alexa' => 'Alexa',
+                ]));
+
+            return $mock;
+        });
+
         /** @var TemplateCollection $collection */
         $collection = TemplateCollection::factory()->create();
 
@@ -130,17 +142,16 @@ class TemplateCollectionTest extends TestCase
             'platform_id' => 'platform.core.webchat',
         ]);
 
+        $this->actingAs($this->user, 'api')
+            ->json('GET', '/admin/api/template-collections/' . $collection->id)
+            ->assertStatus(200)
+            ->assertJsonFragment([
+                'all' => false
+            ]);
+
         Template::factory()->create([
             'template_collection_id' => $collection->id,
             'platform_id' => 'platform.core.alexa',
-        ]);
-
-        factory(ComponentConfiguration::class)->create([
-            'component_id' => 'platform.core.webchat'
-        ]);
-
-        factory(ComponentConfiguration::class)->create([
-            'component_id' => 'platform.core.alexa'
         ]);
 
         $this->actingAs($this->user, 'api')
@@ -148,19 +159,6 @@ class TemplateCollectionTest extends TestCase
             ->assertStatus(200)
             ->assertJsonFragment([
                 'all' => true
-            ]);
-
-        // Add another platform component so 'all' should now be false
-
-        factory(ComponentConfiguration::class)->create([
-            'component_id' => 'platform.core.facebook'
-        ]);
-
-        $this->actingAs($this->user, 'api')
-            ->json('GET', '/admin/api/template-collections/' . $collection->id)
-            ->assertStatus(200)
-            ->assertJsonFragment([
-                'all' => false
             ]);
     }
 
