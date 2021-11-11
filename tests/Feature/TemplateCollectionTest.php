@@ -118,7 +118,8 @@ class TemplateCollectionTest extends TestCase
                 'active' => $collection2->active,
                 'platforms' => array_values($platforms2->toArray())
             ])
-            ->assertJsonCount(2, 'data');
+            ->assertJsonCount(2, 'data')
+            ->assertSee('Next');
     }
 
     public function testAllPlatforms()

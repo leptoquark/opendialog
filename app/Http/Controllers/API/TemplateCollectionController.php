@@ -14,7 +14,7 @@ class TemplateCollectionController extends Controller
     {
         $templateCollections = $this->getTemplateCollectionQuery()
             ->where('active', 1)
-            ->get();
+            ->paginate(50);
 
         return new TemplateCollectionCollection($templateCollections);
     }
