@@ -7,7 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Facades\Serializer;
 use App\Http\Requests\ConversationObjectDuplicationRequest;
 use App\Http\Requests\ConversationRequest;
-use App\Http\Requests\ScenarioRequest;
+use App\Http\Requests\ScenarioCreateRequest;
+use App\Http\Requests\ScenarioUpdateRequest;
 use App\Http\Resources\ConversationResource;
 use App\Http\Resources\ScenarioDeploymentKeyResource;
 use App\Http\Resources\ScenarioResource;
@@ -17,6 +18,7 @@ use App\ScenarioAccessToken;
 use App\Template;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
 use OpenDialogAi\Core\Components\Configuration\ConfigurationDataHelper;
@@ -121,27 +123,42 @@ class ScenariosController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param ScenarioRequest $request
-     * @return JsonResponse
+     * @param ScenarioCreateRequest $request
+     * @return ScenarioResource|JsonResponse
      */
-    public function store(ScenarioRequest $request): JsonResponse
+    public function store(ScenarioCreateRequest $request)
     {
-        /** @var Scenario $newScenario */
-        $newScenario = Serializer::deserialize($request->getContent(), Scenario::class, 'json');
+        switch ($request->query('creation_type', 'default')) {
+            case 'duplicate':
+                // Duplicate
+                $scenario = ConversationDataClient::getScenarioByUid($request->query('object_id'));
+                return $this->duplicateScenario($scenario, $request);
+            case 'from-template':
+                // From template
+                $template = Template::find($request->query('object_id'));
+                return $this->createScenarioFromTemplate($template, $request);
+            case 'default':
+            default:
+                $platformId = $request->query('object_id', WebchatPlatform::getComponentId());
 
-        if ($newScenario->getInterpreter() === "") {
-            $newScenario->setInterpreter(ConfigurationDataHelper::OPENDIALOG_INTERPRETER);
+                // Create via platform
+                /** @var Scenario $newScenario */
+                $newScenario = Serializer::deserialize($request->getContent(), Scenario::class, 'json');
+
+                if ($newScenario->getInterpreter() === "") {
+                    $newScenario->setInterpreter(ConfigurationDataHelper::OPENDIALOG_INTERPRETER);
+                }
+
+                $persistedScenario = $this->createDefaultConversations($newScenario);
+
+                $this->createDefaultConfigurationsForScenario($persistedScenario->getUid());
+
+                // Add a new condition to the scenario now that it has an ID
+                $persistedScenario = $this->setDefaultScenarioCondition($persistedScenario);
+                $updatedScenario = ConversationDataClient::updateScenario($persistedScenario);
+
+                return (new ScenarioResource($updatedScenario))->response()->setStatusCode(201);
         }
-
-        $persistedScenario = $this->createDefaultConversations($newScenario);
-
-        $this->createDefaultConfigurationsForScenario($persistedScenario->getUid());
-
-        // Add a new condition to the scenario now that it has an ID
-        $persistedScenario = $this->setDefaultScenarioCondition($persistedScenario);
-        $updatedScenario = ConversationDataClient::updateScenario($persistedScenario);
-
-        return (new ScenarioResource($updatedScenario))->response()->setStatusCode(201);
     }
 
     /**
@@ -263,11 +280,11 @@ class ScenariosController extends Controller
     /**
      * Update the specified scenario.
      *
-     * @param ScenarioRequest $request
+     * @param ScenarioUpdateRequest $request
      * @param Scenario $scenario
      * @return ScenarioResource
      */
-    public function update(ScenarioRequest $request, Scenario $scenario): ScenarioResource
+    public function update(ScenarioUpdateRequest $request, Scenario $scenario): ScenarioResource
     {
         $scenarioUpdate = Serializer::deserialize($request->getContent(), Scenario::class, 'json');
         $updatedScenario = ConversationDataClient::updateScenario($scenarioUpdate);
@@ -297,49 +314,23 @@ class ScenariosController extends Controller
      * @param ConversationObjectDuplicationRequest $request
      * @param Scenario|null $scenario
      * @param Template|null $template
-     * @return ScenarioResource
+     * @return ScenarioResource|Response
+     * @deprecated Use store instead
      */
     public function duplicate(
         ConversationObjectDuplicationRequest $request,
         Scenario $scenario = null,
         Template $template = null
-    ): ScenarioResource {
+    ) {
         if (!is_null($template)) {
             // Creating from template
-
-            $data = $template->data;
-            $originalTemplateOdId = $data['od_id'];
-
-            $tempScenario = new Scenario();
-            $tempScenario->setOdId($originalTemplateOdId);
-            $tempScenario->setName($data['name']);
-            $tempScenario->setDescription($data['description']);
-
-            $tempScenario = $request->setUniqueOdId($tempScenario, null, false, true);
-            $tempScenario = $request->setDescription($tempScenario);
-
-            $data['od_id'] = $tempScenario->getOdId();
-            $data['name'] = $tempScenario->getName();
-            $data['description'] = $tempScenario->getDescription();
-
-            $oldPath = PathSubstitutionHelper::createPath($originalTemplateOdId);
-            $newPath = PathSubstitutionHelper::createPath($tempScenario->getOdId());
-
-            $data = json_decode(str_replace($oldPath, $newPath, json_encode($data)), true);
+            return $this->createScenarioFromTemplate($template, $request);
         } elseif (!is_null($scenario)) {
             // Duplicating from scenario
-
-            $scenario = ScenarioDataClient::getFullScenarioGraph($scenario->getUid());
-            $scenario = $request->setUniqueOdId($scenario);
-            $data = json_decode(ScenarioImportExportHelper::getSerializedData($scenario), true);
+            return $this->duplicateScenario($scenario, $request);
+        } else {
+            return response(null, 400);
         }
-
-        $scenario = ScenarioImportExportHelper::importScenarioFromString(json_encode($data));
-
-        $scenario->setCreatedAt(Carbon::now());
-        $scenario->setUpdatedAt(Carbon::now());
-
-        return new ScenarioResource($scenario);
     }
 
     public function export(Scenario $scenario): StreamedResponse
@@ -582,6 +573,78 @@ class ScenariosController extends Controller
 
             $requestIntent->addMessageTemplate($messageTemplate);
         }
+    }
+
+    /**
+     * @param Template $template
+     * @param Request $request
+     * @return array
+     */
+    protected function getCreateFromTemplateScenarioData(Template $template, Request $request)
+    {
+        $data = $template->data;
+        $originalTemplateOdId = $data['od_id'];
+
+        $tempScenario = new Scenario();
+        $tempScenario->setOdId($originalTemplateOdId);
+        $tempScenario->setName($data['name']);
+        $tempScenario->setDescription($data['description']);
+
+        $tempScenario = ConversationObjectDuplicationRequest::setUniqueOdId($tempScenario, $request, null, false, true);
+        $tempScenario = ConversationObjectDuplicationRequest::setDescription($tempScenario, $request);
+
+        $data['od_id'] = $tempScenario->getOdId();
+        $data['name'] = $tempScenario->getName();
+        $data['description'] = $tempScenario->getDescription();
+
+        $oldPath = PathSubstitutionHelper::createPath($originalTemplateOdId);
+        $newPath = PathSubstitutionHelper::createPath($tempScenario->getOdId());
+
+        return json_decode(str_replace($oldPath, $newPath, json_encode($data)), true);
+    }
+
+    /**
+     * @param Scenario $scenario
+     * @param Request $request
+     * @return array
+     */
+    protected function getDuplicateScenarioData(Scenario $scenario, Request $request)
+    {
+        $scenario = ScenarioDataClient::getFullScenarioGraph($scenario->getUid());
+        $scenario = ConversationObjectDuplicationRequest::setUniqueOdId($scenario, $request);
+        return json_decode(ScenarioImportExportHelper::getSerializedData($scenario), true);
+    }
+
+    /**
+     * @param Scenario $scenario
+     * @param Request $request
+     * @return ScenarioResource
+     */
+    protected function duplicateScenario(Scenario $scenario, Request $request): ScenarioResource
+    {
+        $data = $this->getDuplicateScenarioData($scenario, $request);
+        $scenario = ScenarioImportExportHelper::importScenarioFromString(json_encode($data));
+
+        $scenario->setCreatedAt(Carbon::now());
+        $scenario->setUpdatedAt(Carbon::now());
+
+        return new ScenarioResource($scenario);
+    }
+
+    /**
+     * @param Template $template
+     * @param Request $request
+     * @return ScenarioResource
+     */
+    protected function createScenarioFromTemplate(Template $template, Request $request): ScenarioResource
+    {
+        $data = $this->getCreateFromTemplateScenarioData($template, $request);
+        $scenario = ScenarioImportExportHelper::importScenarioFromString(json_encode($data));
+
+        $scenario->setCreatedAt(Carbon::now());
+        $scenario->setUpdatedAt(Carbon::now());
+
+        return new ScenarioResource($scenario);
     }
 
     /**

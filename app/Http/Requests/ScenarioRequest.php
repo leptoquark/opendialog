@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\Status;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ScenarioRequest extends FormRequest
@@ -29,14 +28,8 @@ class ScenarioRequest extends FormRequest
         $currentUid = $this->get('id');
 
         return $this->odIdRule(null, $currentUid) + [
-            'id' => 'string',
-            'name' => 'string',
-            'description' => 'string',
-            'defaultInterpreter' => 'string',
-            'behaviors' => 'array',
-            'conditions' => 'array',
-            'status' => ['string', new Status],
-            'conversations' => 'array'
+            'name' => ['bail', 'string', 'filled'],
+            'description' => ['string'],
         ];
     }
 }

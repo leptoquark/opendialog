@@ -179,14 +179,14 @@ class ScenariosTest extends TestCase
             $this->actingAs($this->user, 'api')
                 ->json('POST', '/admin/api/conversation-builder/scenarios/', [
                     'name' => 'Example scenario',
-                    'odId' => $scenarioOdId,
+                    'od_id' => $scenarioOdId,
                     'description' =>  'An example scenario'
                 ])
                 ->assertStatus(201)
                 ->assertJson([
                     'name' => 'Example scenario',
                     'uid'=> $scenarioUid,
-                    'odId' => $scenarioOdId,
+                    'od_id' => $scenarioOdId,
                     'description' =>  'An example scenario',
                     'conversations' => [['id' => $conversationUid]]
                 ]);
@@ -199,14 +199,14 @@ class ScenariosTest extends TestCase
             $this->actingAs($this->user, 'api')
                 ->json('POST', '/admin/api/conversation-builder/scenarios?creation_type=default&object_id=platform.core.webchat', [
                     'name' => 'Example scenario',
-                    'odId' => $scenarioOdId,
+                    'od_id' => $scenarioOdId,
                     'description' =>  'An example scenario'
                 ])
                 ->assertStatus(201)
                 ->assertJson([
                     'name' => 'Example scenario',
                     'uid'=> $scenarioUid,
-                    'odId' => $scenarioOdId,
+                    'od_id' => $scenarioOdId,
                     'description' =>  'An example scenario',
                     'conversations' => [['id' => $conversationUid]]
                 ]);
@@ -707,12 +707,17 @@ class ScenariosTest extends TestCase
             ->once()
             ->with($fakeScenarioUpdated, 'json', ScenarioResource::$fields)
             ->andReturn(json_decode(sprintf('{
-            "uid": "%s",
-            "odId": "example_scenario",
-            "name": "Example scenario",
-            "description": "An example scenario",
-            "conversations": [{"id": "%s"}]
-        }', $scenarioUid, $conversationUid), true));
+                "uid": "%s",
+                "od_id": "example_scenario",
+                "name": "Example scenario",
+                "description": "An example scenario",
+                "conversations": [{"id": "%s"}]
+            }', $scenarioUid, $conversationUid), true));
+
+        // Called in request validation
+        ConversationDataClient::shouldReceive('getAllScenarios')
+            ->once()
+            ->andReturn(new ScenarioCollection([]));
 
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')
             ->once()

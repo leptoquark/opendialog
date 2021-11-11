@@ -79,7 +79,7 @@ class IntentsController extends Controller
             $turn = ConversationDataClient::getTurnByUid($intent->getTurn()->getUid());
 
             /** @var Intent $intent */
-            $intent = $request->setUniqueOdId($intent, $turn, true);
+            $intent = $request->setUniqueOdId($intent, $request, $turn, true);
         }
 
         $intent->removeUid();

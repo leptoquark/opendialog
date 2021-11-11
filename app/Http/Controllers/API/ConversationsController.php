@@ -140,7 +140,7 @@ class ConversationsController extends Controller
         $scenario = ConversationDataClient::getScenarioByUid($conversation->getScenario()->getUid());
 
         /** @var Conversation $conversation */
-        $conversation = $request->setUniqueOdId($conversation, $scenario);
+        $conversation = $request->setUniqueOdId($conversation, $request, $scenario);
 
         $map = PathSubstitutionHelper::createConversationMap($conversation, '_duplicate');
 

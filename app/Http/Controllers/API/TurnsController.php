@@ -228,7 +228,7 @@ class TurnsController extends Controller
         $scene = ConversationDataClient::getSceneByUid($turn->getScene()->getUid());
 
         /** @var Turn $turn */
-        $turn = $request->setUniqueOdId($turn, $scene);
+        $turn = $request->setUniqueOdId($turn, $request, $scene);
 
         $map = PathSubstitutionHelper::createTurnMap($turn, '_duplicate', '_duplicate', '_duplicate');
 
