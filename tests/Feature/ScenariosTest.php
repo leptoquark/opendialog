@@ -3,12 +3,14 @@
 
 namespace Tests\Feature;
 
+use App\Console\Facades\ImportExportSerializer;
 use App\Http\Facades\Serializer;
 use App\Http\Resources\ScenarioResource;
 use App\ImportExportHelpers\ScenarioImportExportHelper;
 use App\Template;
 use App\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
 use OpenDialogAi\Core\Components\Configuration\ConfigurationDataHelper;
 use OpenDialogAi\Core\Conversation\Condition;
@@ -185,7 +187,7 @@ class ScenariosTest extends TestCase
                 ->assertStatus(201)
                 ->assertJson([
                     'name' => 'Example scenario',
-                    'uid'=> $scenarioUid,
+                    'id'=> $scenarioUid,
                     'od_id' => $scenarioOdId,
                     'description' =>  'An example scenario',
                     'conversations' => [['id' => $conversationUid]]
@@ -205,7 +207,7 @@ class ScenariosTest extends TestCase
                 ->assertStatus(201)
                 ->assertJson([
                     'name' => 'Example scenario',
-                    'uid'=> $scenarioUid,
+                    'id'=> $scenarioUid,
                     'od_id' => $scenarioOdId,
                     'description' =>  'An example scenario',
                     'conversations' => [['id' => $conversationUid]]
@@ -288,7 +290,7 @@ class ScenariosTest extends TestCase
                         'od_id' => 'my_scenario'
                     ]
                 )
-                ->assertStatus(200)
+                ->assertStatus(201)
                 ->assertJson([
                     'name' => 'My scenario',
                     'od_id' => 'my_scenario',
@@ -355,7 +357,7 @@ class ScenariosTest extends TestCase
                     'POST',
                     "/admin/api/conversation-builder/scenarios?creation_type=duplicate&object_id=$uid",
                 )
-                ->assertStatus(200)
+                ->assertStatus(201)
                 ->assertJson([
                     'name' => 'Example scenario copy',
                     'od_id' => 'example_scenario_copy',
@@ -619,76 +621,18 @@ class ScenariosTest extends TestCase
     protected function mockAndAssertScenarioCreation(callable $create): void
     {
         $scenarioOdId = 'example_scenario';
-        $scenarioUid = '0x001';
-        $conversationUid = '0x002';
 
-        $fakeScenario = new Scenario();
-        $fakeScenario->setName("Example scenario");
-        $fakeScenario->setODId($scenarioOdId);
-        $fakeScenario->setDescription('An example scenario');
+        $defaultWebchatScenarioData = File::get(resource_path('platform-defaults/webchat.json'));
 
-        $fakeWelcomeConversation = new Conversation($fakeScenario);
-        $fakeWelcomeConversation->setName('Welcome Conversation');
-        $fakeWelcomeConversation->setOdId('welcome_conversation');
-        $fakeWelcomeConversation->setDescription('Automatically generated');
-        $fakeScenario->setConversations(new ConversationCollection([$fakeWelcomeConversation]));
+        /** @var Scenario $fakeScenarioCreated */
+        $fakeScenarioCreated = ImportExportSerializer::deserialize($defaultWebchatScenarioData, Scenario::class, 'json');
+        $fakeScenarioCreated = $this->addFakeUids($fakeScenarioCreated);
+        $fakeScenarioCreated->setOdId($scenarioOdId);
+        $fakeScenarioCreated->setName('Example scenario');
+        $fakeScenarioCreated->setDescription('An example scenario');
 
-        $fakeWelcomeScene = new Scene($fakeWelcomeConversation);
-        $fakeWelcomeScene->setName('Welcome Scene');
-        $fakeWelcomeScene->setOdId('welcome_scene');
-        $fakeWelcomeScene->setDescription('Automatically generated');
-        $fakeWelcomeConversation->setScenes(new SceneCollection([$fakeWelcomeScene]));
-
-        $fakeWelcomeTurn = new Turn($fakeWelcomeScene);
-        $fakeWelcomeTurn->setName('Welcome Turn');
-        $fakeWelcomeTurn->setOdId('welcome_turn');
-        $fakeWelcomeTurn->setDescription('Automatically generated');
-        $fakeWelcomeScene->setTurns(new TurnCollection([$fakeWelcomeTurn]));
-
-        $fakeWelcomeIntent = new Intent($fakeWelcomeTurn);
-        $fakeWelcomeIntent->setName('Welcome Intent');
-        $fakeWelcomeIntent->setOdId('intent.app.welcomeResponse');
-        $fakeWelcomeIntent->setSpeaker(Intent::APP);
-        $fakeWelcomeIntent->setDescription('Automatically generated');
-        $fakeWelcomeIntent->setIsRequestIntent(true);
-        $fakeWelcomeTurn->setRequestIntents(new IntentCollection([$fakeWelcomeIntent]));
-
-        $fakeTriggerConversation = new Conversation($fakeScenario);
-        $fakeTriggerConversation->setName('Trigger Conversation');
-        $fakeTriggerConversation->setOdId('trigger_conversation');
-        $fakeTriggerConversation->setDescription('Automatically generated');
-        $fakeScenario->setConversations(new ConversationCollection([$fakeTriggerConversation]));
-
-        $fakeTriggerScene = new Scene($fakeTriggerConversation);
-        $fakeTriggerScene->setName('Trigger Scene');
-        $fakeTriggerScene->setOdId('trigger_scene');
-        $fakeTriggerScene->setDescription('Automatically generated');
-        $fakeTriggerConversation->setScenes(new SceneCollection([$fakeTriggerScene]));
-
-        $fakeTriggerTurn = new Turn($fakeTriggerScene);
-        $fakeTriggerTurn->setName('Trigger Turn');
-        $fakeTriggerTurn->setOdId('trigger_turn');
-        $fakeTriggerTurn->setDescription('Automatically generated');
-        $fakeTriggerScene->setTurns(new TurnCollection([$fakeTriggerTurn]));
-
-        $fakeTriggerWelcomeIntent = new Intent($fakeTriggerTurn);
-        $fakeTriggerWelcomeIntent->setName('Trigger Intent');
-        $fakeTriggerWelcomeIntent->setOdId('intent.core.welcome');
-        $fakeTriggerWelcomeIntent->setSpeaker(Intent::USER);
-        $fakeTriggerWelcomeIntent->setDescription('Automatically generated');
-        $fakeTriggerWelcomeIntent->setIsRequestIntent(true);
-        $fakeTriggerTurn->setRequestIntents(new IntentCollection([$fakeTriggerWelcomeIntent]));
-
-        $fakeTriggerRestartIntent = new Intent($fakeTriggerTurn);
-        $fakeTriggerRestartIntent->setName('Trigger Intent');
-        $fakeTriggerRestartIntent->setOdId('intent.core.restart');
-        $fakeTriggerRestartIntent->setSpeaker(Intent::USER);
-        $fakeTriggerRestartIntent->setDescription('Automatically generated');
-        $fakeTriggerRestartIntent->setIsRequestIntent(true);
-        $fakeTriggerTurn->setRequestIntents(new IntentCollection([$fakeTriggerRestartIntent]));
-
-        $fakeScenarioCreated = clone($fakeScenario);
-        $fakeScenarioCreated->setUid($scenarioUid);
+        $scenarioUid = $fakeScenarioCreated->getUid();
+        $conversationUid = $fakeScenarioCreated->getConversations()->first()->getUid();
 
         $condition = new Condition(
             'eq',
@@ -699,41 +643,21 @@ class ScenariosTest extends TestCase
         $fakeScenarioUpdated = clone($fakeScenarioCreated);
         $fakeScenarioUpdated->setConditions(new ConditionCollection([$condition]));
 
-        Serializer::shouldReceive('deserialize')
-            ->once()
-            ->andReturn($fakeScenario);
-
-        Serializer::shouldReceive('normalize')
-            ->once()
-            ->with($fakeScenarioUpdated, 'json', ScenarioResource::$fields)
-            ->andReturn(json_decode(sprintf('{
-                "uid": "%s",
-                "od_id": "example_scenario",
-                "name": "Example scenario",
-                "description": "An example scenario",
-                "conversations": [{"id": "%s"}]
-            }', $scenarioUid, $conversationUid), true));
-
-        // Called in request validation
+        // Called in request validation, and on import
         ConversationDataClient::shouldReceive('getAllScenarios')
-            ->once()
+            ->times(3)
             ->andReturn(new ScenarioCollection([]));
 
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')
             ->once()
-            ->with($fakeScenario)
             ->andReturn($fakeScenarioCreated);
 
         ScenarioDataClient::shouldReceive('getFullScenarioGraph')
-            ->once()
+            ->twice()
             ->andReturn($fakeScenarioCreated);
 
         ConversationDataClient::shouldReceive('updateIntent')
-            ->twice()
-            ->andReturn(
-                $fakeTriggerWelcomeIntent,
-                $fakeTriggerRestartIntent
-            );
+            ->twice();
 
         ConversationDataClient::shouldReceive('updateScenario')
             ->once()
