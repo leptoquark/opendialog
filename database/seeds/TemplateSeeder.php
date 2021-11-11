@@ -40,7 +40,6 @@ class TemplateSeeder extends Seeder
             'preview' => [
                 'url' => 'https://od-demos.cloud.opendialog.ai/vendor/webchat/js/opendialog-bot.js',
                 'selected_scenario' => '0x3bfa9f',
-                'key' => '16|UvaoIHGuUEVQ3K64QhZ8imxtjqyAIhWZnoP2qKPf'
             ]
         ]);
 
@@ -70,7 +69,6 @@ class TemplateSeeder extends Seeder
             'preview' => [
                 'url' => 'https://od-demos.cloud.opendialog.ai/vendor/webchat/js/opendialog-bot.js',
                 'selected_scenario' => '0x3bf93c',
-                'key' => '15|DuiJ9fyDr2SNGmLOyqFECrsZyCCE53smxTjeABLr'
             ]
         ]);
 
