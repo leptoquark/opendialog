@@ -12,6 +12,7 @@ use OpenDialogAi\Core\Conversation\Facades\TransitionDataClient;
 use OpenDialogAi\Core\Conversation\Intent;
 use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\Transition;
+use OpenDialogAi\PlatformEngine\Components\WebchatPlatform;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class FocusedScenarioResource extends JsonResource
@@ -50,7 +51,12 @@ class FocusedScenarioResource extends JsonResource
      */
     public function toArray($request)
     {
-        $normalizedScenario = Serializer::normalize($this->resource, 'json', self::$fields);
+        $normalizedScenario = Serializer::normalize($this->resource, 'json', self::$fields) + [
+            'labels' => [
+                'platform_components' => [WebchatPlatform::getComponentId()],
+                'platform_types' => ['text'],
+            ]
+        ];
 
         $data = $this->rearrangeData($normalizedScenario);
 

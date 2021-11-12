@@ -72,50 +72,60 @@ class ScenariosTest extends TestCase
             ->andReturn($fakeScenarioCollection);
 
         Serializer::shouldReceive('normalize')
-            ->once()
-            ->with($fakeScenarioCollection, 'json', ScenarioResource::$fields)
-            ->andReturn(json_decode('[
-            {
-            "uid": "0x0001",
-            "odId": "example_scenario1",
-            "name": "Example scenario1",
-            "description": "An example scenario",
-            "updatedAt": "2021-02-25T14:30:00.000Z",
-            "createdAt": "2021-02-24T09:30:00.000Z",
-            "defaultInterpreter": "interpreter.core.nlp",
-            "behaviors": [],
-            "conditions": [],
-            "status": "PUBLISHED",
-            "conversations": ["0x0002"]
-        },
-        {
-            "uid": "0x0002",
-            "odId": "example_scenario2",
-            "name": "Example scenario2",
-            "description": "An example scenario",
-            "updatedAt": "2021-02-25T14:30:00.000Z",
-            "createdAt": "2021-02-24T09:30:00.000Z",
-            "defaultInterpreter": "interpreter.core.nlp",
-            "behaviors": [],
-            "conditions": [],
-            "status": "PUBLISHED",
-            "conversations": ["0x0002"]
-        }]'));
+            ->twice()
+            ->andReturn(
+                json_decode('{
+                    "uid": "0x0001",
+                    "odId": "example_scenario1",
+                    "name": "Example scenario1",
+                    "description": "An example scenario",
+                    "updatedAt": "2021-02-25T14:30:00.000Z",
+                    "createdAt": "2021-02-24T09:30:00.000Z",
+                    "defaultInterpreter": "interpreter.core.nlp",
+                    "behaviors": [],
+                    "conditions": [],
+                    "status": "PUBLISHED",
+                    "conversations": ["0x0002"]
+                }', true),
+                json_decode('{
+                    "uid": "0x0002",
+                    "odId": "example_scenario2",
+                    "name": "Example scenario2",
+                    "description": "An example scenario",
+                    "updatedAt": "2021-02-25T14:30:00.000Z",
+                    "createdAt": "2021-02-24T09:30:00.000Z",
+                    "defaultInterpreter": "interpreter.core.nlp",
+                    "behaviors": [],
+                    "conditions": [],
+                    "status": "PUBLISHED",
+                    "conversations": ["0x0002"]
+                }', true)
+            );
 
 
         $this->actingAs($this->user, 'api')
             ->json('GET', '/admin/api/conversation-builder/scenarios')
             ->assertStatus(200)
-            ->assertJson([[
-                "uid"=> "0x0001",
-                "odId"=> "example_scenario1",
-                "name"=> "Example scenario1",
+            ->assertJson([
+                [
+                    "uid"=> "0x0001",
+                    "odId"=> "example_scenario1",
+                    "name"=> "Example scenario1",
+                    'labels' => [
+                        'platform_components' => [WebchatPlatform::getComponentId()],
+                        'platform_types' => ['text'],
+                    ]
                 ],
                 [
-                "uid"=> "0x0002",
-                "odId"=> "example_scenario2",
-                "name"=> "Example scenario2"
-                ]]);
+                    "uid"=> "0x0002",
+                    "odId"=> "example_scenario2",
+                    "name"=> "Example scenario2",
+                    'labels' => [
+                        'platform_components' => [WebchatPlatform::getComponentId()],
+                        'platform_types' => ['text'],
+                    ]
+                ]
+            ]);
     }
 
     public function testGetScenarioNotFound()
@@ -162,7 +172,11 @@ class ScenariosTest extends TestCase
                 'name' => 'Example scenario',
                 'uid' => '0x0001',
                 'odId' => 'example_scenario',
-                'description' =>  'An example scenario'
+                'description' =>  'An example scenario',
+                'labels' => [
+                    'platform_components' => [WebchatPlatform::getComponentId()],
+                    'platform_types' => ['text'],
+                ]
             ]);
     }
 
@@ -190,7 +204,11 @@ class ScenariosTest extends TestCase
                     'id'=> $scenarioUid,
                     'od_id' => $scenarioOdId,
                     'description' =>  'An example scenario',
-                    'conversations' => [['id' => $conversationUid]]
+                    'conversations' => [['id' => $conversationUid]],
+                    'labels' => [
+                        'platform_components' => [WebchatPlatform::getComponentId()],
+                        'platform_types' => ['text'],
+                    ]
                 ]);
         });
     }
@@ -210,7 +228,11 @@ class ScenariosTest extends TestCase
                     'id'=> $scenarioUid,
                     'od_id' => $scenarioOdId,
                     'description' =>  'An example scenario',
-                    'conversations' => [['id' => $conversationUid]]
+                    'conversations' => [['id' => $conversationUid]],
+                    'labels' => [
+                        'platform_components' => [WebchatPlatform::getComponentId()],
+                        'platform_types' => ['text'],
+                    ]
                 ]);
         });
     }

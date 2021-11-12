@@ -12,6 +12,7 @@ use App\Http\Requests\ScenarioUpdateRequest;
 use App\Http\Resources\ConversationResource;
 use App\Http\Resources\ScenarioDeploymentKeyResource;
 use App\Http\Resources\ScenarioResource;
+use App\Http\Resources\ScenarioResourceCollection;
 use App\ImportExportHelpers\PathSubstitutionHelper;
 use App\ImportExportHelpers\ScenarioImportExportHelper;
 use App\ScenarioAccessToken;
@@ -44,12 +45,12 @@ class ScenariosController extends Controller
     /**
      * Returns a collection of scenarios.
      *
-     * @return ScenarioResource
+     * @return ScenarioResourceCollection
      */
-    public function index(): ScenarioResource
+    public function index(): ScenarioResourceCollection
     {
         $scenarios = ConversationDataClient::getAllScenarios();
-        return new ScenarioResource($scenarios);
+        return new ScenarioResourceCollection($scenarios);
     }
 
     /**
