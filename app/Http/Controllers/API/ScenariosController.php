@@ -213,9 +213,6 @@ class ScenariosController extends Controller
         $data = $this->getCreateDefaultScenarioForPlatformData($platformId, $request);
         $scenario = ScenarioImportExportHelper::importScenarioFromString(json_encode($data));
 
-        $scenario->setCreatedAt(Carbon::now());
-        $scenario->setUpdatedAt(Carbon::now());
-
         return new ScenarioResource($scenario);
     }
 
@@ -232,9 +229,6 @@ class ScenariosController extends Controller
 
         $scenario = ScenarioImportExportHelper::importScenarioFromString(json_encode($data));
 
-        $scenario->setCreatedAt(Carbon::now());
-        $scenario->setUpdatedAt(Carbon::now());
-
         return new ScenarioResource($scenario);
     }
 
@@ -247,9 +241,6 @@ class ScenariosController extends Controller
     {
         $data = $this->getCreateFromTemplateScenarioData($template, $request);
         $scenario = ScenarioImportExportHelper::importScenarioFromString(json_encode($data));
-
-        $scenario->setCreatedAt(Carbon::now());
-        $scenario->setUpdatedAt(Carbon::now());
 
         return new ScenarioResource($scenario);
     }
