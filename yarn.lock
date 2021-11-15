@@ -714,10 +714,10 @@
     consola "^2.15.0"
     node-fetch "^2.6.1"
 
-"@opendialogai/opendialog-design-system-pkg@1.6.2":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@opendialogai/opendialog-design-system-pkg/-/opendialog-design-system-pkg-1.6.2.tgz#c106c566f98354408cfcc6cb037ca550223ed7c1"
-  integrity sha512-VuSp7ZR8cibHz2DKeId03tdAQooIOGR44ku6+i/cK23AVaPiofYagKK2/fR0UovRAH2DNp2L17348aOI+7hYGg==
+"@opendialogai/opendialog-design-system-pkg@1.6.3-0":
+  version "1.6.3-0"
+  resolved "https://registry.yarnpkg.com/@opendialogai/opendialog-design-system-pkg/-/opendialog-design-system-pkg-1.6.3-0.tgz#7ca80cf99b8df481e6c6194d0d2ee007b420819b"
+  integrity sha512-7AMwOUa789LMv06odPt10xE+oR0GT3P1aDI2IfZDXzFHLr+uwGWM/arHQ1fCdbWcSeJEkuy5aCS3Lz4JpgycOw==
   dependencies:
     "@coreui/coreui" "^2.1.12"
     "@coreui/coreui-plugin-chartjs-custom-tooltips" "^1.3.1"
