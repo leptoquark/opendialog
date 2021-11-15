@@ -652,6 +652,8 @@ class ScenariosTest extends TestCase
         $fakeScenarioCreated->setOdId($scenarioOdId);
         $fakeScenarioCreated->setName('Example scenario');
         $fakeScenarioCreated->setDescription('An example scenario');
+        $fakeScenarioCreated->setCreatedAt(Carbon::now());
+        $fakeScenarioCreated->setUpdatedAt(Carbon::now());
 
         $scenarioUid = $fakeScenarioCreated->getUid();
         $conversationUid = $fakeScenarioCreated->getConversations()->first()->getUid();
@@ -713,6 +715,8 @@ class ScenariosTest extends TestCase
             ->andReturnUsing(function ($scenario) use (&$duplicated) {
                 $scenario = $scenario->copy();
                 $scenario->setUid('0x9999');
+                $scenario->setCreatedAt(Carbon::now());
+                $scenario->setUpdatedAt(Carbon::now());
                 $duplicated = $scenario;
                 return $scenario;
             });
@@ -844,6 +848,8 @@ class ScenariosTest extends TestCase
             ->andReturnUsing(function ($scenario) use (&$duplicated, $persistedScenarioId) {
                 $scenario = $scenario->copy();
                 $scenario->setUid($persistedScenarioId);
+                $scenario->setCreatedAt(Carbon::now());
+                $scenario->setUpdatedAt(Carbon::now());
                 $duplicated = $scenario;
                 return $scenario;
             });
