@@ -128,7 +128,7 @@ class ScenesController extends Controller
         $conversation = ConversationDataClient::getConversationByUid($scene->getConversation()->getUid());
 
         /** @var Scene $scene */
-        $scene = $request->setUniqueOdId($scene, $conversation);
+        $scene = $request->setUniqueOdId($scene, $request, $conversation);
 
         $map = PathSubstitutionHelper::createSceneMap($scene, '_duplicate', '_duplicate');
 
