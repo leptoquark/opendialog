@@ -69,7 +69,7 @@ const router = new VueRouter({
           },
         },
         {
-          path: 'template',
+          path: 'template/:id',
           name: 'template',
           component: Template,
           meta: {
