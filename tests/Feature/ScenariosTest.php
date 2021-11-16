@@ -3,12 +3,14 @@
 
 namespace Tests\Feature;
 
+use App\Console\Facades\ImportExportSerializer;
 use App\Http\Facades\Serializer;
 use App\Http\Resources\ScenarioResource;
 use App\ImportExportHelpers\ScenarioImportExportHelper;
 use App\Template;
 use App\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 use OpenDialogAi\Core\Components\Configuration\ComponentConfiguration;
 use OpenDialogAi\Core\Components\Configuration\ConfigurationDataHelper;
 use OpenDialogAi\Core\Conversation\Condition;
@@ -30,6 +32,7 @@ use OpenDialogAi\Core\Conversation\TurnCollection;
 use OpenDialogAi\Core\InterpreterEngine\OpenDialog\OpenDialogInterpreterConfiguration;
 use OpenDialogAi\InterpreterEngine\Interpreters\OpenDialogInterpreter;
 use OpenDialogAi\MessageBuilder\MessageMarkUpGenerator;
+use OpenDialogAi\PlatformEngine\Components\WebchatPlatform;
 use Tests\TestCase;
 
 class ScenariosTest extends TestCase
@@ -69,50 +72,60 @@ class ScenariosTest extends TestCase
             ->andReturn($fakeScenarioCollection);
 
         Serializer::shouldReceive('normalize')
-            ->once()
-            ->with($fakeScenarioCollection, 'json', ScenarioResource::$fields)
-            ->andReturn(json_decode('[
-            {
-            "uid": "0x0001",
-            "odId": "example_scenario1",
-            "name": "Example scenario1",
-            "description": "An example scenario",
-            "updatedAt": "2021-02-25T14:30:00.000Z",
-            "createdAt": "2021-02-24T09:30:00.000Z",
-            "defaultInterpreter": "interpreter.core.nlp",
-            "behaviors": [],
-            "conditions": [],
-            "status": "PUBLISHED",
-            "conversations": ["0x0002"]
-        },
-        {
-            "uid": "0x0002",
-            "odId": "example_scenario2",
-            "name": "Example scenario2",
-            "description": "An example scenario",
-            "updatedAt": "2021-02-25T14:30:00.000Z",
-            "createdAt": "2021-02-24T09:30:00.000Z",
-            "defaultInterpreter": "interpreter.core.nlp",
-            "behaviors": [],
-            "conditions": [],
-            "status": "PUBLISHED",
-            "conversations": ["0x0002"]
-        }]'));
+            ->twice()
+            ->andReturn(
+                json_decode('{
+                    "uid": "0x0001",
+                    "odId": "example_scenario1",
+                    "name": "Example scenario1",
+                    "description": "An example scenario",
+                    "updatedAt": "2021-02-25T14:30:00.000Z",
+                    "createdAt": "2021-02-24T09:30:00.000Z",
+                    "defaultInterpreter": "interpreter.core.nlp",
+                    "behaviors": [],
+                    "conditions": [],
+                    "status": "PUBLISHED",
+                    "conversations": ["0x0002"]
+                }', true),
+                json_decode('{
+                    "uid": "0x0002",
+                    "odId": "example_scenario2",
+                    "name": "Example scenario2",
+                    "description": "An example scenario",
+                    "updatedAt": "2021-02-25T14:30:00.000Z",
+                    "createdAt": "2021-02-24T09:30:00.000Z",
+                    "defaultInterpreter": "interpreter.core.nlp",
+                    "behaviors": [],
+                    "conditions": [],
+                    "status": "PUBLISHED",
+                    "conversations": ["0x0002"]
+                }', true)
+            );
 
 
         $this->actingAs($this->user, 'api')
             ->json('GET', '/admin/api/conversation-builder/scenarios')
             ->assertStatus(200)
-            ->assertJson([[
-                "uid"=> "0x0001",
-                "odId"=> "example_scenario1",
-                "name"=> "Example scenario1",
+            ->assertJson([
+                [
+                    "uid"=> "0x0001",
+                    "odId"=> "example_scenario1",
+                    "name"=> "Example scenario1",
+                    'labels' => [
+                        'platform_components' => [WebchatPlatform::getComponentId()],
+                        'platform_types' => ['text'],
+                    ]
                 ],
                 [
-                "uid"=> "0x0002",
-                "odId"=> "example_scenario2",
-                "name"=> "Example scenario2"
-                ]]);
+                    "uid"=> "0x0002",
+                    "odId"=> "example_scenario2",
+                    "name"=> "Example scenario2",
+                    'labels' => [
+                        'platform_components' => [WebchatPlatform::getComponentId()],
+                        'platform_types' => ['text'],
+                    ]
+                ]
+            ]);
     }
 
     public function testGetScenarioNotFound()
@@ -159,7 +172,11 @@ class ScenariosTest extends TestCase
                 'name' => 'Example scenario',
                 'uid' => '0x0001',
                 'odId' => 'example_scenario',
-                'description' =>  'An example scenario'
+                'description' =>  'An example scenario',
+                'labels' => [
+                    'platform_components' => [WebchatPlatform::getComponentId()],
+                    'platform_types' => ['text'],
+                ]
             ]);
     }
 
@@ -172,137 +189,52 @@ class ScenariosTest extends TestCase
             ->assertStatus(422);
     }
 
+    public function testCreateNewScenarioUsingApiDefaults()
+    {
+        $this->mockAndAssertScenarioCreation(function ($scenarioOdId, $scenarioUid, $conversationUid) {
+            $this->actingAs($this->user, 'api')
+                ->json('POST', '/admin/api/conversation-builder/scenarios/', [
+                    'name' => 'Example scenario',
+                    'od_id' => $scenarioOdId,
+                    'description' =>  'An example scenario'
+                ])
+                ->assertStatus(201)
+                ->assertJson([
+                    'name' => 'Example scenario',
+                    'id'=> $scenarioUid,
+                    'od_id' => $scenarioOdId,
+                    'description' =>  'An example scenario',
+                    'conversations' => [['id' => $conversationUid]],
+                    'labels' => [
+                        'platform_components' => [WebchatPlatform::getComponentId()],
+                        'platform_types' => ['text'],
+                    ]
+                ]);
+        });
+    }
+
     public function testCreateNewScenario()
     {
-        $fakeScenario = new Scenario();
-        $fakeScenario->setName("Example scenario");
-        $fakeScenario->setODId("example_scenario");
-        $fakeScenario->setDescription('An example scenario');
-
-        $fakeWelcomeConversation = new Conversation($fakeScenario);
-        $fakeWelcomeConversation->setName('Welcome Conversation');
-        $fakeWelcomeConversation->setOdId('welcome_conversation');
-        $fakeWelcomeConversation->setDescription('Automatically generated');
-        $fakeScenario->setConversations(new ConversationCollection([$fakeWelcomeConversation]));
-
-        $fakeWelcomeScene = new Scene($fakeWelcomeConversation);
-        $fakeWelcomeScene->setName('Welcome Scene');
-        $fakeWelcomeScene->setOdId('welcome_scene');
-        $fakeWelcomeScene->setDescription('Automatically generated');
-        $fakeWelcomeConversation->setScenes(new SceneCollection([$fakeWelcomeScene]));
-
-        $fakeWelcomeTurn = new Turn($fakeWelcomeScene);
-        $fakeWelcomeTurn->setName('Welcome Turn');
-        $fakeWelcomeTurn->setOdId('welcome_turn');
-        $fakeWelcomeTurn->setDescription('Automatically generated');
-        $fakeWelcomeScene->setTurns(new TurnCollection([$fakeWelcomeTurn]));
-
-        $fakeWelcomeIntent = new Intent($fakeWelcomeTurn);
-        $fakeWelcomeIntent->setName('Welcome Intent');
-        $fakeWelcomeIntent->setOdId('intent.app.welcomeResponse');
-        $fakeWelcomeIntent->setSpeaker(Intent::APP);
-        $fakeWelcomeIntent->setDescription('Automatically generated');
-        $fakeWelcomeIntent->setIsRequestIntent(true);
-        $fakeWelcomeTurn->setRequestIntents(new IntentCollection([$fakeWelcomeIntent]));
-
-        $fakeTriggerConversation = new Conversation($fakeScenario);
-        $fakeTriggerConversation->setName('Trigger Conversation');
-        $fakeTriggerConversation->setOdId('trigger_conversation');
-        $fakeTriggerConversation->setDescription('Automatically generated');
-        $fakeScenario->setConversations(new ConversationCollection([$fakeTriggerConversation]));
-
-        $fakeTriggerScene = new Scene($fakeTriggerConversation);
-        $fakeTriggerScene->setName('Trigger Scene');
-        $fakeTriggerScene->setOdId('trigger_scene');
-        $fakeTriggerScene->setDescription('Automatically generated');
-        $fakeTriggerConversation->setScenes(new SceneCollection([$fakeTriggerScene]));
-
-        $fakeTriggerTurn = new Turn($fakeTriggerScene);
-        $fakeTriggerTurn->setName('Trigger Turn');
-        $fakeTriggerTurn->setOdId('trigger_turn');
-        $fakeTriggerTurn->setDescription('Automatically generated');
-        $fakeTriggerScene->setTurns(new TurnCollection([$fakeTriggerTurn]));
-
-        $fakeTriggerWelcomeIntent = new Intent($fakeTriggerTurn);
-        $fakeTriggerWelcomeIntent->setName('Trigger Intent');
-        $fakeTriggerWelcomeIntent->setOdId('intent.core.welcome');
-        $fakeTriggerWelcomeIntent->setSpeaker(Intent::USER);
-        $fakeTriggerWelcomeIntent->setDescription('Automatically generated');
-        $fakeTriggerWelcomeIntent->setIsRequestIntent(true);
-        $fakeTriggerTurn->setRequestIntents(new IntentCollection([$fakeTriggerWelcomeIntent]));
-
-        $fakeTriggerRestartIntent = new Intent($fakeTriggerTurn);
-        $fakeTriggerRestartIntent->setName('Trigger Intent');
-        $fakeTriggerRestartIntent->setOdId('intent.core.restart');
-        $fakeTriggerRestartIntent->setSpeaker(Intent::USER);
-        $fakeTriggerRestartIntent->setDescription('Automatically generated');
-        $fakeTriggerRestartIntent->setIsRequestIntent(true);
-        $fakeTriggerTurn->setRequestIntents(new IntentCollection([$fakeTriggerRestartIntent]));
-
-        $fakeScenarioCreated = clone($fakeScenario);
-        $fakeScenarioCreated->setUid("0x0001");
-
-        $condition = new Condition(
-            'eq',
-            ['attribute' => 'user.selected_scenario'],
-            ['value' => $fakeScenarioCreated->getUid()]
-        );
-
-        $fakeScenarioUpdated = clone($fakeScenarioCreated);
-        $fakeScenarioUpdated->setConditions(new ConditionCollection([$condition]));
-
-        $fakeWelcomeConversationCreated = clone($fakeWelcomeConversation);
-        $fakeWelcomeConversationCreated->setUid("0x0001");
-
-        Serializer::shouldReceive('deserialize')
-            ->once()
-            ->andReturn($fakeScenario);
-
-        Serializer::shouldReceive('normalize')
-            ->once()
-            ->with($fakeScenarioUpdated, 'json', ScenarioResource::$fields)
-            ->andReturn(json_decode('{
-            "uid": "0x0001",
-            "odId": "example_scenario",
-            "name": "Example scenario",
-            "description": "An example scenario",
-            "conversations": [{"id": "0x0001"}]
-        }', true));
-
-        ScenarioDataClient::shouldReceive('addFullScenarioGraph')
-            ->once()
-            ->with($fakeScenario)
-            ->andReturn($fakeScenarioCreated);
-
-        ScenarioDataClient::shouldReceive('getFullScenarioGraph')
-            ->once()
-            ->andReturn($fakeScenarioCreated);
-
-        ConversationDataClient::shouldReceive('updateIntent')
-            ->twice()
-            ->andReturn(
-                $fakeTriggerWelcomeIntent,
-                $fakeTriggerRestartIntent
-            );
-
-        ConversationDataClient::shouldReceive('updateScenario')
-            ->once()
-            ->andReturn($fakeScenarioUpdated);
-
-        $this->actingAs($this->user, 'api')
-            ->json('POST', '/admin/api/conversation-builder/scenarios/', [
-                'name' => 'Example scenario',
-                'odId' => 'example_scenario',
-                'description' =>  'An example scenario'
-            ])
-            ->assertStatus(201)
-            ->assertJson([
-                'name' => 'Example scenario',
-                'uid'=> '0x0001',
-                'odId' => 'example_scenario',
-                'description' =>  'An example scenario',
-                'conversations' => [['id' => $fakeWelcomeConversationCreated->getUid()]]
-            ]);
+        $this->mockAndAssertScenarioCreation(function ($scenarioOdId, $scenarioUid, $conversationUid) {
+            $this->actingAs($this->user, 'api')
+                ->json('POST', '/admin/api/conversation-builder/scenarios?creation_type=default&object_id=platform.core.webchat', [
+                    'name' => 'Example scenario',
+                    'od_id' => $scenarioOdId,
+                    'description' =>  'An example scenario'
+                ])
+                ->assertStatus(201)
+                ->assertJson([
+                    'name' => 'Example scenario',
+                    'id'=> $scenarioUid,
+                    'od_id' => $scenarioOdId,
+                    'description' =>  'An example scenario',
+                    'conversations' => [['id' => $conversationUid]],
+                    'labels' => [
+                        'platform_components' => [WebchatPlatform::getComponentId()],
+                        'platform_types' => ['text'],
+                    ]
+                ]);
+        });
     }
 
     public function testDuplicateScenarioFailure()
@@ -328,221 +260,149 @@ class ScenariosTest extends TestCase
             ->assertStatus(422);
     }
 
-    public function testCreateFromTemplate()
+    public function testCreateScenarioFromTemplateUsingDeprecatedEndpoint()
     {
-        /** @var Template $template */
-        $template = Template::create([
-            'name' => 'My Template',
-            'data' => json_decode(ScenarioImportExportHelper::getSerializedData(self::getFakeScenarioForDuplication()), true)
-        ]);
-
-        // Called in request validation, and in importing
-        ConversationDataClient::shouldReceive('getAllScenarios')
-            ->times(3)
-            ->andReturn(new ScenarioCollection([]));
-
-        $duplicated = null;
-        ScenarioDataClient::shouldReceive('addFullScenarioGraph')
-            ->once()
-            ->andReturnUsing(function ($scenario) use (&$duplicated) {
-                $scenario = $scenario->copy();
-                $scenario->setUid('0x9999');
-                $duplicated = $scenario;
-                return $scenario;
-            });
-
-        // Called in controller
-        ScenarioDataClient::shouldReceive('getFullScenarioGraph')
-            ->twice()
-            ->andReturnUsing(
-                function ($uid) use (&$duplicated) {
-                    return $duplicated;
-                },
-                function ($uid) use (&$duplicated) {
-                    $duplicated->setConditions(new ConditionCollection([new Condition(
-                        'eq',
-                        ['attribute' => 'user.selected_scenario'],
-                        ['value' => $uid]
-                    )]));
-
-                    return $duplicated;
-                }
-            );
-
-        // Called when patching the scenario's condition
-        ConversationDataClient::shouldReceive('updateScenario')
-            ->once()
-            ->andReturnUsing(fn ($scenario) => $scenario);
-
-        // Attempt to create from template with different ID
-        $this->actingAs($this->user, 'api')
-            ->json(
-                'POST',
-                '/admin/api/conversation-builder/scenarios/create-from-template/' . $template->id,
-                [
-                    'name' => 'My scenario',
-                    'od_id' => 'my_scenario'
-                ]
-            )
-            ->assertStatus(200)
-            ->assertJson([
-                'name' => 'My scenario',
-                'od_id' => 'my_scenario',
-                'id'=> '0x9999',
-                "conditions" => [
+        $this->mockAndAssertScenarioCreationFromTemplate(function ($templateId, $persistedScenarioId) {
+            // Attempt to create from template with different od id
+            $this->actingAs($this->user, 'api')
+                ->json(
+                    'POST',
+                    '/admin/api/conversation-builder/scenarios/create-from-template/' . $templateId,
                     [
-                        "operation" => "eq",
-                        "operationAttributes" => [
-                            [
-                                "id" => "attribute",
-                                "value" => "user.selected_scenario"
-                            ]
-                        ],
-                        "parameters" => [
-                            [
-                                "id" => "value",
-                                "value" => "0x9999"
+                        'name' => 'My scenario',
+                        'od_id' => 'my_scenario'
+                    ]
+                )
+                ->assertStatus(200)
+                ->assertJson([
+                    'name' => 'My scenario',
+                    'od_id' => 'my_scenario',
+                    'id'=> $persistedScenarioId,
+                    "conditions" => [
+                        [
+                            "operation" => "eq",
+                            "operationAttributes" => [
+                                [
+                                    "id" => "attribute",
+                                    "value" => "user.selected_scenario"
+                                ]
+                            ],
+                            "parameters" => [
+                                [
+                                    "id" => "value",
+                                    "value" => $persistedScenarioId
+                                ]
                             ]
                         ]
                     ]
-                ]
-            ]);
+                ]);
+        });
+    }
+
+    public function testCreateScenarioFromTemplate()
+    {
+        $this->mockAndAssertScenarioCreationFromTemplate(function ($templateId, $persistedScenarioId) {
+            // Attempt to create from template with different od id
+            $this->actingAs($this->user, 'api')
+                ->json(
+                    'POST',
+                    "/admin/api/conversation-builder/scenarios?creation_type=from-template&object_id=$templateId",
+                    [
+                        'name' => 'My scenario',
+                        'od_id' => 'my_scenario'
+                    ]
+                )
+                ->assertStatus(201)
+                ->assertJson([
+                    'name' => 'My scenario',
+                    'od_id' => 'my_scenario',
+                    'id'=> $persistedScenarioId,
+                    "conditions" => [
+                        [
+                            "operation" => "eq",
+                            "operationAttributes" => [
+                                [
+                                    "id" => "attribute",
+                                    "value" => "user.selected_scenario"
+                                ]
+                            ],
+                            "parameters" => [
+                                [
+                                    "id" => "value",
+                                    "value" => $persistedScenarioId
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+        });
+    }
+
+    public function testDuplicateScenarioSuccessUsingDeprecatedEndpoint()
+    {
+        $this->mockAndAssertScenarioDuplication(function ($uid) {
+            // Attempt to duplicate with different ID
+            $this->actingAs($this->user, 'api')
+                ->json('POST', '/admin/api/conversation-builder/scenarios/' . $uid . '/duplicate')
+                ->assertStatus(200)
+                ->assertJson([
+                    'name' => 'Example scenario copy',
+                    'od_id' => 'example_scenario_copy',
+                    'id'=> '0x9999',
+                    "conditions" => [
+                        [
+                            "operation" => "eq",
+                            "operationAttributes" => [
+                                [
+                                    "id" => "attribute",
+                                    "value" => "user.selected_scenario"
+                                ]
+                            ],
+                            "parameters" => [
+                                [
+                                    "id" => "value",
+                                    "value" => "0x9999"
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+        });
     }
 
     public function testDuplicateScenarioSuccess()
     {
-        $scenario = self::getFakeScenarioForDuplication();
-
-        // Called during route binding
-        ConversationDataClient::shouldReceive('getScenarioByUid')
-            ->once()
-            ->andReturn($scenario);
-
-        // Called in request validation, and in importing
-        ConversationDataClient::shouldReceive('getAllScenarios')
-            ->twice()
-            ->andReturn(new ScenarioCollection([]));
-
-        $duplicated = null;
-        ScenarioDataClient::shouldReceive('addFullScenarioGraph')
-            ->once()
-            ->andReturnUsing(function ($scenario) use (&$duplicated) {
-                $scenario = $scenario->copy();
-                $scenario->setUid('0x9999');
-                $duplicated = $scenario;
-                return $scenario;
-            });
-
-        // Called in controller
-        ScenarioDataClient::shouldReceive('getFullScenarioGraph')
-            ->times(3)
-            ->andReturnUsing(
-                fn () => $scenario,
-                function ($uid) use (&$duplicated) {
-                    return $duplicated;
-                },
-                function ($uid) use (&$duplicated) {
-                    $duplicated->setConditions(new ConditionCollection([new Condition(
-                        'eq',
-                        ['attribute' => 'user.selected_scenario'],
-                        ['value' => $uid]
-                    )]));
-
-                    return $duplicated;
-                }
-            );
-
-        // Called when patching the scenario's condition
-        ConversationDataClient::shouldReceive('updateScenario')
-            ->once()
-            ->andReturnUsing(fn ($scenario) => $scenario);
-
-        /** @var ComponentConfiguration $openDialogInterpreter */
-        $openDialogInterpreter = ComponentConfiguration::create([
-            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
-            'scenario_id' => '0x0001',
-            'component_id' => OpenDialogInterpreter::getComponentId(),
-            'configuration' => [
-                OpenDialogInterpreterConfiguration::CALLBACKS => [
-                    'hello' => 'world',
-                ],
-            ],
-            'active' => true,
-        ]);
-
-        /** @var ComponentConfiguration $otherInterpreter */
-        $otherInterpreter = ComponentConfiguration::create([
-            'name' => 'other',
-            'scenario_id' => '0x0001',
-            'component_id' => OpenDialogInterpreter::getComponentId(),
-            'configuration' => [
-                OpenDialogInterpreterConfiguration::CALLBACKS => [
-                    'open' => 'dialog',
-                ],
-            ],
-            'active' => false,
-        ]);
-
-        // Attempt to duplicate with different ID
-        $this->actingAs($this->user, 'api')
-            ->json('POST', '/admin/api/conversation-builder/scenarios/' . $scenario->getUid() . '/duplicate')
-            ->assertStatus(200)
-            ->assertJson([
-                'name' => 'Example scenario copy',
-                'od_id' => 'example_scenario_copy',
-                'id'=> '0x9999',
-                "conditions" => [
-                    [
-                        "operation" => "eq",
-                        "operationAttributes" => [
-                            [
-                                "id" => "attribute",
-                                "value" => "user.selected_scenario"
-                            ]
-                        ],
-                        "parameters" => [
-                            [
-                                "id" => "value",
-                                "value" => "0x9999"
+        $this->mockAndAssertScenarioDuplication(function ($uid) {
+            // Attempt to duplicate with different ID
+            $this->actingAs($this->user, 'api')
+                ->json(
+                    'POST',
+                    "/admin/api/conversation-builder/scenarios?creation_type=duplicate&object_id=$uid",
+                )
+                ->assertStatus(201)
+                ->assertJson([
+                    'name' => 'Example scenario copy',
+                    'od_id' => 'example_scenario_copy',
+                    'id'=> '0x9999',
+                    "conditions" => [
+                        [
+                            "operation" => "eq",
+                            "operationAttributes" => [
+                                [
+                                    "id" => "attribute",
+                                    "value" => "user.selected_scenario"
+                                ]
+                            ],
+                            "parameters" => [
+                                [
+                                    "id" => "value",
+                                    "value" => "0x9999"
+                                ]
                             ]
                         ]
                     ]
-                ]
-            ]);
-
-        // The default interpreter and platform should have been duplicated too
-        $this->assertCount(4, ComponentConfiguration::all());
-
-        $this->assertNotNull(
-            ComponentConfiguration::where([
-                'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
-                'scenario_id' => '0x0001'
-            ])->first()
-        );
-
-        $this->assertNotNull(
-            ComponentConfiguration::where([
-                'name' => 'other',
-                'scenario_id' => '0x0001'
-            ])->first()
-        );
-
-        /** @var ComponentConfiguration $newConfiguration1 */
-        $newConfiguration1 = ComponentConfiguration::where([
-            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
-            'scenario_id' => '0x9999'
-        ])->first();
-        $this->assertNotNull($newConfiguration1);
-        $this->assertEquals($openDialogInterpreter->configuration, $newConfiguration1->configuration);
-        $this->assertEquals($openDialogInterpreter->active, $newConfiguration1->active);
-
-        $newConfiguration2 = ComponentConfiguration::where([
-            'name' => 'other',
-            'scenario_id' => '0x9999'
-        ])->first();
-        $this->assertNotNull($newConfiguration2);
-        $this->assertEquals($otherInterpreter->configuration, $newConfiguration2->configuration);
-        $this->assertEquals($otherInterpreter->active, $newConfiguration2->active);
+                ]);
+        });
     }
 
     public function testUpdateScenarioNotFound()
@@ -775,5 +635,252 @@ class ScenariosTest extends TestCase
         $scenario->setConversations(new ConversationCollection($conversations));
 
         return $scenario;
+    }
+
+    /**
+     * @param callable $create
+     */
+    protected function mockAndAssertScenarioCreation(callable $create): void
+    {
+        $scenarioOdId = 'example_scenario';
+
+        $defaultWebchatScenarioData = File::get(resource_path('platform-defaults/webchat.json'));
+
+        /** @var Scenario $fakeScenarioCreated */
+        $fakeScenarioCreated = ImportExportSerializer::deserialize($defaultWebchatScenarioData, Scenario::class, 'json');
+        $fakeScenarioCreated = $this->addFakeUids($fakeScenarioCreated);
+        $fakeScenarioCreated->setOdId($scenarioOdId);
+        $fakeScenarioCreated->setName('Example scenario');
+        $fakeScenarioCreated->setDescription('An example scenario');
+        $fakeScenarioCreated->setCreatedAt(Carbon::now());
+        $fakeScenarioCreated->setUpdatedAt(Carbon::now());
+
+        $scenarioUid = $fakeScenarioCreated->getUid();
+        $conversationUid = $fakeScenarioCreated->getConversations()->first()->getUid();
+
+        $condition = new Condition(
+            'eq',
+            ['attribute' => 'user.selected_scenario'],
+            ['value' => $fakeScenarioCreated->getUid()]
+        );
+
+        $fakeScenarioUpdated = clone($fakeScenarioCreated);
+        $fakeScenarioUpdated->setConditions(new ConditionCollection([$condition]));
+
+        // Called in request validation, and on import
+        ConversationDataClient::shouldReceive('getAllScenarios')
+            ->times(3)
+            ->andReturn(new ScenarioCollection([]));
+
+        ScenarioDataClient::shouldReceive('addFullScenarioGraph')
+            ->once()
+            ->andReturn($fakeScenarioCreated);
+
+        ScenarioDataClient::shouldReceive('getFullScenarioGraph')
+            ->twice()
+            ->andReturn($fakeScenarioCreated);
+
+        ConversationDataClient::shouldReceive('updateIntent')
+            ->twice();
+
+        ConversationDataClient::shouldReceive('updateScenario')
+            ->once()
+            ->andReturn($fakeScenarioUpdated);
+
+        $create($scenarioOdId, $scenarioUid, $conversationUid);
+
+        $configurations = ComponentConfiguration::all();
+        $this->assertCount(2, $configurations);
+        $this->assertContains(OpenDialogInterpreter::getComponentId(), $configurations->pluck('component_id'));
+        $this->assertContains(WebchatPlatform::getComponentId(), $configurations->pluck('component_id'));
+    }
+
+    protected function mockAndAssertScenarioDuplication(callable $duplicate)
+    {
+        $scenario = self::getFakeScenarioForDuplication();
+
+        // Called during route binding
+        ConversationDataClient::shouldReceive('getScenarioByUid')
+            ->once()
+            ->andReturn($scenario);
+
+        // Called in request validation, and in importing
+        ConversationDataClient::shouldReceive('getAllScenarios')
+            ->twice()
+            ->andReturn(new ScenarioCollection([]));
+
+        $duplicated = null;
+        ScenarioDataClient::shouldReceive('addFullScenarioGraph')
+            ->once()
+            ->andReturnUsing(function ($scenario) use (&$duplicated) {
+                $scenario = $scenario->copy();
+                $scenario->setUid('0x9999');
+                $scenario->setCreatedAt(Carbon::now());
+                $scenario->setUpdatedAt(Carbon::now());
+                $duplicated = $scenario;
+                return $scenario;
+            });
+
+        // Called in controller
+        ScenarioDataClient::shouldReceive('getFullScenarioGraph')
+            ->times(3)
+            ->andReturnUsing(
+                fn () => $scenario,
+                function ($uid) use (&$duplicated) {
+                    return $duplicated;
+                },
+                function ($uid) use (&$duplicated) {
+                    $duplicated->setConditions(new ConditionCollection([new Condition(
+                        'eq',
+                        ['attribute' => 'user.selected_scenario'],
+                        ['value' => $uid]
+                    )]));
+
+                    return $duplicated;
+                }
+            );
+
+        // Called when patching the scenario's condition
+        ConversationDataClient::shouldReceive('updateScenario')
+            ->once()
+            ->andReturnUsing(fn ($scenario) => $scenario);
+
+        /** @var ComponentConfiguration $openDialogInterpreter */
+        $openDialogInterpreter = ComponentConfiguration::create([
+            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+            'scenario_id' => '0x0001',
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [
+                OpenDialogInterpreterConfiguration::CALLBACKS => [
+                    'hello' => 'world',
+                ],
+            ],
+            'active' => true,
+        ]);
+
+        /** @var ComponentConfiguration $otherInterpreter */
+        $otherInterpreter = ComponentConfiguration::create([
+            'name' => 'other',
+            'scenario_id' => '0x0001',
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [
+                OpenDialogInterpreterConfiguration::CALLBACKS => [
+                    'open' => 'dialog',
+                ],
+            ],
+            'active' => false,
+        ]);
+
+        $duplicate($scenario->getUid());
+
+        // The default interpreter and platform should have been duplicated too
+        $this->assertCount(4, ComponentConfiguration::all());
+
+        $this->assertNotNull(
+            ComponentConfiguration::where([
+                'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+                'scenario_id' => '0x0001'
+            ])->first()
+        );
+
+        $this->assertNotNull(
+            ComponentConfiguration::where([
+                'name' => 'other',
+                'scenario_id' => '0x0001'
+            ])->first()
+        );
+
+        /** @var ComponentConfiguration $newConfiguration1 */
+        $newConfiguration1 = ComponentConfiguration::where([
+            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+            'scenario_id' => '0x9999'
+        ])->first();
+        $this->assertNotNull($newConfiguration1);
+        $this->assertEquals($openDialogInterpreter->configuration, $newConfiguration1->configuration);
+        $this->assertEquals($openDialogInterpreter->active, $newConfiguration1->active);
+
+        $newConfiguration2 = ComponentConfiguration::where([
+            'name' => 'other',
+            'scenario_id' => '0x9999'
+        ])->first();
+        $this->assertNotNull($newConfiguration2);
+        $this->assertEquals($otherInterpreter->configuration, $newConfiguration2->configuration);
+        $this->assertEquals($otherInterpreter->active, $newConfiguration2->active);
+    }
+
+    /**
+     * @param callable $createFromTemplate
+     */
+    protected function mockAndAssertScenarioCreationFromTemplate(callable $createFromTemplate)
+    {
+        /** @var ComponentConfiguration $configuration */
+        $configuration = ComponentConfiguration::create([
+            'name' => ConfigurationDataHelper::OPENDIALOG_INTERPRETER,
+            'scenario_id' => '0x0001',
+            'component_id' => OpenDialogInterpreter::getComponentId(),
+            'configuration' => [
+                OpenDialogInterpreterConfiguration::CALLBACKS => [
+                    'hello' => 'world',
+                ],
+            ],
+            'active' => true,
+        ]);
+
+        /** @var Template $template */
+        $templateData = ScenarioImportExportHelper::getSerializedData(self::getFakeScenarioForDuplication());
+
+        $configuration->delete();
+
+        $template = Template::create([
+            'name' => 'My Template',
+            'data' => json_decode($templateData, true)
+        ]);
+
+        // Called in request validation, and in importing
+        ConversationDataClient::shouldReceive('getAllScenarios')
+            ->times(3)
+            ->andReturn(new ScenarioCollection([]));
+
+        $persistedScenarioId = '0x9999';
+        $duplicated = null;
+        ScenarioDataClient::shouldReceive('addFullScenarioGraph')
+            ->once()
+            ->andReturnUsing(function ($scenario) use (&$duplicated, $persistedScenarioId) {
+                $scenario = $scenario->copy();
+                $scenario->setUid($persistedScenarioId);
+                $scenario->setCreatedAt(Carbon::now());
+                $scenario->setUpdatedAt(Carbon::now());
+                $duplicated = $scenario;
+                return $scenario;
+            });
+
+        // Called in controller
+        ScenarioDataClient::shouldReceive('getFullScenarioGraph')
+            ->twice()
+            ->andReturnUsing(
+                function ($uid) use (&$duplicated) {
+                    return $duplicated;
+                },
+                function ($uid) use (&$duplicated) {
+                    $duplicated->setConditions(new ConditionCollection([new Condition(
+                        'eq',
+                        ['attribute' => 'user.selected_scenario'],
+                        ['value' => $uid]
+                    )]));
+
+                    return $duplicated;
+                }
+            );
+
+        // Called when patching the scenario's condition
+        ConversationDataClient::shouldReceive('updateScenario')
+            ->once()
+            ->andReturnUsing(fn ($scenario) => $scenario);
+
+        $createFromTemplate($template->id, $persistedScenarioId);
+
+        $configurations = ComponentConfiguration::all();
+        $this->assertCount(1, $configurations);
+        $this->assertContains(OpenDialogInterpreter::getComponentId(), $configurations->pluck('component_id'));
     }
 }

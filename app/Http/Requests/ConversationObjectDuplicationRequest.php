@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Rules\OdId;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Request;
 use OpenDialogAi\Core\Conversation\ConversationObject;
 
 class ConversationObjectDuplicationRequest extends FormRequest
@@ -36,33 +37,35 @@ class ConversationObjectDuplicationRequest extends FormRequest
 
     /**
      * Finds and sets a unique OD ID and name for the given object, ensuring that it is unique with respect to
-     * it's parent scope
+     * its parent scope
      *
      * @param ConversationObject $object
      * @param ConversationObject|null $parent
+     * @param Request|null $request
      * @param bool $isIntent
      * @param bool $isTemplate
      * @return ConversationObject
      */
-    public function setUniqueOdId(
+    public static function setUniqueOdId(
         ConversationObject $object,
+        Request $request,
         ?ConversationObject $parent = null,
         bool $isIntent = false,
         bool $isTemplate = false
     ): ConversationObject {
         $originalOdId = $object->getOdId();
-        $odId = $this->get('od_id', $this->formatId($originalOdId, null, $isIntent, $isTemplate));
+        $odId = $request->get('od_id', self::formatId($originalOdId, null, $isIntent, $isTemplate));
 
         $i = 1;
         while (!OdId::isOdIdUniqueWithinParentScope($odId, $parent)) {
             $i++;
-            $odId = $this->formatId($originalOdId, $i, $isIntent);
+            $odId = self::formatId($originalOdId, $i, $isIntent);
         }
 
         if ($i > 1) {
-            $name = $this->get('name', $this->formatName($object->getName(), $i, $isIntent, $isTemplate));
+            $name = $request->get('name', self::formatName($object->getName(), $i, $isIntent, $isTemplate));
         } else {
-            $name = $this->get('name', $this->formatName($object->getName(), null, $isIntent, $isTemplate));
+            $name = $request->get('name', self::formatName($object->getName(), null, $isIntent, $isTemplate));
         }
 
         $object->setOdId($odId);
@@ -73,11 +76,12 @@ class ConversationObjectDuplicationRequest extends FormRequest
 
     /**
      * @param ConversationObject $object
+     * @param Request $request
      * @return ConversationObject
      */
-    public function setDescription(ConversationObject $object): ConversationObject
+    public static function setDescription(ConversationObject $object, Request $request): ConversationObject
     {
-        $description = $this->get('description', $object->getDescription());
+        $description = $request->get('description', $object->getDescription());
         $object->setDescription($description);
 
         return $object;
@@ -90,7 +94,7 @@ class ConversationObjectDuplicationRequest extends FormRequest
      * @param bool $isTemplate
      * @return string
      */
-    public function formatId(string $id, int $number = null, bool $isIntent = false, bool $isTemplate = false): string
+    public static function formatId(string $id, int $number = null, bool $isIntent = false, bool $isTemplate = false): string
     {
         if (is_null($number)) {
             if ($isIntent) {
@@ -116,7 +120,7 @@ class ConversationObjectDuplicationRequest extends FormRequest
      * @param bool $isTemplate
      * @return string
      */
-    public function formatName(string $name, int $number = null, bool $isIntent = false, bool $isTemplate = false): string
+    public static function formatName(string $name, int $number = null, bool $isIntent = false, bool $isTemplate = false): string
     {
         if ($isIntent) {
             $name = sprintf("%s%s", $name, $isTemplate ? '' : 'Copy');

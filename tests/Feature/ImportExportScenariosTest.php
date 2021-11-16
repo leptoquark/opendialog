@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Console\Facades\ImportExportSerializer;
-use App\Http\Controllers\API\ScenariosController;
 use App\ImportExportHelpers\PathSubstitutionHelper;
 use App\ImportExportHelpers\ScenarioImportExportHelper;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -62,38 +61,6 @@ class ImportExportScenariosTest extends TestCase
         /** @var AbstractAdapter $diskAdapter */
         $diskAdapter = $this->disk->getAdapter();
         File::copyDirectory(base_path('tests/specification'), $diskAdapter->getPathPrefix());
-    }
-
-    /**
-     * Adds Uid values to the provided Scenario and all its conversation objects.
-     *
-     * @param  Scenario  $scenario
-     *
-     * @return Scenario
-     */
-    public function addFakeUids(Scenario $scenario)
-    {
-        static $currentUid = 0;
-
-        $getUid = fn (int $count) => "0x".(1000 + $count);
-        $scenario->setUid($getUid($currentUid++));
-        $conversations = $scenario->getConversations();
-        foreach ($conversations as $conversation) {
-            $conversation->setUid($getUid($currentUid++));
-            foreach ($conversation->getScenes() as $scene) {
-                $scene->setUid($getUid($currentUid++));
-                foreach ($scene->getTurns() as $turn) {
-                    $turn->setUid($getUid($currentUid++));
-                    foreach ($turn->getRequestIntents() as $intent) {
-                        $intent->setUid($getUid($currentUid++));
-                    }
-                    foreach ($turn->getResponseIntents() as $intent) {
-                        $intent->setUid($getUid($currentUid++));
-                    }
-                }
-            }
-        }
-        return $scenario;
     }
 
     /**
@@ -385,10 +352,10 @@ class ImportExportScenariosTest extends TestCase
         $scenarioWithUids = $this->addFakeUids($scenario);
 
         // Create configurations for our scenario
-        ScenariosController::createDefaultConfigurationsForScenario($scenarioWithUids->getUid());
+        ScenarioImportExportHelper::createDefaultConfigurationsForScenario($scenarioWithUids->getUid());
 
         // Create configurations for some other scenario
-        ScenariosController::createDefaultConfigurationsForScenario('0x123789');
+        ScenarioImportExportHelper::createDefaultConfigurationsForScenario('0x123789');
 
         // Mock storing the scenario in DGraph
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')->with($scenario)
@@ -435,7 +402,7 @@ class ImportExportScenariosTest extends TestCase
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')->with($scenarioA)
             ->andReturn($this->addFakeUids($scenarioA));
         $storedScenarioA = ScenarioDataClient::addFullScenarioGraph($scenarioA);
-        ScenariosController::createDefaultConfigurationsForScenario($storedScenarioA->getUid());
+        ScenarioImportExportHelper::createDefaultConfigurationsForScenario($storedScenarioA->getUid());
 
         // Store Scenario B (Storage mocked)
 
@@ -445,7 +412,7 @@ class ImportExportScenariosTest extends TestCase
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')->with($scenarioB)
             ->andReturn($this->addFakeUids($scenarioB));
         $storedScenarioB = ScenarioDataClient::addFullScenarioGraph($scenarioB);
-        ScenariosController::createDefaultConfigurationsForScenario($storedScenarioB->getUid());
+        ScenarioImportExportHelper::createDefaultConfigurationsForScenario($storedScenarioB->getUid());
 
         // Store Scenario C (Storage mocked)
         $scenarioC = $this->getSimpleTestScenario();
@@ -454,7 +421,7 @@ class ImportExportScenariosTest extends TestCase
         ScenarioDataClient::shouldReceive('addFullScenarioGraph')->with($scenarioC)
             ->andReturn($this->addFakeUids($scenarioC));
         $storedScenarioC = ScenarioDataClient::addFullScenarioGraph($scenarioC);
-        ScenariosController::createDefaultConfigurationsForScenario($storedScenarioC->getUid());
+        ScenarioImportExportHelper::createDefaultConfigurationsForScenario($storedScenarioC->getUid());
 
         // Run the export (Storage mocked)
         ConversationDataClient::shouldReceive('getAllScenarios')->andReturn(new ScenarioCollection([
