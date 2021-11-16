@@ -284,7 +284,10 @@ class ScenariosController extends Controller
         $tempScenario = new Scenario();
         $tempScenario->setOdId($originalTemplateOdId);
         $tempScenario->setName($data['name']);
-        $tempScenario->setDescription($data['description']);
+
+        if (isset($data['description'])) {
+            $tempScenario->setDescription($data['description']);
+        }
 
         $tempScenario = ConversationObjectDuplicationRequest::setUniqueOdId($tempScenario, $request, null, false, true);
         $tempScenario = ConversationObjectDuplicationRequest::setDescription($tempScenario, $request);
