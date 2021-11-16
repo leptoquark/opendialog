@@ -14,25 +14,17 @@ class TemplateSeeder extends Seeder
      */
     public function run()
     {
-        /** @var ComponentConfiguration $webchatComponent */
-        $webchatComponent = factory(ComponentConfiguration::class)->create([
-            'component_id' => 'platform.core.webchat'
-        ]);
-
-        /** @var ComponentConfiguration $alexaComponent */
-        $alexaComponent = factory(ComponentConfiguration::class)->create([
-            'component_id' => 'platform.core.alexa'
-        ]);
-
-        /** @var ComponentConfiguration $facebookComponent */
-        $facebookComponent = factory(ComponentConfiguration::class)->create([
-            'component_id' => 'platform.core.facebook'
-        ]);
-
-        /** @var ComponentConfiguration $whatsappComponent */
-        $whatsappComponent = factory(ComponentConfiguration::class)->create([
-            'component_id' => 'platform.core.whatsapp'
-        ]);
+        $defaultScenario = TemplateCollection::factory()->create(array(
+            'name' => 'Custom',
+            'preview' => array(
+                'url' => 'https://od-kamau.cloud.opendialog.ai/vendor/webchat/js/opendialog-bot.js',
+                'selected_scenario' => '0x38c0c7',
+                'text' => "Click here to see the preview for this template"
+            ),
+            'description' => "Start creating sophisticated conversational applications with the OpenDialog framework, from
+            scratch for the platform of your choice.",
+            'default' => true
+        ));
 
         /** @var TemplateCollection $templateCollection1 */
         $templateCollection1 = TemplateCollection::factory()->create([
@@ -40,27 +32,28 @@ class TemplateSeeder extends Seeder
             'preview' => [
                 'url' => 'https://od-demos.cloud.opendialog.ai/vendor/webchat/js/opendialog-bot.js',
                 'selected_scenario' => '0x3bfa9f',
+                'text' => "Click here to see the preview for this template"
             ]
         ]);
 
         Template::factory()->create([
             'template_collection_id' => $templateCollection1->id,
-            'platform_id' => $webchatComponent->component_id
+            'platform_id' => 'platform.core.webchat'
         ]);
 
         Template::factory()->create([
             'template_collection_id' => $templateCollection1->id,
-            'platform_id' => $alexaComponent->component_id
+            'platform_id' => 'platform.voice.alexa'
         ]);
 
         Template::factory()->create([
             'template_collection_id' => $templateCollection1->id,
-            'platform_id' => $facebookComponent->component_id
+            'platform_id' => 'platform.core.facebook'
         ]);
 
         Template::factory()->create([
             'template_collection_id' => $templateCollection1->id,
-            'platform_id' => $whatsappComponent->component_id
+            'platform_id' => 'platform.core.whatsapp'
         ]);
 
         /** @var TemplateCollection $templateCollection2 */
@@ -69,17 +62,13 @@ class TemplateSeeder extends Seeder
             'preview' => [
                 'url' => 'https://od-demos.cloud.opendialog.ai/vendor/webchat/js/opendialog-bot.js',
                 'selected_scenario' => '0x3bf93c',
+                'text' => "Click here to see the preview for this template"
             ]
         ]);
 
         Template::factory()->create([
             'template_collection_id' => $templateCollection2->id,
-            'platform_id' => $webchatComponent->component_id
-        ]);
-
-        Template::factory()->create([
-            'template_collection_id' => $templateCollection2->id,
-            'platform_id' => $alexaComponent->component_id
+            'platform_id' => 'platform.voice.alexa'
         ]);
     }
 }

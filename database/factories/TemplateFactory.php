@@ -27,6 +27,7 @@ class TemplateFactory extends Factory
             'data' => [
                 'id' => 'my_scenario',
                 'name' => 'My Scenario',
+                'od_id' => 'my_scenario',
                 'conversations' => [],
                 'configurations' => [],
             ],

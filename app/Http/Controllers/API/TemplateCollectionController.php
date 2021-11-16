@@ -12,18 +12,26 @@ class TemplateCollectionController extends Controller
 {
     public function all()
     {
-        $templateCollections = $this->getTemplateCollectionQuery()
-            ->where('active', 1)
-            ->paginate(50);
+        if (config('templates.enabled')) {
+            $templateCollections = $this->getTemplateCollectionQuery()
+                ->where('active', 1)
+                ->paginate(50);
+        } else {
+            $templateCollections = collect([$this->getDefaultTemplate()]);
+        }
 
         return new TemplateCollectionCollection($templateCollections);
     }
 
     public function handle($templateCollectionId)
     {
-        $templateCollection = $this->getTemplateCollectionQuery()
-            ->where('id', $templateCollectionId)
-            ->first();
+        if (config('templates.enabled')) {
+            $templateCollection = $this->getTemplateCollectionQuery()
+                ->where('id', $templateCollectionId)
+                ->first();
+        } else {
+            $templateCollection = $this->getDefaultTemplate();
+        }
 
         return new TemplateCollectionResource($templateCollection);
     }
@@ -40,5 +48,18 @@ class TemplateCollectionController extends Controller
             $query->where('active', 1)
                 ->select(['id', 'name', 'description', 'platform_id', 'active', 'template_collection_id']);
         }]);
+    }
+
+    private function getDefaultTemplate()
+    {
+        $default = TemplateCollection::make([
+            'name' => 'Custom',
+            'description' => 'Start creating sophisticated conversational applications with the OpenDialog framework,
+            from scratch for the platform of your choice.',
+            'default' => true,
+            'active' => true
+        ]);
+
+        return $default;
     }
 }

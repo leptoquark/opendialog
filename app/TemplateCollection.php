@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property Template[] $templates
  * @property Template[] $templatesNoData
+ * @property boolean $default
  */
 class TemplateCollection extends VariableConnectionModel
 {
@@ -21,7 +22,15 @@ class TemplateCollection extends VariableConnectionModel
     protected $casts = [
         'description' => 'array',
         'preview' => 'array',
-        'active' => 'boolean'
+        'active' => 'boolean',
+        'default' => 'boolean'
+    ];
+
+    protected $fillable = [
+        'name',
+        'description',
+        'active',
+        'default'
     ];
 
     /**

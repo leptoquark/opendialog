@@ -21,8 +21,9 @@ class TemplateCollectionFactory extends Factory
      */
     public function definition()
     {
+        $name = $this->faker->unique()->words(3, true);
         return [
-            'name' => $this->faker->unique()->words(3, true),
+            'name' => $name,
             'description' => [
                 $this->faker->unique()->words(10, true),
                 $this->faker->unique()->words(10, true),
@@ -31,9 +32,11 @@ class TemplateCollectionFactory extends Factory
             'preview' => [
                 'url' =>  $this->faker->url,
                 'selected_scenario' => $this->faker->hexColor,
-                'token' => $this->faker->uuid
+                'token' => $this->faker->uuid,
+                'text' => "Click here to see the preview for this template"
             ],
             'active' => true,
+            'default' => false
         ];
     }
 }
