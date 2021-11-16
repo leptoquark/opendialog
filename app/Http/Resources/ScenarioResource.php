@@ -8,6 +8,7 @@ use OpenDialogAi\Core\Conversation\Behavior;
 use OpenDialogAi\Core\Conversation\Condition;
 use OpenDialogAi\Core\Conversation\Conversation;
 use OpenDialogAi\Core\Conversation\Scenario;
+use OpenDialogAi\PlatformEngine\Components\WebchatPlatform;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class ScenarioResource extends JsonResource
@@ -41,6 +42,11 @@ class ScenarioResource extends JsonResource
      */
     public function toArray($request)
     {
-        return Serializer::normalize($this->resource, 'json', self::$fields);
+        return Serializer::normalize($this->resource, 'json', self::$fields) + [
+            'labels' => [
+                'platform_components' => [WebchatPlatform::getComponentId()],
+                'platform_types' => ['text'],
+            ]
+        ];
     }
 }

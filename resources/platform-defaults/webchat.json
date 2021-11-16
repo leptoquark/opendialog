@@ -1,0 +1,368 @@
+{
+    "od_id": "webchat",
+    "name": "Webchat",
+    "description": "This is the default Webchat scenario.",
+    "interpreter": "OpenDialog",
+    "conditions": [
+        {
+            "operation": "eq",
+            "operationAttributes": [
+                {
+                    "id": "attribute",
+                    "value": "user.selected_scenario"
+                }
+            ],
+            "parameters": [
+                {
+                    "id": "value",
+                    "value": "$path:webchat"
+                }
+            ]
+        }
+    ],
+    "behaviors": [],
+    "conversations": [
+        {
+            "od_id": "no_match_conversation",
+            "name": "No Match Conversation",
+            "description": "Automatically generated",
+            "interpreter": "",
+            "conditions": [],
+            "behaviors": [
+                "STARTING"
+            ],
+            "scenes": [
+                {
+                    "od_id": "no_match_scene",
+                    "name": "No Match Scene",
+                    "description": "Automatically generated",
+                    "interpreter": "",
+                    "conditions": [],
+                    "behaviors": [
+                        "STARTING"
+                    ],
+                    "turns": [
+                        {
+                            "od_id": "no_match_turn",
+                            "name": "No Match Turn",
+                            "description": "Automatically generated",
+                            "interpreter": "",
+                            "conditions": [],
+                            "behaviors": [
+                                "OPEN",
+                                "STARTING"
+                            ],
+                            "valid_origins": [],
+                            "request_intents": [
+                                {
+                                    "od_id": "intent.core.NoMatch",
+                                    "name": "intent.core.NoMatch",
+                                    "description": "Automatically generated",
+                                    "interpreter": "OpenDialog",
+                                    "conditions": [],
+                                    "behaviors": [],
+                                    "speaker": "USER",
+                                    "confidence": 1,
+                                    "sample_utterance": "[no match]",
+                                    "listens_for": [],
+                                    "expected_attributes": [],
+                                    "actions": [],
+                                    "message_templates": []
+                                }
+                            ],
+                            "response_intents": [
+                                {
+                                    "od_id": "intent.app.noMatchResponseWebchat",
+                                    "name": "intent.app.noMatchResponseWebchat",
+                                    "description": "Automatically generated",
+                                    "interpreter": "",
+                                    "conditions": [],
+                                    "behaviors": [
+                                        "COMPLETING"
+                                    ],
+                                    "speaker": "APP",
+                                    "confidence": 1,
+                                    "sample_utterance": "Sorry, I didn't understand that",
+                                    "listens_for": [],
+                                    "expected_attributes": [],
+                                    "actions": [],
+                                    "message_templates": [
+                                        {
+                                            "od_id": "auto_generated",
+                                            "name": "auto generated",
+                                            "description": "",
+                                            "conditions": [],
+                                            "message_markup": "<message disable_text=\"false\" hide_avatar=\"false\"><text-message>Sorry, I didn't understand that</text-message></message>"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "od_id": "welcome_conversation",
+            "name": "Welcome Conversation",
+            "description": "Automatically generated",
+            "interpreter": "",
+            "conditions": [],
+            "behaviors": [],
+            "scenes": [
+                {
+                    "od_id": "welcome_scene",
+                    "name": "Welcome Scene",
+                    "description": "Automatically generated",
+                    "interpreter": "",
+                    "conditions": [],
+                    "behaviors": [
+                        "STARTING"
+                    ],
+                    "turns": [
+                        {
+                            "od_id": "welcome_turn",
+                            "name": "Welcome Turn",
+                            "description": "Automatically generated",
+                            "interpreter": "",
+                            "conditions": [],
+                            "behaviors": [
+                                "OPEN",
+                                "STARTING"
+                            ],
+                            "valid_origins": [],
+                            "request_intents": [
+                                {
+                                    "od_id": "intent.app.welcomeResponseForWebchat",
+                                    "name": "intent.app.welcomeResponseForWebchat",
+                                    "description": "Automatically generated",
+                                    "interpreter": "",
+                                    "conditions": [],
+                                    "behaviors": [],
+                                    "speaker": "APP",
+                                    "confidence": 1,
+                                    "sample_utterance": "Hi! This is the default welcome message for your scenario.",
+                                    "listens_for": [],
+                                    "expected_attributes": [],
+                                    "actions": [],
+                                    "message_templates": [
+                                        {
+                                            "od_id": "auto_generated",
+                                            "name": "auto generated",
+                                            "description": "",
+                                            "conditions": [],
+                                            "message_markup": "<message disable_text=\"false\" hide_avatar=\"false\"><button-message>\n    <text>Hi! This is the default welcome message for the Webchat Scenario.</text>\n    <external>false</external>\n    <button>\n    <text>OK</text>\n    <callback>intent.app.autogenerated</callback>\n    <display>true</display>\n    \n</button>\n</button-message></message>"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "response_intents": [
+                                {
+                                    "od_id": "intent.app.autogenerated",
+                                    "name": "intent.app.autogenerated",
+                                    "description": "Automatically generated",
+                                    "interpreter": "OpenDialog",
+                                    "conditions": [],
+                                    "behaviors": [],
+                                    "speaker": "USER",
+                                    "confidence": 1,
+                                    "sample_utterance": "This is the user's first response to what the app asked for in the welcome conversation",
+                                    "listens_for": [],
+                                    "expected_attributes": [],
+                                    "actions": [],
+                                    "message_templates": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "od_id": "trigger_conversation",
+            "name": "Trigger Conversation",
+            "description": "Automatically generated",
+            "interpreter": "",
+            "conditions": [],
+            "behaviors": [
+                "STARTING"
+            ],
+            "scenes": [
+                {
+                    "od_id": "trigger_scene",
+                    "name": "Trigger Scene",
+                    "description": "Automatically generated",
+                    "interpreter": "",
+                    "conditions": [],
+                    "behaviors": [
+                        "STARTING"
+                    ],
+                    "turns": [
+                        {
+                            "od_id": "trigger_turn",
+                            "name": "Trigger Turn",
+                            "description": "Automatically generated",
+                            "interpreter": "",
+                            "conditions": [],
+                            "behaviors": [
+                                "OPEN",
+                                "STARTING"
+                            ],
+                            "valid_origins": [],
+                            "request_intents": [
+                                {
+                                    "od_id": "intent.core.welcome",
+                                    "name": "intent.core.welcome",
+                                    "description": "Automatically generated",
+                                    "interpreter": "OpenDialog",
+                                    "conditions": [],
+                                    "behaviors": [],
+                                    "speaker": "USER",
+                                    "confidence": 1,
+                                    "sample_utterance": "- User triggers conversational application -",
+                                    "listens_for": [],
+                                    "expected_attributes": [],
+                                    "transition": {
+                                        "conversation": "$path:webchat/welcome_conversation",
+                                        "scene": "$path:webchat/welcome_conversation/welcome_scene",
+                                        "turn": "$path:webchat/welcome_conversation/welcome_scene/welcome_turn"
+                                    },
+                                    "actions": [],
+                                    "message_templates": []
+                                },
+                                {
+                                    "od_id": "intent.core.restart",
+                                    "name": "intent.core.restart",
+                                    "description": "Automatically generated",
+                                    "interpreter": "OpenDialog",
+                                    "conditions": [],
+                                    "behaviors": [],
+                                    "speaker": "USER",
+                                    "confidence": 1,
+                                    "sample_utterance": "- User restarts conversational application -",
+                                    "listens_for": [],
+                                    "expected_attributes": [],
+                                    "transition": {
+                                        "conversation": "$path:webchat/welcome_conversation",
+                                        "scene": "$path:webchat/welcome_conversation/welcome_scene",
+                                        "turn": "$path:webchat/welcome_conversation/welcome_scene/welcome_turn"
+                                    },
+                                    "actions": [],
+                                    "message_templates": []
+                                }
+                            ],
+                            "response_intents": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "configurations": [
+        {
+            "name": "OpenDialog",
+            "scenario_id": "$path:webchat",
+            "component_id": "interpreter.core.opendialog",
+            "configuration": {
+                "callbacks": {
+                    "WELCOME": "intent.core.welcome"
+                },
+                "enable_similarity_evaluation": true
+            },
+            "active": true
+        },
+        {
+            "name": "Webchat",
+            "scenario_id": "$path:webchat",
+            "component_id": "platform.core.webchat",
+            "configuration": {
+                "colours": {
+                    "buttonText": "#1b2956",
+                    "headerText": "#ffffff",
+                    "userInputText": "#1b212a",
+                    "iconBackground": "0000ff",
+                    "sentMessageText": "#1b2956",
+                    "buttonBackground": "#7fdad1",
+                    "headerBackground": "#1b2956",
+                    "externalButtonText": "#1b2956",
+                    "launcherBackground": "#1b2956",
+                    "iconHoverBackground": "ffffff",
+                    "receivedMessageText": "#1b2956",
+                    "userInputBackground": "#ffffff",
+                    "buttonHoverBackground": "#7fdad1",
+                    "messageListBackground": "#1b2956",
+                    "sentMessageBackground": "#7fdad1",
+                    "externalButtonBackground": "#7fdad1",
+                    "receivedMessageBackground": "#ffffff",
+                    "externalButtonHoverBackground": "#7fdad1"
+                },
+                "general": {
+                    "logo": "/images/homepage-logo.svg",
+                    "open": true,
+                    "teamName": "",
+                    "validPath": [
+                        "*"
+                    ],
+                    "useBotName": false,
+                    "chatbotName": "OpenDialog",
+                    "pageCssPath": "",
+                    "messageDelay": "500",
+                    "useBotAvatar": true,
+                    "useHumanName": false,
+                    "collectUserIp": true,
+                    "chatbotCssPath": "",
+                    "useHumanAvatar": false,
+                    "hideMessageTime": true,
+                    "disableCloseChat": false,
+                    "formResponseText": null,
+                    "messageAnimation": false,
+                    "chatbotAvatarPath": "/vendor/webchat/images/avatar.svg",
+                    "showEndChatButton": false,
+                    "showRestartButton": false,
+                    "showDownloadButton": true,
+                    "hideDatetimeMessage": true,
+                    "newUserOpenCallback": "WELCOME",
+                    "typingIndicatorStyle": "",
+                    "newUserStartMinimized": false,
+                    "restartButtonCallback": "intent.core.restart",
+                    "showHeaderCloseButton": false,
+                    "chatbotFullpageCssPath": "",
+                    "ongoingUserOpenCallback": "",
+                    "scrollToFirstNewMessage": false,
+                    "ongoingUserStartMinimized": false,
+                    "returningUserOpenCallback": "WELCOME",
+                    "returningUserStartMinimized": false,
+                    "showTextInputWithExternalButtons": false,
+                    "showHeaderButtonsOnFullPageMessages": false,
+                    "hideTypingIndicatorOnInternalMessages": false
+                },
+                "comments": {
+                    "commentsName": "Comments",
+                    "commentsEnabled": false,
+                    "commentsEndpoint": "http://example.com/json-api/v1",
+                    "commentsAuthToken": "Bearer ApiTokenValue",
+                    "commentsEntityName": "comments",
+                    "commentsTextFieldName": "comment",
+                    "commentsAuthorEntityName": "users",
+                    "commentsCreatedFieldName": "created-at",
+                    "commentsAuthorIdFieldName": "id",
+                    "commentsSectionEntityName": "posts",
+                    "commentsEnabledPathPattern": "^\\/home\\/posts",
+                    "commentsSectionFilterQuery": "post",
+                    "commentsSectionIdFieldName": "id",
+                    "commentsSectionPathPattern": "home\\/posts\\/\\d*$",
+                    "commentsAuthorNameFieldName": "name",
+                    "commentsSectionNameFieldName": "name",
+                    "commentsAuthorRelationshipName": "author",
+                    "commentsSectionRelationshipName": "post",
+                    "commentsSectionFilterPathPattern": "home\\/posts\\/(\\d*)\\/?"
+                },
+                "webchatHistory": {
+                    "showHistory": true,
+                    "numberOfMessages": 10
+                }
+            },
+            "active": true
+        }
+    ]
+}

@@ -24,6 +24,7 @@ use OpenDialogAi\Core\Conversation\SceneCollection;
 use OpenDialogAi\Core\Conversation\Transition;
 use OpenDialogAi\Core\Conversation\Turn;
 use OpenDialogAi\Core\Conversation\TurnCollection;
+use OpenDialogAi\PlatformEngine\Components\WebchatPlatform;
 use Tests\TestCase;
 
 class UIStateControllerTest extends TestCase
@@ -169,6 +170,10 @@ class UIStateControllerTest extends TestCase
                                 ],
                             ]
                         ]
+                    ],
+                    'labels' => [
+                        'platform_components' => [WebchatPlatform::getComponentId()],
+                        'platform_types' => ['text'],
                     ]
                 ]
             ]);

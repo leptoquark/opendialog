@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Artisan;
 use OpenDialogAi\Core\Conversation\BehaviorsCollection;
 use OpenDialogAi\Core\Conversation\ConditionCollection;
 use OpenDialogAi\Core\Conversation\Intent;
+use OpenDialogAi\Core\Conversation\Scenario;
 use OpenDialogAi\Core\Conversation\Transition;
 use OpenDialogAi\Core\Conversation\Turn;
 use OpenDialogAi\Core\Conversation\VirtualIntent;
@@ -52,6 +53,38 @@ abstract class TestCase extends BaseTestCase
 //            $client->initSchema();
 //            $this->dgraphInitialised = true;
 //        }
+    }
+
+    /**
+     * Adds Uid values to the provided Scenario and all its conversation objects.
+     *
+     * @param  Scenario  $scenario
+     *
+     * @return Scenario
+     */
+    public function addFakeUids(Scenario $scenario)
+    {
+        static $currentUid = 0;
+
+        $getUid = fn (int $count) => "0x".(1000 + $count);
+        $scenario->setUid($getUid($currentUid++));
+        $conversations = $scenario->getConversations();
+        foreach ($conversations as $conversation) {
+            $conversation->setUid($getUid($currentUid++));
+            foreach ($conversation->getScenes() as $scene) {
+                $scene->setUid($getUid($currentUid++));
+                foreach ($scene->getTurns() as $turn) {
+                    $turn->setUid($getUid($currentUid++));
+                    foreach ($turn->getRequestIntents() as $intent) {
+                        $intent->setUid($getUid($currentUid++));
+                    }
+                    foreach ($turn->getResponseIntents() as $intent) {
+                        $intent->setUid($getUid($currentUid++));
+                    }
+                }
+            }
+        }
+        return $scenario;
     }
 
     /**

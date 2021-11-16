@@ -20,8 +20,10 @@ class TemplateCollectionTest extends TestCase
         $this->user = factory(User::class)->create();
     }
 
-    public function testView()
+    public function testViewEnabled()
     {
+        $this->app['config']->set('templates.enabled', true);
+
         /** @var TemplateCollection $collection */
         $collection = TemplateCollection::factory()->create();
         for ($i = 0; $i < 10; $i++) {
@@ -65,6 +67,8 @@ class TemplateCollectionTest extends TestCase
 
     public function testViewAll()
     {
+        $this->app['config']->set('templates.enabled', true);
+
         /** @var TemplateCollection $collection1 */
         $collection1 = TemplateCollection::factory()->create();
         for ($i = 0; $i < 10; $i++) {
@@ -124,6 +128,8 @@ class TemplateCollectionTest extends TestCase
 
     public function testAllPlatforms()
     {
+        $this->app['config']->set('templates.enabled', true);
+
         $this->app->singleton(PlatformEngineReflectionInterface::class, function () {
             $mock = \Mockery::mock(PlatformEngineReflectionInterface::class);
             $mock->shouldReceive('getAvailablePlatforms')
@@ -165,6 +171,8 @@ class TemplateCollectionTest extends TestCase
 
     public function testChildTemplatesAreDeleted()
     {
+        $this->app['config']->set('templates.enabled', true);
+
         /** @var TemplateCollection $collection */
         $collection = TemplateCollection::factory()->create();
         for ($i = 0; $i < 10; $i++) {
@@ -184,6 +192,8 @@ class TemplateCollectionTest extends TestCase
 
     public function testDescriptionKeysRemoved()
     {
+        $this->app['config']->set('templates.enabled', true);
+
         /** @var TemplateCollection $collection */
         $collection = TemplateCollection::factory()->create([
             'description' => [
@@ -198,5 +208,32 @@ class TemplateCollectionTest extends TestCase
             ->assertJsonFragment([
                 'description' => ['1', '2', '3']
             ]);
+    }
+
+    public function testTemplatesDisabled()
+    {
+        $this->app['config']->set('templates.enabled', true);
+
+        TemplateCollection::factory()->create();
+        TemplateCollection::factory()->create();
+        TemplateCollection::factory()->create();
+
+        $this->actingAs($this->user, 'api')
+            ->json('GET', '/admin/api/template-collections/')
+            ->assertStatus(200)
+            ->assertJsonMissing([
+                'name' => 'Custom'
+            ])
+            ->assertJsonCount(3, 'data');
+
+        // We should only get 1 template returned here if templates are disabled
+        $this->app['config']->set('templates.enabled', false);
+        $this->actingAs($this->user, 'api')
+            ->json('GET', '/admin/api/template-collections/')
+            ->assertStatus(200)
+            ->assertJsonFragment([
+                'name' => 'Custom'
+            ])
+            ->assertJsonCount(1, 'data');
     }
 }
