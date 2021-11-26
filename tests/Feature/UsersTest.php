@@ -130,17 +130,15 @@ class UsersTest extends TestCase
             ->json('POST', '/admin/api/user', [
                 'email' => 'test@test.com',
             ])
-            ->assertStatus(400);
-
-        $this->assertEquals($response->content(), '{"field":"name","message":"User name field is required."}');
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
 
         $response = $this->actingAs($this->user, 'api')
             ->json('POST', '/admin/api/user', [
                 'name' => 'test',
             ])
-            ->assertStatus(400);
-
-        $this->assertEquals($response->content(), '{"field":"email","message":"User email field is required."}');
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
     }
 
     public function testUsersInvalidUpdateEndpoint()
@@ -151,8 +149,7 @@ class UsersTest extends TestCase
             ->json('PATCH', '/admin/api/user/' . $user->id, [
                 'name' => '',
             ])
-            ->assertStatus(400);
-
-        $this->assertEquals($response->content(), '{"field":"name","message":"User name field is required."}');
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
     }
 }
