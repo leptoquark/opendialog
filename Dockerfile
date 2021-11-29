@@ -1,7 +1,5 @@
 FROM php:7.4-fpm
 
-USER root
-
 # Install dependencies
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     apt-get update && apt-get install -y \
