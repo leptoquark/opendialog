@@ -50,7 +50,7 @@ RUN chown -R www-data:www-data /var/www
 RUN chmod +x ./scripts/set_up_od_docker.sh
 RUN ./scripts/set_up_od_docker.sh
 
-RUN chmod -R 777 /var/www/storage
+RUN chmod ugo+rwx /var/www/storage
 
 COPY .env.example.docker .env
 
